@@ -141,10 +141,10 @@ export default {
             this.$socket.emit('widget-action', this.id, msg)
         },
         submit () {
-            this.send({ payload: this.formData })
+            this.send({ payload: { formData: this.formData, userTask: this.userTask(), action: 'submit' } })
         },
         cancel () {
-            this.send({ payload: this.formData })
+            this.send({ payload: { formData: this.formData, userTask: this.userTask(), action: 'cancal' } })
         }
     }
 }
