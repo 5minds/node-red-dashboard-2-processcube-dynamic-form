@@ -3,7 +3,7 @@
     <div className="dynamic-form-wrapper">
         <p v-if="hasFields">
             <v-form ref="form" v-model="form">
-                <v-row v-for="(field, index) in fields" :key="index">
+                <v-row v-for="(field, index) in fields()" :key="index">
                     <v-col cols="12">
                         <component
                             :is="field.component"
@@ -57,19 +57,6 @@ export default {
     },
     computed: {
         ...mapState('data', ['messages']),
-        fields () {
-            const aFields = this.messages && this.messages[this.id] ? this.messages[this.id].payload.formFields : []
-
-            const fieldMap = aFields.map(field => ({
-                ...field,
-                component: field.type
-            }))
-
-            return fieldMap
-        },
-        hasFields () {
-            return this.messages && this.messages[this.id] && this.messages[this.id].payload.formFields
-        },
         waiting_title () {
             return this.props.waiting_title || 'Warten auf den Usertask...'
         },
@@ -127,6 +114,25 @@ export default {
         this.$socket?.off('msg-input:' + this.id)
     },
     methods: {
+        hasUserTask () {
+            return this.messages && this.messages[this.id] && this.messages[this.id].payload.userTask
+        },
+        userTask () {
+            return this.hasUserTask() ? this.messages[this.id].payload.userTask : {}
+        },
+        fields () {
+            const aFields = this.hasUserTask() ? this.userTask().userTaskConfig.formFields : []
+
+            const fieldMap = aFields.map(field => ({
+                ...field,
+                component: mapFieldTypes(field.type)
+            }))
+
+            return fieldMap
+        },
+        hasFields () {
+            return this.hasUserTask && this.userTask.userTaskConfig.formFields.length > 0
+        },
         /*
             widget-action just sends a msg to Node-RED, it does not store the msg state server-side
             alternatively, you can use widget-change, which will also store the msg in the Node's datastore
@@ -142,6 +148,52 @@ export default {
         }
     }
 }
+
+function mapFieldTypes (fieldType) {
+    switch (fieldType) {
+    case 'string':
+    case 'long':
+    case 'date':
+    case 'enum':
+    case 'boolean':
+        return 'v-text-field'
+    case 'text':
+        return 'v-text-field'
+    case 'select':
+        return 'v-select'
+    case 'checkbox':
+        return 'v-checkbox'
+    case 'radio':
+        return 'v-radio'
+    case 'switch':
+        return 'v-switch'
+    case 'slider':
+        return 'v-slider'
+    case 'time':
+        return 'v-time-picker'
+    case 'datetime':
+        return 'v-datetime-picker'
+    case 'color':
+        return 'v-color-picker'
+    case 'file':
+        return 'v-file-input'
+    case 'textarea':
+        return 'v-textarea'
+    case 'password':
+        return 'v-text-field'
+    case 'number':
+        return 'v-text-field'
+    case 'email':
+        return 'v-text-field'
+    case 'tel':
+        return 'v-text-field'
+    case 'url':
+        return 'v-text-field'
+    default:
+        return 'v-text-field'
+    }
+}
+
 </script>
 
 <style scoped>

@@ -1,0 +1,116 @@
+{
+    "userTask": {
+        "flowNodeInstanceId": "3b3102c5-102d-4e52-ab27-40602cc5fd86",
+        "flowNodeId": "Activity_0ljiko7",
+        "flowNodeName": "Hello world",
+        "flowNodeLane": "Lane",
+        "flowNodeType": "bpmn:UserTask",
+        "previousFlowNodeInstanceId": "2ebcb278-d90c-4b2b-98ee-c9847dcaf461",
+        "parentProcessInstanceId": null,
+        "processDefinitionId": "SampleUserTask_Definition",
+        "processModelId": "SampleUserTask_Process",
+        "processInstanceId": "8a8ab5a7-fbef-4bf0-9905-1937defb8cd8",
+        "correlationId": "61845380-2bd3-4bc9-b3bf-60933d05121b",
+        "state": "suspended",
+        "tokens": [],
+        "startToken": {},
+        "endToken": {},
+        "ownerId": "dummy_token",
+        "startedAt": "2024-06-16T19:18:38.580Z",
+        "assignedUserIds": null,
+        "actualOwnerId": null,
+        "finishedByUserId": null,
+        "userTaskConfig": {
+            "formFields": [
+                {
+                    "id": "text_id",
+                    "label": "Text Label",
+                    "type": "string"
+                },
+                {
+                    "id": "number_id",
+                    "label": "Number Label",
+                    "type": "long",
+                    "defaultValue": "undefined",
+                    "customForm": "{\"hint\":\"Sample\"}"
+                },
+                {
+                    "id": "date_id",
+                    "label": "Date Label",
+                    "type": "date"
+                },
+                {
+                    "id": "select_id",
+                    "label": "Select Label",
+                    "type": "enum",
+                    "enumValues": [
+                        {
+                            "id": "value_01",
+                            "name": "Value 01"
+                        },
+                        {
+                            "id": "value_02",
+                            "name": "Value 02"
+                        }
+                    ]
+                },
+                {
+                    "id": "boolean_id",
+                    "label": "Boolean Label",
+                    "type": "boolean"
+                },
+                {
+                    "id": "customer_01",
+                    "label": "Custom_01",
+                    "type": "v-text-field"
+                }
+            ]
+        },
+        "userTaskConfigModel": {
+            "formFields": [
+                {
+                    "id": "text_id",
+                    "label": "Text Label",
+                    "type": "string"
+                },
+                {
+                    "id": "number_id",
+                    "label": "Number Label",
+                    "type": "long",
+                    "defaultValue": "${token.current.sample}",
+                    "customForm": "{\"hint\":\"Sample\"}"
+                },
+                {
+                    "id": "date_id",
+                    "label": "Date Label",
+                    "type": "date"
+                },
+                {
+                    "id": "select_id",
+                    "label": "Select Label",
+                    "type": "enum",
+                    "enumValues": [
+                        {
+                            "id": "value_01",
+                            "name": "Value 01"
+                        },
+                        {
+                            "id": "value_02",
+                            "name": "Value 02"
+                        }
+                    ]
+                },
+                {
+                    "id": "boolean_id",
+                    "label": "Boolean Label",
+                    "type": "boolean"
+                },
+                {
+                    "id": "customer_01",
+                    "label": "Custom_01",
+                    "type": "v-text-field"
+                }
+            ]
+        }
+    }
+}
