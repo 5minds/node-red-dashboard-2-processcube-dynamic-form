@@ -144,7 +144,7 @@ export default {
             this.send({ payload: { formData: this.formData, userTask: this.userTask(), action: 'submit' } })
         },
         cancel () {
-            this.send({ payload: { formData: this.formData, userTask: this.userTask(), action: 'cancal' } })
+            this.send({ payload: { formData: this.formData, userTask: this.userTask(), action: 'cancel' } })
         }
     }
 }
