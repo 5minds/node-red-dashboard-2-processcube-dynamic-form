@@ -125,8 +125,10 @@ export default {
 
             const fieldMap = aFields.map(field => ({
                 ...field,
-                component: mapFieldTypes(field.type)
+                component: mapFieldTypes(field.type),
+                items: mapItems(field.type, field)
             }))
+
 
             return fieldMap
         },
@@ -149,14 +151,28 @@ export default {
     }
 }
 
+function mapItems (type, field) {
+    if (type === 'enum') {
+        return field.enumValues.map(enumValue => ({
+            title: enumValue.name,
+            value: enumValue.id
+        }))
+    } else {
+        return null
+    }
+}
+
 function mapFieldTypes (fieldType) {
     switch (fieldType) {
     case 'string':
+        return 'v-text-field'
     case 'long':
     case 'date':
-    case 'enum':
-    case 'boolean':
         return 'v-text-field'
+    case 'enum':
+        return 'v-select'
+    case 'boolean':
+        return 'v-checkbox'
     case 'text':
         return 'v-text-field'
     case 'select':
