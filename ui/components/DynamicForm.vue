@@ -126,9 +126,9 @@ export default {
             const fieldMap = aFields.map(field => ({
                 ...field,
                 component: mapFieldTypes(field.type),
-                items: mapItems(field.type, field)
+                items: mapItems(field.type, field),
+                value: field.defaultValue || ''
             }))
-
 
             return fieldMap
         },
