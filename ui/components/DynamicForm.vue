@@ -82,12 +82,12 @@ export default {
         this.$socket.on('msg-input:' + this.id, (msg) => {
             // store the latest message in our client-side vuex store when we receive a new message
 
-            console.info(msg)
-
             if (msg.payload.formFields) {
                 const formData = msg.payload.formFields.reduce((acc, field) => {
                     console.info('field:', field)
                     console.info('field.id:', field.id)
+                    console.info('field.value:', field.value)
+                    console.info('field.defaultValue:', field.defaultValue)
 
                     acc[field.id] = field.value || field.defaultValue || ''
                     return acc
@@ -126,8 +126,7 @@ export default {
             const fieldMap = aFields.map(field => ({
                 ...field,
                 component: mapFieldTypes(field.type),
-                items: mapItems(field.type, field),
-                value: field.defaultValue || ''
+                items: mapItems(field.type, field)
             }))
 
             return fieldMap
