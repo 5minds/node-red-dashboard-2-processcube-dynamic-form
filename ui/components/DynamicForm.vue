@@ -89,7 +89,7 @@ export default {
                     console.info('field:', field)
                     console.info('field.id:', field.id)
 
-                    acc[field.id] = field.value || ''
+                    acc[field.id] = field.value || field.defaultValue || ''
                     return acc
                 }, {})
 
