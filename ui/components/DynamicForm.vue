@@ -84,20 +84,14 @@ export default {
 
             if (msg.payload.formFields) {
                 const formData = msg.payload.formFields.reduce((acc, field) => {
-                    console.info('field:', field)
-                    console.info('field.id:', field.id)
-                    console.info('field.value:', field.value)
-                    console.info('field.defaultValue:', field.defaultValue)
-
-                    acc[field.id] = field.value || field.defaultValue || ''
+                    // acc[field.id] = field.value || field.defaultValue || ''
+                    acc[field.id] = field.defaultValue || ''
                     return acc
                 }, {})
 
-                console.info('formData: ', formData)
-                console.info('this.formData (1):', this.formData)
-
                 this.formData = formData
-                console.info('this.formData (2):', this.formData)
+            } else {
+                console.debug('No formFields in msg.payload', msg.payload.formFields)
             }
 
             this.$store.commit('data/bind', {
