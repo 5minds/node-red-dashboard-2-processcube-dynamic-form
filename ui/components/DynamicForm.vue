@@ -77,7 +77,8 @@ export default {
   },
   mounted() {
     this.$socket.on("widget-load:" + this.id, (msg) => {
-      this.init();
+      this.init()
+
       this.$store.commit("data/bind", {
         widgetId: this.id,
         msg,
@@ -85,18 +86,11 @@ export default {
     });
     this.$socket.on("msg-input:" + this.id, (msg) => {
       // store the latest message in our client-side vuex store when we receive a new message
-      this.init();
+      this.init()
 
-      if (msg.payload.formFields) {
-        const formData = msg.payload.formFields.reduce((acc, field) => {
-          // acc[field.id] = field.value || field.defaultValue || ''
-          acc[field.id] = field.defaultValue || "";
-          return acc;
-        }, {});
-
-        this.formData = formData;
-      } else {
-        console.debug("No formFields in msg.payload", msg.payload.formFields);
+      if (msg.payload && msg.payload.userTask && msg.payload.userTask.startToken && msg.payload.userTask.startToken.formData) {
+              this.formData = { ...msg.payload.userTask.startToken.formData };
+              console.info(this.formData)
       }
 
       this.$store.commit("data/bind", {
@@ -137,7 +131,6 @@ export default {
       return fieldMap;
     },
     hasFields() {
-      console.info("luisss");
       return (
         this.messages &&
         this.messages[this.id] &&
