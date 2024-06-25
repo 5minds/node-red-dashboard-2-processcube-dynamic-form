@@ -37,5 +37,12 @@ module.exports = function (RED) {
         }
     }
 
-    RED.nodes.registerType('dynamic-form', DynamicFormNode)
+    RED.nodes.registerType('dynamic-form', DynamicFormNode, {
+      defaults: {
+        outputs: { value: 1 }
+      },
+      outputs: function(config) {
+        return config.outputs || 1;
+      }
+    })
 }
