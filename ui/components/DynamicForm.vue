@@ -88,7 +88,7 @@ export default {
       // store the latest message in our client-side vuex store when we receive a new message
       this.init()
 
-      if (msg.payload && msg.payload.userTask && msg.payload.userTask.startToken && msg.payload.userTask.startToken.formData) {
+      if (msg.payload && msg.payload.userTask && msg.payload.userTask.startToken) {
         //this.formData = { ...msg.payload.userTask.startToken.formData };
         this.formData = { ...msg.payload.userTask.startToken }
         console.info(this.formData)
