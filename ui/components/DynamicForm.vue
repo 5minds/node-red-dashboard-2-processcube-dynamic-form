@@ -66,7 +66,7 @@ export default {
   computed: {
     ...mapState("data", ["messages"]),
     waiting_title() {
-      return this.props.waiting_title || "Warten auf den Usertask...";
+      return this.props.waiting_title || "Warten auf den Usertask..."
     },
     waiting_info() {
       return (
@@ -89,8 +89,9 @@ export default {
       this.init()
 
       if (msg.payload && msg.payload.userTask && msg.payload.userTask.startToken && msg.payload.userTask.startToken.formData) {
-              this.formData = { ...msg.payload.userTask.startToken.formData };
-              console.info(this.formData)
+        //this.formData = { ...msg.payload.userTask.startToken.formData };
+        this.formData = { ...msg.payload.userTask.startToken }
+        console.info(this.formData)
       }
 
       this.$store.commit("data/bind", {
