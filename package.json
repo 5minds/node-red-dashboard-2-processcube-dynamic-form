@@ -1,6 +1,6 @@
 {
   "name": "@5minds/node-red-dashboard-2-processcube-dynamic-form",
-  "version": "1.0.14",
+  "version": "1.0.15",
   "description": "The ui component for the ProcessCube dynamic-form",
   "keywords": [
     "processcube",
@@ -77,7 +77,7 @@
     "version": "1.0.0",
     "widgets": {
       "ui-dynamic-form": {
-        "output": "dynamic-form.umd.js",
+        "output": "ui-dynamic-form.umd.js",
         "component": "DynamicForm"
       }
     }
