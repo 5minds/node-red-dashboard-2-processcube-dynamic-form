@@ -58,6 +58,8 @@ export default {
             actions: [],
             form: {},
             formData: {},
+            msg: {},
+            taskInput: {},
             error: false,
             errorMsg: '',
         };
@@ -86,6 +88,12 @@ export default {
         this.$socket.on('msg-input:' + this.id, (msg) => {
             // store the latest message in our client-side vuex store when we receive a new message
             this.init();
+
+            this.msg = msg;
+
+            if (msg.payload && msg.payload.userTask) {
+                this.taskInput = msg.payload.userTask;
+            }
 
             if (msg.payload && msg.payload.userTask && msg.payload.userTask.startToken) {
                 //this.formData = { ...msg.payload.userTask.startToken.formData };
@@ -152,8 +160,8 @@ export default {
         },
         checkCondition(condition) {
             try {
-                const func = Function('fields', '"use strict"; return (' + condition + ')');
-                const result = func(this.formData);
+                const func = Function('fields', 'userTask', 'msg', '"use strict"; return (' + condition + ')');
+                const result = func(this.formData, this.taskInput, this.msg);
                 return Boolean(result);
             } catch (err) {
                 console.error('Error while evaluating condition: ' + err);
