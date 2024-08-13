@@ -1,10 +1,10 @@
 /* Exports of all of the components in this node */
-import DynamicForm from './components/DynamicForm.vue'
+import UIDynamicForm from './components/UIDynamicForm.vue'
 
 export {
-    DynamicForm
+    UIDynamicForm
 }
 
 export default {
-    'ui-dynamic-form': DynamicForm
+    'ui-dynamic-form': UIDynamicForm
 }

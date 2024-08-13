@@ -1,5 +1,5 @@
 module.exports = function (RED) {
-  function DynamicFormNode(config) {
+  function UIDynamicFormNode(config) {
     RED.nodes.createNode(this, config);
 
     const node = this;
@@ -37,7 +37,7 @@ module.exports = function (RED) {
     }
   }
 
-  RED.nodes.registerType("ui-dynamic-form", DynamicFormNode, {
+  RED.nodes.registerType("ui-dynamic-form", UIDynamicFormNode, {
     defaults: {
       outputs: { value: 1 },
     },

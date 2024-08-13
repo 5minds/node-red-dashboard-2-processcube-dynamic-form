@@ -5,6 +5,6 @@
  */
 import { createApp } from 'vue'
 
-import DynamicForm from './components/DynamicForm.vue'
+import UIDynamicForm from './components/UIDynamicForm.vue'
 
-createApp(DynamicForm).mount('#app')
+createApp(UIDynamicForm).mount('#app')

@@ -38,7 +38,7 @@ import { markRaw } from 'vue';
 import { mapState } from 'vuex';
 
 export default {
-    name: 'DynamicForm',
+    name: 'UIDynamicForm',
     inject: ['$socket'],
     props: {
         /* do not remove entries from this - Dashboard's Layout Manager's will pass this data to your component */
@@ -50,7 +50,7 @@ export default {
         },
     },
     setup(props) {
-        console.info('DynamicForm setup with:', props);
+        console.info('UIDynamicForm setup with:', props);
         console.debug('Vue function loaded correctly', markRaw);
     },
     data() {
@@ -237,5 +237,5 @@ function mapFieldTypes(fieldType) {
 
 <style scoped>
 /* CSS is auto scoped, but using named classes is still recommended */
-@import '../stylesheets/dynamic-form.css';
+@import '../stylesheets/ui-dynamic-form.css';
 </style>

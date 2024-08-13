@@ -28,8 +28,8 @@
         }
     ],
     "exports": {
-        "import": "./resources/dynamic-form.esm.js",
-        "require": "./resources/dynamic-form.umd.js"
+        "import": "./resources/ui-dynamic-form.esm.js",
+        "require": "./resources/ui-dynamic-form.umd.js"
     },
     "files": [
         "dist/*",
@@ -70,7 +70,7 @@
     "node-red": {
         "version": ">=3.0.0",
         "nodes": {
-            "ui-dynamic-form": "nodes/dynamic-form.js"
+            "ui-dynamic-form": "nodes/ui-dynamic-form.js"
         }
     },
     "node-red-dashboard-2": {
@@ -78,7 +78,7 @@
         "widgets": {
             "ui-dynamic-form": {
                 "output": "ui-dynamic-form.umd.js",
-                "component": "DynamicForm"
+                "component": "UIDynamicForm"
             }
         }
     }
