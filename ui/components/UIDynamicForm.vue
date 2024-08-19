@@ -91,14 +91,24 @@ export default {
 
             this.msg = msg;
 
-            if (msg.payload && msg.payload.userTask) {
+            const hasTask = msg.payload && msg.payload.userTask;
+            const defaultValues = msg.payload.userTask.userTaskConfig.formFields;
+            const initialValues = msg.payload.userTask.startToken;
+
+            if (hasTask) {
                 this.taskInput = msg.payload.userTask;
             }
 
-            if (msg.payload && msg.payload.userTask && msg.payload.userTask.startToken) {
-                //this.formData = { ...msg.payload.userTask.startToken.formData };
-                this.formData = { ...msg.payload.userTask.startToken };
-                console.info(this.formData);
+            if (hasTask && defaultValues) {
+                defaultValues.forEach((field) => {
+                    this.formData[field.id] = field.defaultValue;
+                });
+            }
+
+            if (hasTask && initialValues) {
+                Object.keys(initialValues).forEach((key) => {
+                    this.formData[key] = initialValues[key];
+                });
             }
 
             this.$store.commit('data/bind', {
