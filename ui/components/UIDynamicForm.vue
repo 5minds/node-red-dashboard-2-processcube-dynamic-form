@@ -6,7 +6,8 @@
                 <v-row v-for="(field, index) in fields()" :key="index">
                     <v-col cols="12">
                         <component
-                            :is="field.component"
+                            :is="`FormKit`"
+                            :type="field.component"
                             :id="field.id"
                             v-model="formData[field.id]"
                             :required="field.required"
@@ -199,48 +200,49 @@ function mapItems(type, field) {
 function mapFieldTypes(fieldType) {
     switch (fieldType) {
         case 'string':
-            return 'v-text-field';
+            return 'text';
         case 'long':
+            return 'number';
         case 'date':
-            return 'v-text-field';
+            return 'date';
         case 'enum':
-            return 'v-select';
+            return 'select';
         case 'boolean':
-            return 'v-checkbox';
+            return 'checkbox';
         case 'text':
-            return 'v-text-field';
+            return 'text';
         case 'select':
-            return 'v-select';
+            return 'select';
         case 'checkbox':
-            return 'v-checkbox';
+            return 'checkbox';
         case 'radio':
-            return 'v-radio';
+            return 'radio';
         case 'switch':
             return 'v-switch';
         case 'slider':
-            return 'v-slider';
+            return 'slider';
         case 'time':
-            return 'v-time-picker';
+            return 'time';
         case 'datetime':
-            return 'v-datetime-picker';
+            return 'datetime-local';
         case 'color':
-            return 'v-color-picker';
+            return 'color';
         case 'file':
-            return 'v-file-input';
+            return 'file';
         case 'textarea':
-            return 'v-textarea';
+            return 'textarea';
         case 'password':
-            return 'v-text-field';
+            return 'password';
         case 'number':
-            return 'v-text-field';
+            return 'number';
         case 'email':
-            return 'v-text-field';
+            return 'email';
         case 'tel':
-            return 'v-text-field';
+            return 'tel';
         case 'url':
-            return 'v-text-field';
+            return 'url';
         default:
-            return 'v-text-field';
+            return 'text';
     }
 }
 </script>
