@@ -1,7 +1,6 @@
 <template>
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
     <div className="ui-dynamic-form-wrapper">
-        <p v-if="uiInfo">{{ uiInfo }}</p>
         <p v-if="hasFields()">
             <v-form ref="form" v-model="form">
                 <v-row v-for="(field, index) in fields()" :key="index">
@@ -15,7 +14,6 @@
                             :items="field.items"
                             :label="field.label"
                             wrapper-class="$remove:formkit-wrapper dynamicstyle"
-                            :wrapper-class="{ primary: isPrimary }"
                         />
                     </v-col>
                 </v-row>
@@ -266,7 +264,7 @@ function mapFieldTypes(fieldType) {
 }
 </script>
 
-<style>
+<style scoped>
 /* CSS is auto scoped, but using named classes is still recommended */
 @import '../stylesheets/ui-dynamic-form.css';
 </style>
