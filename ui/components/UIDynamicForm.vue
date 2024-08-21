@@ -169,6 +169,7 @@ export default {
             }
         },
         checkCondition(condition) {
+            if (condition == '') return true;
             try {
                 const func = Function('fields', 'userTask', 'msg', '"use strict"; return (' + condition + ')');
                 const result = func(this.formData, this.taskInput, this.msg);
