@@ -133,15 +133,19 @@ export default {
     },
     methods: {
         injectDynamicStyles() {
-            const styleTag = document.createElement('style');
-            const colors = JSON.parse(localStorage.getItem('styles'));
-            styleTag.type = 'text/css';
-            styleTag.innerHTML = `
+            try {
+                const styleTag = document.createElement('style');
+                const colors = JSON.parse(localStorage.getItem('styles'));
+                styleTag.type = 'text/css';
+                styleTag.innerHTML = `
                 .dynamicstyle {
                     background-color: ${colors.primary};
                 }
             `;
-            document.head.appendChild(styleTag);
+                document.head.appendChild(styleTag);
+            } catch (e) {
+                console.log('style injection failed: ' + e);
+            }
         },
         hasUserTask() {
             return this.messages && this.messages[this.id] && this.messages[this.id].payload.userTask;
