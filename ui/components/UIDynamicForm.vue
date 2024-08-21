@@ -1,6 +1,7 @@
 <template>
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
     <div className="ui-dynamic-form-wrapper">
+        <p v-if="uiInfo">{{ uiInfo }}</p>
         <p v-if="hasFields()">
             <v-form ref="form" v-model="form">
                 <v-row v-for="(field, index) in fields()" :key="index">
@@ -13,6 +14,8 @@
                             :required="field.required"
                             :items="field.items"
                             :label="field.label"
+                            wrapper-class="$remove:formkit-wrapper dynamicstyle"
+                            :wrapper-class="{ primary: isPrimary }"
                         />
                     </v-col>
                 </v-row>
@@ -78,9 +81,14 @@ export default {
         },
     },
     mounted() {
+        this.$socket.on('ui-config', (topic, payload) => {
+            const firstThemeKey = Object.keys(payload.themes)[0];
+            localStorage.setItem('styles', JSON.stringify(payload.themes[firstThemeKey].colors));
+            this.injectDynamicStyles();
+        });
+        this.injectDynamicStyles();
         this.$socket.on('widget-load:' + this.id, (msg) => {
             this.init();
-
             this.$store.commit('data/bind', {
                 widgetId: this.id,
                 msg,
@@ -126,6 +134,17 @@ export default {
         this.$socket?.off('msg-input:' + this.id);
     },
     methods: {
+        injectDynamicStyles() {
+            const styleTag = document.createElement('style');
+            const colors = JSON.parse(localStorage.getItem('styles'));
+            styleTag.type = 'text/css';
+            styleTag.innerHTML = `
+                .dynamicstyle {
+                    background-color: ${colors.primary};
+                }
+            `;
+            document.head.appendChild(styleTag);
+        },
         hasUserTask() {
             return this.messages && this.messages[this.id] && this.messages[this.id].payload.userTask;
         },
@@ -247,7 +266,7 @@ function mapFieldTypes(fieldType) {
 }
 </script>
 
-<style scoped>
+<style>
 /* CSS is auto scoped, but using named classes is still recommended */
 @import '../stylesheets/ui-dynamic-form.css';
 </style>
