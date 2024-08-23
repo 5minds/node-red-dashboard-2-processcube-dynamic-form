@@ -69,6 +69,7 @@ export default {
         };
     },
     created() {
+        this.injectDynamicStyles();
         const formkitConfig = defaultConfig({
             theme: 'genesis',
         });
@@ -87,12 +88,6 @@ export default {
         },
     },
     mounted() {
-        this.$socket.on('ui-config', (topic, payload) => {
-            const firstThemeKey = Object.keys(payload.themes)[0];
-            localStorage.setItem('styles', JSON.stringify(payload.themes[firstThemeKey].colors));
-            this.injectDynamicStyles();
-        });
-        this.injectDynamicStyles();
         this.$socket.on('widget-load:' + this.id, (msg) => {
             this.init();
             this.$store.commit('data/bind', {
@@ -143,11 +138,12 @@ export default {
         injectDynamicStyles() {
             try {
                 const styleTag = document.createElement('style');
-                const colors = JSON.parse(localStorage.getItem('styles'));
+                const rootStyles = getComputedStyle(document.documentElement);
+                const primaryColor = rootStyles.getPropertyValue('--v-theme-primary').trim();
                 styleTag.type = 'text/css';
                 styleTag.innerHTML = `
                 .dynamicstyle {
-                    background-color: ${colors.primary};
+                    background-color: rgb(${primaryColor});
                 }
             `;
                 document.head.appendChild(styleTag);
@@ -276,7 +272,11 @@ function mapFieldTypes(fieldType) {
 }
 </script>
 
-<style scoped>
+<style>
 /* CSS is auto scoped, but using named classes is still recommended */
 @import '../stylesheets/ui-dynamic-form.css';
+
+.vuetifytheme {
+    background-color: var(--v-theme-primary) !important;
+}
 </style>
