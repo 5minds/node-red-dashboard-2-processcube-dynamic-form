@@ -13,7 +13,7 @@
                             :required="field.required"
                             :items="field.items"
                             :label="field.label"
-                            wrapper-class="$remove:formkit-wrapper dynamicstyle"
+                            wrapper-class="$remove:formkit-wrapper"
                         />
                     </v-col>
                 </v-row>
@@ -69,7 +69,6 @@ export default {
         };
     },
     created() {
-        this.injectDynamicStyles();
         const formkitConfig = defaultConfig({
             theme: 'genesis',
         });
@@ -135,22 +134,6 @@ export default {
         this.$socket?.off('msg-input:' + this.id);
     },
     methods: {
-        injectDynamicStyles() {
-            try {
-                const styleTag = document.createElement('style');
-                const rootStyles = getComputedStyle(document.documentElement);
-                const primaryColor = rootStyles.getPropertyValue('--v-theme-primary').trim();
-                styleTag.type = 'text/css';
-                styleTag.innerHTML = `
-                .dynamicstyle {
-                    background-color: rgb(${primaryColor});
-                }
-            `;
-                document.head.appendChild(styleTag);
-            } catch (e) {
-                console.log('style injection failed: ' + e);
-            }
-        },
         hasUserTask() {
             return this.messages && this.messages[this.id] && this.messages[this.id].payload.userTask;
         },
@@ -275,8 +258,4 @@ function mapFieldTypes(fieldType) {
 <style>
 /* CSS is auto scoped, but using named classes is still recommended */
 @import '../stylesheets/ui-dynamic-form.css';
-
-.vuetifytheme {
-    background-color: var(--v-theme-primary) !important;
-}
 </style>
