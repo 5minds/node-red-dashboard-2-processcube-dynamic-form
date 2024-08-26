@@ -39,7 +39,7 @@ import { mapState } from 'vuex';
 
 export default {
     name: 'UIDynamicForm',
-    inject: ['$socket'],
+    inject: ['$socket', '$dataTracker'], // TODO: mm - '$dataTracker'
     props: {
         /* do not remove entries from this - Dashboard's Layout Manager's will pass this data to your component */
         id: { type: String, required: true },
@@ -75,6 +75,9 @@ export default {
                 'Der Usertask wird automatisch angezeigt, wenn ein entsprechender Task vorhanden ist.'
             );
         },
+    },
+    created () {
+        this.$dataTracker(this.id)
     },
     mounted() {
         this.$socket.on('widget-load:' + this.id, (msg) => {
