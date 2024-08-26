@@ -29,7 +29,7 @@
         {
             "name": "Colin Law",
             "url": "https://github.com/colinl"
-        },
+        }
     ],
     "exports": {
         "import": "./resources/ui-dynamic-form.esm.js",
