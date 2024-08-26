@@ -16,17 +16,19 @@ module.exports = function (RED) {
                 // store the latest value in our Node-RED datastore
                 base.stores.data.save(base, node, msg);
             },
-            onSocket: {
-                'my-custom-event': function (conn, id, msg) {
-                    console.info('"my-custom-event" received:', conn.id, id, msg);
-                    console.info('conn.id:', conn.id);
-                    console.info('id:', id);
-                    console.info('msg:', msg);
-                    console.info('node.id:', node.id);
-                    // emit a msg in Node-RED from this node
-                    node.send(msg);
-                },
-            },
+            // TODO: mm - begin
+            // onSocket: {
+            //     'my-custom-event': function (conn, id, msg) {
+            //         console.info('"my-custom-event" received:', conn.id, id, msg);
+            //         console.info('conn.id:', conn.id);
+            //         console.info('id:', id);
+            //         console.info('msg:', msg);
+            //         console.info('node.id:', node.id);
+            //         // emit a msg in Node-RED from this node
+            //         node.send(msg);
+            //     },
+            //},
+            // TODO: mm - end
         };
 
         // inform the dashboard UI that we are adding this node
