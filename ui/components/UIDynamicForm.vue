@@ -89,7 +89,8 @@ export default {
             // store the latest message in our client-side vuex store when we receive a new message
             this.init();
 
-            this.msg = msg;
+            // TODO: MM - this.msg = msg;
+            this.messages[this.id] = msg;
 
             const hasTask = msg.payload && msg.payload.userTask;
             const defaultValues = msg.payload.userTask.userTaskConfig.formFields;
@@ -160,10 +161,18 @@ export default {
         actionFn(action) {
             if (this.checkCondition(action.condition)) {
                 this.showError(false, '');
+                // TODO: MM - begin
+                // this.send(
+                //    { payload: { formData: this.formData, userTask: this.userTask() } },
+                //    this.actions.findIndex((element) => element.label === action.label)
+                // );
+                const msg = this.messages[this.id] || {};
+                msg.payload = { formData: this.formData, userTask: this.userTask() };
                 this.send(
-                    { payload: { formData: this.formData, userTask: this.userTask() } },
+                    msg,
                     this.actions.findIndex((element) => element.label === action.label)
                 );
+                // TODO: mm - end
             } else {
                 this.showError(true, action.errorMessage);
             }
