@@ -58,7 +58,6 @@ export default {
             actions: [],
             form: {},
             formData: {},
-            msg: {},
             taskInput: {},
             error: false,
             errorMsg: '',
@@ -180,7 +179,7 @@ export default {
             if (condition == '') return true;
             try {
                 const func = Function('fields', 'userTask', 'msg', '"use strict"; return (' + condition + ')');
-                const result = func(this.formData, this.taskInput, this.msg);
+                const result = func(this.formData, this.taskInput, this.messages[this.id]);
                 return Boolean(result);
             } catch (err) {
                 console.error('Error while evaluating condition: ' + err);
