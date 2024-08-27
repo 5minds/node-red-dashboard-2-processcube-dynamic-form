@@ -39,7 +39,7 @@ import { mapState } from 'vuex';
 
 export default {
     name: 'UIDynamicForm',
-    inject: ['$socket'],
+    inject: ['$socket', '$dataTracker'],
     props: {
         /* do not remove entries from this - Dashboard's Layout Manager's will pass this data to your component */
         id: { type: String, required: true },
@@ -48,6 +48,9 @@ export default {
             type: Object,
             default: () => ({ enabled: false, visible: false }),
         },
+    },
+    created() {
+        this.$dataTracker(this.id);
     },
     setup(props) {
         console.info('UIDynamicForm setup with:', props);
@@ -89,8 +92,6 @@ export default {
             // store the latest message in our client-side vuex store when we receive a new message
             this.init();
 
-            // TODO: MM - this.msg = msg;
-            this.messages[this.id] = msg;
 
             const hasTask = msg.payload && msg.payload.userTask;
             const defaultValues = msg.payload.userTask.userTaskConfig.formFields;
