@@ -13,6 +13,8 @@
                             :required="field.required"
                             :items="field.items"
                             :label="field.label"
+                            validation="lowercase"
+                            validation-visibility="live"
                             wrapper-class="$remove:formkit-wrapper"
                         />
                     </v-col>
@@ -134,6 +136,15 @@ export default {
         this.$socket?.off('msg-input:' + this.id);
     },
     methods: {
+        checkFormState(state) {
+            const field = this.$formkit.get('field_01');
+            console.info(field.context.state.valid);
+
+            // loop over fields then this.$formkit.get(this.id) -> check error state if all ok return true else return false
+            // ?? wie unterscheiden wir welche actions dieser validierungsfehler betrifft ??
+            // ?? wie machen wir formkit validierung auch im Studio available ??
+            // \_ vllt macht es sinn das schema von formkit zu übernehmen oder alternativ nur unsere validierung zu nutzen.
+        },
         hasUserTask() {
             return this.messages && this.messages[this.id] && this.messages[this.id].payload.userTask;
         },
@@ -142,7 +153,6 @@ export default {
         },
         fields() {
             const aFields = this.hasUserTask() ? this.userTask().userTaskConfig.formFields : [];
-
             const fieldMap = aFields.map((field) => ({
                 ...field,
                 component: mapFieldTypes(field.type),
@@ -167,6 +177,7 @@ export default {
             this.actions = this.props.options;
         },
         actionFn(action) {
+            this.checkFormState();
             if (this.checkCondition(action.condition)) {
                 this.showError(false, '');
                 // TODO: MM - begin
@@ -216,6 +227,8 @@ function mapItems(type, field) {
 
 function mapFieldTypes(fieldType) {
     switch (fieldType) {
+        case: 'confirm':
+            return 'button';
         case 'string':
             return 'text';
         case 'long':
