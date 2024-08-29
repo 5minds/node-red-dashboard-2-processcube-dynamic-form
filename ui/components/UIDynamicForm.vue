@@ -5,18 +5,7 @@
             <v-form ref="form" v-model="form">
                 <v-row v-for="(field, index) in fields()" :key="index">
                     <v-col cols="12">
-                        <component
-                            :is="`FormKit`"
-                            :type="field.component"
-                            :id="field.id"
-                            v-model="formData[field.id]"
-                            :required="field.required"
-                            :items="field.items"
-                            :label="field.label"
-                            validation="lowercase"
-                            validation-visibility="live"
-                            wrapper-class="$remove:formkit-wrapper"
-                        />
+                        <component :is="createComponent(field).type" v-bind="createComponent(field).props" />
                     </v-col>
                 </v-row>
                 <v-row style="padding: 12px">
@@ -38,10 +27,11 @@
 </template>
 
 <script>
-import { markRaw } from 'vue';
+import { markRaw, h } from 'vue';
 import { mapState } from 'vuex';
 import { plugin, defaultConfig } from '@formkit/vue';
 import '@formkit/themes/genesis';
+import { FormKit } from '@formkit/vue';
 
 export default {
     name: 'UIDynamicForm',
@@ -135,7 +125,123 @@ export default {
         this.$socket?.off('widget-load' + this.id);
         this.$socket?.off('msg-input:' + this.id);
     },
+    components: {
+        FormKit,
+    },
     methods: {
+        createComponent(field) {
+            const hint = field.customForm ? JSON.parse(field.customForm).hint : undefined;
+            switch (field.type) {
+                case 'long':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'number',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            number: 'integer',
+                            help: hint,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'number':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'number',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'date':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'date',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'enum':
+                    const enums = field.enumValues.map((obj) => {
+                        return { value: obj.id, label: obj.name };
+                    });
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'select', // JSON.parse(field.customForm).displayAs
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            options: enums,
+                            help: hint,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'string':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'text',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'boolean':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'checkbox',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                        },
+                    };
+                case 'file':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'file',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            innerClass: 'reset-background',
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                default:
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: field.type,
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                        },
+                    };
+            }
+        },
         checkFormState(state) {
             const field = this.$formkit.get('field_01');
             console.info(field.context.state.valid);
@@ -155,7 +261,6 @@ export default {
             const aFields = this.hasUserTask() ? this.userTask().userTaskConfig.formFields : [];
             const fieldMap = aFields.map((field) => ({
                 ...field,
-                component: mapFieldTypes(field.type),
                 items: mapItems(field.type, field),
             }));
 
@@ -222,57 +327,6 @@ function mapItems(type, field) {
         }));
     } else {
         return null;
-    }
-}
-
-function mapFieldTypes(fieldType) {
-    switch (fieldType) {
-        case: 'confirm':
-            return 'button';
-        case 'string':
-            return 'text';
-        case 'long':
-            return 'number';
-        case 'date':
-            return 'date';
-        case 'enum':
-            return 'select';
-        case 'boolean':
-            return 'checkbox';
-        case 'text':
-            return 'text';
-        case 'select':
-            return 'select';
-        case 'checkbox':
-            return 'checkbox';
-        case 'radio':
-            return 'radio';
-        case 'switch':
-            return 'v-switch';
-        case 'slider':
-            return 'slider';
-        case 'time':
-            return 'time';
-        case 'datetime':
-            return 'datetime-local';
-        case 'color':
-            return 'color';
-        case 'file':
-            return 'file';
-        case 'textarea':
-            return 'textarea';
-        case 'password':
-            return 'password';
-        case 'number':
-            return 'number';
-        case 'email':
-            return 'email';
-        case 'tel':
-            return 'tel';
-        case 'url':
-            return 'url';
-        default:
-            return 'text';
     }
 }
 </script>

@@ -49,3 +49,8 @@ code {
     --fk-bg-input: rgb(var(--v-theme-group-background));
     --fk-color-input: rgb(var(--v-theme-on-group-background));
 }
+
+.reset-background {
+    --fk-bg-input: rgb(var(--does-not-exist, #000));
+    /* i dont know why this works but it works */
+}
