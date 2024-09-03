@@ -202,3 +202,36 @@
         <input type="text" id="node-input-waiting_info">
     </div>
 </script>
+
+
+<script type="text/markdown" data-help-name="ui-dynamic-form">
+A UI-Node to display usertasks forms from the ProcessCube Engine dynamicly.
+
+## Usage
+
+Connect the UI-Node to the usertask input node. Every action in the configuration of the node will display as a button at the bottom of the form.
+
+## Validation
+
+### message
+
+Access to the message object is available through _msg_ 
+
+### form fields
+
+Access to the form fields is available through the _fields_ object. A single form field can be accessed by selecting the field id as a key.
+Example: _fields.field_01_
+
+### usertask
+
+Access to the usertask object is available through _usertask_
+
+## Outputs
+
+: usertask (Object) : The representative object of the usertask.
+
+### References
+
+-   [The ProcessCube Developer Network](https://processcube.io) - All documentation for the ProcessCube&copy; Plattform
+-   [Node-RED Integration in ProcessCube&copy;](https://processcube.io/docs/node-red) - Node-RED Integration in ProcessCube&copy;
+</script>
