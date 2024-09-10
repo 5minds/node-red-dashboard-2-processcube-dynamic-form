@@ -486,8 +486,10 @@ export default {
             }
         },
         checkFormState(state) {
-            const field = this.$formkit.get('field_01');
-            console.info(field.context.state.valid);
+            // const field = this.$formkit.get('field_01');
+            // console.info(field.context.state.valid);
+
+            return true;
 
             // loop over fields then this.$formkit.get(this.id) -> check error state if all ok return true else return false
             // ?? wie unterscheiden wir welche actions dieser validierungsfehler betrifft ??
