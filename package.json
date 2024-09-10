@@ -54,6 +54,8 @@
         "lint:package:fix": "sort-package-json 'package.json'"
     },
     "dependencies": {
+        "@formkit/themes": "^1.6.5",
+        "@formkit/vue": "^1.6.5",
         "to-title-case": "^1.0.0",
         "vue": "^3.3.8",
         "vuex": "^4.1.0"

@@ -6,13 +6,13 @@
                 <v-row v-for="(field, index) in fields()" :key="index">
                     <v-col cols="12">
                         <component
-                            :is="field.component"
-                            :id="field.id"
-                            v-model="formData[field.id]"
-                            :required="field.required"
-                            :items="field.items"
-                            :label="field.label"
-                        />
+                            v-if="createComponent(field).innerText"
+                            :is="createComponent(field).type"
+                            v-bind="createComponent(field).props"
+                        >
+                            {{ createComponent(field).innerText }}
+                        </component>
+                        <component v-else :is="createComponent(field).type" v-bind="createComponent(field).props" />
                     </v-col>
                 </v-row>
                 <v-row style="padding: 12px">
@@ -34,8 +34,11 @@
 </template>
 
 <script>
-import { markRaw } from 'vue';
+import { markRaw, h } from 'vue';
 import { mapState } from 'vuex';
+import { plugin, defaultConfig } from '@formkit/vue';
+import '@formkit/themes/genesis';
+import { FormKit } from '@formkit/vue';
 
 export default {
     name: 'UIDynamicForm',
@@ -63,6 +66,12 @@ export default {
             errorMsg: '',
         };
     },
+    created() {
+        const formkitConfig = defaultConfig({
+            theme: 'genesis',
+        });
+        window.app.use(plugin, formkitConfig);
+    },
     computed: {
         ...mapState('data', ['messages']),
         waiting_title() {
@@ -78,7 +87,6 @@ export default {
     mounted() {
         this.$socket.on('widget-load:' + this.id, (msg) => {
             this.init();
-
             this.$store.commit('data/bind', {
                 widgetId: this.id,
                 msg,
@@ -123,7 +131,370 @@ export default {
         this.$socket?.off('widget-load' + this.id);
         this.$socket?.off('msg-input:' + this.id);
     },
+    components: {
+        FormKit,
+    },
     methods: {
+        createComponent(field) {
+            const hint = field.customForm ? JSON.parse(field.customForm).hint : undefined;
+            const placeholder = field.customForm ? JSON.parse(field.customForm).placeholder : undefined;
+            switch (field.type) {
+                case 'long':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'number',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            number: 'integer',
+                            help: hint,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'number':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'number',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'date':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'date',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'enum':
+                    const enums = field.enumValues.map((obj) => {
+                        return { value: obj.id, label: obj.name };
+                    });
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'select', // JSON.parse(field.customForm).displayAs
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            options: enums,
+                            help: hint,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'select':
+                    const selections = JSON.parse(field.customForm).entries.map((obj) => {
+                        return { value: obj.key, label: obj.value };
+                    });
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'select', // JSON.parse(field.customForm).displayAs
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            options: selections,
+                            placeholder: placeholder,
+                            help: hint,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'string':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'text',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            placeholder: placeholder,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'boolean':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'checkbox',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                        },
+                    };
+                case 'file':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'file',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            innerClass: 'reset-background',
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'checkbox':
+                    const options = JSON.parse(field.customForm).entries.map((obj) => {
+                        return { value: obj.key, label: obj.value };
+                    });
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'checkbox',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            options: options,
+                            help: hint,
+                            fieldsetClass: 'custom-fieldset',
+                        },
+                    };
+                case 'color':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'color',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                        },
+                    };
+                case 'datetime-local':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'datetime-local',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'email':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'email',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            validation: 'email',
+                            validationVisibility: 'live',
+                            placeholder: placeholder,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'header':
+                    let typeToUse = 'h1';
+                    if (field.customForm && JSON.parse(field.customForm).style == 'heading_2') {
+                        typeToUse = 'h2';
+                    }
+                    if (field.customForm && JSON.parse(field.customForm).style == 'heading_3') {
+                        typeToUse = 'h3';
+                    }
+                    return {
+                        type: typeToUse,
+                        innerText: field.defaultValue,
+                    };
+                case 'hidden':
+                    return {
+                        type: 'input',
+                        props: {
+                            type: 'hidden',
+                            value: field.defaultValue,
+                        },
+                    };
+                case 'month':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'month',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'paragraph':
+                    return {
+                        type: 'p',
+                        innerText: field.defaultValue,
+                    };
+                case 'password':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'password',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            placeholder: placeholder,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'radio':
+                    const radioOptions = JSON.parse(field.customForm).entries.map((obj) => {
+                        return { value: obj.key, label: obj.value };
+                    });
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'radio',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            options: radioOptions,
+                            help: hint,
+                            fieldsetClass: 'custom-fieldset',
+                        },
+                    };
+                case 'range':
+                    const customForm = JSON.parse(field.customForm);
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'range',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            min: customForm.min,
+                            max: customForm.max,
+                            step: customForm.step, //step is not supported by formkit free version
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'tel':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'tel' /* with pro component mask more good */,
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            placeholder: placeholder,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'textarea':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'textarea' /* with pro component mask more good */,
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            placeholder: placeholder,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'time':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'time' /* with pro component mask more good */,
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            placeholder: placeholder,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'url':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'url',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            placeholder: placeholder,
+                            validation: 'url',
+                            validationVisibility: 'live',
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                case 'week':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: 'week',
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                            placeholder: placeholder,
+                            wrapperClass: '$remove:formkit-wrapper',
+                        },
+                    };
+                default:
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            type: field.type,
+                            id: field.id,
+                            label: field.label,
+                            required: field.required,
+                            value: field.defaultValue,
+                            help: hint,
+                        },
+                    };
+            }
+        },
+        checkFormState(state) {
+            // const field = this.$formkit.get('field_01');
+            // console.info(field.context.state.valid);
+
+            return true;
+
+            // loop over fields then this.$formkit.get(this.id) -> check error state if all ok return true else return false
+            // ?? wie unterscheiden wir welche actions dieser validierungsfehler betrifft ??
+            // ?? wie machen wir formkit validierung auch im Studio available ??
+            // \_ vllt macht es sinn das schema von formkit zu übernehmen oder alternativ nur unsere validierung zu nutzen.
+        },
         hasUserTask() {
             return this.messages && this.messages[this.id] && this.messages[this.id].payload.userTask;
         },
@@ -132,10 +503,8 @@ export default {
         },
         fields() {
             const aFields = this.hasUserTask() ? this.userTask().userTaskConfig.formFields : [];
-
             const fieldMap = aFields.map((field) => ({
                 ...field,
-                component: mapFieldTypes(field.type),
                 items: mapItems(field.type, field),
             }));
 
@@ -157,6 +526,7 @@ export default {
             this.actions = this.props.options;
         },
         actionFn(action) {
+            this.checkFormState();
             if (this.checkCondition(action.condition)) {
                 this.showError(false, '');
                 // TODO: MM - begin
@@ -203,57 +573,9 @@ function mapItems(type, field) {
         return null;
     }
 }
-
-function mapFieldTypes(fieldType) {
-    switch (fieldType) {
-        case 'string':
-            return 'v-text-field';
-        case 'long':
-        case 'date':
-            return 'v-text-field';
-        case 'enum':
-            return 'v-select';
-        case 'boolean':
-            return 'v-checkbox';
-        case 'text':
-            return 'v-text-field';
-        case 'select':
-            return 'v-select';
-        case 'checkbox':
-            return 'v-checkbox';
-        case 'radio':
-            return 'v-radio';
-        case 'switch':
-            return 'v-switch';
-        case 'slider':
-            return 'v-slider';
-        case 'time':
-            return 'v-time-picker';
-        case 'datetime':
-            return 'v-datetime-picker';
-        case 'color':
-            return 'v-color-picker';
-        case 'file':
-            return 'v-file-input';
-        case 'textarea':
-            return 'v-textarea';
-        case 'password':
-            return 'v-text-field';
-        case 'number':
-            return 'v-text-field';
-        case 'email':
-            return 'v-text-field';
-        case 'tel':
-            return 'v-text-field';
-        case 'url':
-            return 'v-text-field';
-        default:
-            return 'v-text-field';
-    }
-}
 </script>
 
-<style scoped>
+<style>
 /* CSS is auto scoped, but using named classes is still recommended */
 @import '../stylesheets/ui-dynamic-form.css';
 </style>

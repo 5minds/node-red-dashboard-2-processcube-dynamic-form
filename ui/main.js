@@ -3,8 +3,8 @@
  *
  * This file is useful for testing your component in isolation from Node-RED.
  */
-import { createApp } from 'vue'
+import { createApp } from 'vue';
+import { plugin, defaultConfig } from '@formkit/vue';
+import UIDynamicForm from './components/UIDynamicForm.vue';
 
-import UIDynamicForm from './components/UIDynamicForm.vue'
-
-createApp(UIDynamicForm).mount('#app')
+createApp(UIDynamicForm).use(plugin, defaultConfig).mount('#app');

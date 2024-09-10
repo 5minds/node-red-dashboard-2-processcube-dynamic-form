@@ -1,44 +1,62 @@
 .dynamic-form-wrapper {
-  padding: 10px;
-  margin: 10px;
-  border: 1px solid black;
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid black;
 }
 
 .dynamic-form-class {
-  color: green;
-  font-weight: bold;
+    color: green;
+    font-weight: bold;
 }
 
 h1 {
-  margin-bottom: 10px;
+    margin-bottom: 10px;
 }
 
 h2 {
-  margin-top: 1.5rem;
-  margin-bottom: 0.75rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
 }
 
 h3 {
-  margin-top: 1rem;
+    margin-top: 1rem;
 }
 
 p {
-  margin-bottom: 5px;
+    margin-bottom: 5px;
 }
 
 ul li {
-  list-style-type: circle;
-  list-style-position: inside;
-  margin-left: 15px;
+    list-style-type: circle;
+    list-style-position: inside;
+    margin-left: 15px;
 }
 
 pre {
-  padding: 12px;
-  margin: 12px;
-  background-color: #eee;
+    padding: 12px;
+    margin: 12px;
+    background-color: #eee;
 }
 
 code {
-  font-size: 0.825rem;
-  color: #ae0000;
+    font-size: 0.825rem;
+    color: #ae0000;
+}
+
+.ui-dynamic-form-wrapper {
+    --fk-color-primary: rgb(var(--v-theme-primary)) !important;
+    --fk-color-border: rgb(var(--v-theme-group-outline)); /* Does not work somehow */
+    --fk-bg-input: rgb(var(--v-theme-group-background));
+    --fk-color-input: rgb(var(--v-theme-on-group-background));
+    --fk-color-help: rgb(var(--v-theme-on-group-background));
+    --fk-color-border-focus: rgb(var(--v-theme-primary));
+}
+
+.reset-background {
+    --fk-bg-input: rgb(var(--does-not-exist, #000));
+    /* i dont know why this works but it works */
+}
+
+.custom-fieldset {
+    max-width: none !important;
 }
