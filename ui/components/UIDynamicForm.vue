@@ -9,10 +9,11 @@
                             v-if="createComponent(field).innerText"
                             :is="createComponent(field).type"
                             v-bind="createComponent(field).props"
+                            v-model="formData[field.id]"
                         >
                             {{ createComponent(field).innerText }}
                         </component>
-                        <component v-else :is="createComponent(field).type" v-bind="createComponent(field).props" />
+                        <component v-else :is="createComponent(field).type" v-bind="createComponent(field).props" v-model="formData[field.id]" />
                     </v-col>
                 </v-row>
                 <v-row style="padding: 12px">
@@ -526,7 +527,7 @@ export default {
             this.actions = this.props.options;
         },
         actionFn(action) {
-            this.checkFormState();
+            // this.checkFormState();
             if (this.checkCondition(action.condition)) {
                 this.showError(false, '');
                 // TODO: MM - begin
@@ -548,6 +549,7 @@ export default {
         checkCondition(condition) {
             if (condition == '') return true;
             try {
+                console.info('luis777', this.formData)
                 const func = Function('fields', 'userTask', 'msg', '"use strict"; return (' + condition + ')');
                 const result = func(this.formData, this.taskInput, this.messages[this.id]);
                 return Boolean(result);

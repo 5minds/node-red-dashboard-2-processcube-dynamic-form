@@ -1,0 +1,179 @@
+[
+    {
+        "id": "e0221ca7bcc43410",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "8d719ec7a03c4c67",
+        "type": "inject",
+        "z": "e0221ca7bcc43410",
+        "name": "UserTask Data",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"userTask\":{\"actualOwnerId\":null,\"finishedByUserId\":null,\"userTaskConfig\":{\"formFields\":[{\"id\":\"email\",\"label\":\"Email\",\"type\":\"string\"}]},\"userTaskConfigModel\":{\"formFields\":[{\"id\":\"email\",\"label\":\"Email\",\"type\":\"string\"}]},\"assignedUserIds\":null,\"multiInstanceMetadataId\":\"c6377f1c-52b4-492d-bf30-134df34fe9b0\",\"multiInstanceStartToken\":{},\"multiInstanceEndToken\":{},\"flowNodeInstanceId\":\"94dea484-ae4d-4323-8b45-b3510e842dff\",\"flowNodeId\":\"Activity_1bb25d1\",\"flowNodeName\":null,\"flowNodeLane\":\"\",\"flowNodeType\":\"bpmn:UserTask\",\"state\":\"suspended\",\"previousFlowNodeInstanceId\":\"717729b5-cec7-4404-be71-3e86192d9ac5\",\"parentProcessInstanceId\":null,\"processDefinitionId\":\"User-Task-Sample_Definition\",\"processModelId\":\"User-Task-Sample_Process\",\"processInstanceId\":\"9b42409a-b222-40c4-abaa-da1314b33557\",\"correlationId\":\"5d8e7063-8ac5-43b5-aaad-e3ad2d234630\",\"ownerId\":\"dummy_token\",\"startToken\":{},\"endToken\":{},\"startedAt\":\"2024-09-16T11:11:50.986Z\"}}",
+        "payloadType": "json",
+        "x": 260,
+        "y": 400,
+        "wires": [
+            [
+                "2ba57472b3afd516"
+            ]
+        ]
+    },
+    {
+        "id": "2ba57472b3afd516",
+        "type": "ui-dynamic-form",
+        "z": "e0221ca7bcc43410",
+        "name": "",
+        "group": "20384e163d8f5d8e",
+        "order": 1,
+        "options": [
+            {
+                "label": "Cancel",
+                "condition": "",
+                "errorMessage": ""
+            },
+            {
+                "label": "Submit",
+                "condition": "fields.email != ''",
+                "errorMessage": "Please enter an email!"
+            }
+        ],
+        "waiting_title": "Warten auf den Usertask...",
+        "waiting_info": "Der Usertask wird automatisch angezeigt, wenn ein entsprechender Task vorhanden ist.",
+        "width": 0,
+        "height": 0,
+        "outputs": 2,
+        "x": 540,
+        "y": 400,
+        "wires": [
+            [
+                "305d5b75a3305097"
+            ],
+            [
+                "6a8d9d814231dc23"
+            ]
+        ]
+    },
+    {
+        "id": "305d5b75a3305097",
+        "type": "debug",
+        "z": "e0221ca7bcc43410",
+        "name": "Cancel",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 860,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "6a8d9d814231dc23",
+        "type": "debug",
+        "z": "e0221ca7bcc43410",
+        "name": "Submit",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 860,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "20384e163d8f5d8e",
+        "type": "ui-group",
+        "name": "Group Name",
+        "page": "ea1d5417b21e1895",
+        "width": "6",
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "ea1d5417b21e1895",
+        "type": "ui-page",
+        "name": "Page 1",
+        "ui": "c2fcc49f6f9d9eee",
+        "path": "/page1",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "67a8213b90451087",
+        "order": 1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "c2fcc49f6f9d9eee",
+        "type": "ui-base",
+        "name": "My Dashboard",
+        "path": "/dashboard",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-dropdown",
+            "ui-radio-group",
+            "ui-slider",
+            "ui-switch",
+            "ui-text",
+            "ui-table",
+            "ui-chart",
+            "ui-gauge",
+            "ui-notification",
+            "ui-markdown",
+            "ui-template",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "showPageTitle": true,
+        "navigationStyle": "default",
+        "titleBarStyle": "default"
+    },
+    {
+        "id": "67a8213b90451087",
+        "type": "ui-theme",
+        "name": "Theme Name",
+        "colors": {
+            "surface": "#ffffff",
+            "primary": "#0094ce",
+            "bgPage": "#eeeeee",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
+    }
+]
