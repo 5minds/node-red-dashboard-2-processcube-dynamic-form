@@ -80,6 +80,7 @@ code {
 
 .ui-dynamic-form-footer-default {
     display: flex;
+    flex-direction: column;
     gap: 8px;
     padding: 16px;
     margin: 0;
@@ -100,6 +101,7 @@ code {
 
 .ui-dynamic-form-footer-dark {
     display: flex;
+    flex-direction: column;
     gap: 8px;
     padding: 16px;
     background-color: rgba(35, 35, 35, 255);
