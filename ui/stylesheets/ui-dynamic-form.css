@@ -43,6 +43,71 @@ code {
     color: #ae0000;
 }
 
+.ui-dynamic-form-light {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px -3px rgba(0, 0, 0, 0.5);
+    max-height: 90%;
+}
+
+.input-dark {
+    background-color: rgba(85, 85, 85, 255);
+}
+
+.ui-dynamic-form-dark {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px -3px rgba(255, 255, 255, 0.9);
+    background-color: rgba(44, 44, 44, 255);
+    color: rgba(165, 165, 165, 255);
+    max-height: 90%;
+}
+
+.ui-dynamic-form-default {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px -3px rgb(var(--v-theme-on-group-background));
+    background-color: rgb(var(--v-theme-group-background));
+    color: rgb(var(--v-theme-on-group-background));
+    max-height: 90%;
+}
+
+.ui-dynamic-form-footer-default {
+    display: flex;
+    gap: 8px;
+    padding: 16px;
+    margin: 0;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.ui-dynamic-form-footer-light {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    background-color: rgba(249, 250, 251, 1);
+    margin: 0;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+.ui-dynamic-form-footer-dark {
+    display: flex;
+    gap: 8px;
+    padding: 16px;
+    background-color: rgba(35, 35, 35, 255);
+    margin: 0;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
 .ui-dynamic-form-wrapper {
     --fk-color-primary: rgb(var(--v-theme-primary)) !important;
     --fk-color-border: rgb(var(--v-theme-group-outline)); /* Does not work somehow */
@@ -50,6 +115,7 @@ code {
     --fk-color-input: rgb(var(--v-theme-on-group-background));
     --fk-color-help: rgb(var(--v-theme-on-group-background));
     --fk-color-border-focus: rgb(var(--v-theme-primary));
+    height: full;
 }
 
 .reset-background {
