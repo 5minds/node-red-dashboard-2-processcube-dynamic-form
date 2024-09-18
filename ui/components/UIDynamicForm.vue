@@ -30,7 +30,7 @@
                     </v-row>
                     <div style="display: flex; gap: 8px">
                         <div v-for="(action, index) in actions" :key="index" style="flex-grow: 1">
-                            <v-btn :key="index" style="width: 100%; min-height: 36px" @click="actionFn(action)">
+                            <v-btn :key="index" style="width: 100% !important; min-height: 36px" @click="actionFn(action)">
                                 {{ action.label }}
                             </v-btn>
                         </div>
