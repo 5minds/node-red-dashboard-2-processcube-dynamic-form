@@ -3,7 +3,7 @@
     <div className="ui-dynamic-form-wrapper">
         <p v-if="hasFields()">
             <v-form ref="form" v-model="form" :class="dynamicClass">
-                <h3 style="padding: 16px">User Task</h3>
+                <h3 style="padding: 16px">{{ this.props.name}}</h3>
                 <div style="padding: 16px; max-height: 550px; overflow-y: auto">
                     <v-row v-for="(field, index) in fields()" :key="index">
                         <v-col cols="12">
