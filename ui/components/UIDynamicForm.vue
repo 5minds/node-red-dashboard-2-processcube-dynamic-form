@@ -3,7 +3,7 @@
     <div className="ui-dynamic-form-wrapper">
         <p v-if="hasFields()">
             <v-form ref="form" v-model="form" :class="dynamicClass">
-                <h3 style="padding: 16px">{{ this.props.name}}</h3>
+                <h3 style="padding: 16px">{{ this.props.name }}</h3>
                 <div style="padding: 16px; max-height: 550px; overflow-y: auto">
                     <v-row v-for="(field, index) in fields()" :key="index">
                         <v-col cols="12">
@@ -15,6 +15,17 @@
                             >
                                 {{ createComponent(field).innerText }}
                             </component>
+                            <div v-else-if="createComponent(field).type == 'v-slider'">
+                                <p class="formkit-label">{{ field.label }}</p>
+                                <component
+                                    :is="createComponent(field).type"
+                                    v-bind="createComponent(field).props"
+                                    v-model="field.defaultValue"
+                                />
+                                <p class="formkit-help">
+                                    {{ field.customForm ? JSON.parse(field.customForm).hint : undefined }}
+                                </p>
+                            </div>
                             <component
                                 v-else
                                 :is="createComponent(field).type"
@@ -30,7 +41,11 @@
                     </v-row>
                     <div style="display: flex; gap: 8px">
                         <div v-for="(action, index) in actions" :key="index" style="flex-grow: 1">
-                            <v-btn :key="index" style="width: 100% !important; min-height: 36px" @click="actionFn(action)">
+                            <v-btn
+                                :key="index"
+                                style="width: 100% !important; min-height: 36px"
+                                @click="actionFn(action)"
+                            >
                                 {{ action.label }}
                             </v-btn>
                         </div>
@@ -201,6 +216,7 @@ export default {
                         },
                     };
                 case 'number':
+                    const step = field.customForm ? JSON.parse(field.customForm).step : undefined;
                     return {
                         type: 'FormKit',
                         props: {
@@ -209,6 +225,7 @@ export default {
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
+                            step: step,
                             help: hint,
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
@@ -457,20 +474,20 @@ export default {
                 case 'range':
                     const customForm = JSON.parse(field.customForm);
                     return {
-                        type: 'FormKit',
+                        type: 'v-slider',
                         props: {
-                            type: 'range',
                             id: field.id,
-                            label: field.label,
+                            // label: field.label,
                             required: field.required,
-                            value: field.defaultValue,
-                            help: hint,
+                            // value: field.defaultValue,
+                            // help: hint,
                             min: customForm.min,
                             max: customForm.max,
-                            step: customForm.step, //step is not supported by formkit free version
-                            wrapperClass: '$remove:formkit-wrapper',
-                            inputClass: `input-${this.theme}`,
-                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            step: customForm.step,
+                            thumbLabel: true,
+                            // wrapperClass: '$remove:formkit-wrapper',
+                            // inputClass: `input-${this.theme}`,
+                            // innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'tel':
@@ -490,6 +507,7 @@ export default {
                         },
                     };
                 case 'textarea':
+                    const rows = field.customForm ? JSON.parse(field.customForm).rows : undefined;
                     return {
                         type: 'FormKit',
                         props: {
@@ -498,6 +516,7 @@ export default {
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
+                            rows: rows,
                             help: hint,
                             placeholder: placeholder,
                             wrapperClass: '$remove:formkit-wrapper',
