@@ -2,27 +2,53 @@
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
     <div className="ui-dynamic-form-wrapper">
         <p v-if="hasFields()">
-            <v-form ref="form" v-model="form">
-                <v-row v-for="(field, index) in fields()" :key="index">
-                    <v-col cols="12">
-                        <component
-                            v-if="createComponent(field).innerText"
-                            :is="createComponent(field).type"
-                            v-bind="createComponent(field).props"
-                        >
-                            {{ createComponent(field).innerText }}
-                        </component>
-                        <component v-else :is="createComponent(field).type" v-bind="createComponent(field).props" />
-                    </v-col>
-                </v-row>
-                <v-row style="padding: 12px">
-                    <v-alert v-if="error" type="error">Error: {{ errorMsg }}</v-alert>
-                </v-row>
-                <v-row style="display: flex; gap: 8px; padding: 12px">
-                    <div v-for="(action, index) in actions" :key="index" style="flex-grow: 1">
-                        <v-btn :key="index" style="width: 100%" @click="actionFn(action)">
-                            {{ action.label }}
-                        </v-btn>
+            <v-form ref="form" v-model="form" :class="dynamicClass">
+                <h3 style="padding: 16px">{{ this.props.name }}</h3>
+                <div style="padding: 16px; max-height: 550px; overflow-y: auto">
+                    <v-row v-for="(field, index) in fields()" :key="index">
+                        <v-col cols="12">
+                            <component
+                                v-if="createComponent(field).innerText"
+                                :is="createComponent(field).type"
+                                v-bind="createComponent(field).props"
+                                v-model="formData[field.id]"
+                            >
+                                {{ createComponent(field).innerText }}
+                            </component>
+                            <div v-else-if="createComponent(field).type == 'v-slider'">
+                                <p class="formkit-label">{{ field.label }}</p>
+                                <component
+                                    :is="createComponent(field).type"
+                                    v-bind="createComponent(field).props"
+                                    v-model="field.defaultValue"
+                                />
+                                <p class="formkit-help">
+                                    {{ field.customForm ? JSON.parse(field.customForm).hint : undefined }}
+                                </p>
+                            </div>
+                            <component
+                                v-else
+                                :is="createComponent(field).type"
+                                v-bind="createComponent(field).props"
+                                v-model="formData[field.id]"
+                            />
+                        </v-col>
+                    </v-row>
+                </div>
+                <v-row :class="dynamicFooterClass">
+                    <v-row v-if="error" style="padding: 12px">
+                        <v-alert v-if="error" type="error">Error: {{ errorMsg }}</v-alert>
+                    </v-row>
+                    <div style="display: flex; gap: 8px">
+                        <div v-for="(action, index) in actions" :key="index" style="flex-grow: 1">
+                            <v-btn
+                                :key="index"
+                                style="width: 100% !important; min-height: 36px"
+                                @click="actionFn(action)"
+                            >
+                                {{ action.label }}
+                            </v-btn>
+                        </div>
                     </div>
                 </v-row>
             </v-form>
@@ -62,11 +88,31 @@ export default {
             form: {},
             formData: {},
             taskInput: {},
+            theme: '',
             error: false,
             errorMsg: '',
         };
     },
     created() {
+        const currentPath = window.location.pathname;
+        const lastPart = currentPath.substring(currentPath.lastIndexOf('/'));
+
+        const store = this.$store.state;
+
+        for (let key in store.ui.pages) {
+            if (store.ui.pages[key].path === lastPart) {
+                const theme = store.ui.pages[key].theme;
+                if (store.ui.themes[theme].name === 'ProcessCube Lightmode') {
+                    this.theme = 'light';
+                } else if (store.ui.themes[theme].name === 'ProcessCube Darkmode') {
+                    this.theme = 'dark';
+                } else {
+                    this.theme = 'default';
+                }
+                break;
+            }
+        }
+
         const formkitConfig = defaultConfig({
             theme: 'genesis',
         });
@@ -83,8 +129,22 @@ export default {
                 'Der Usertask wird automatisch angezeigt, wenn ein entsprechender Task vorhanden ist.'
             );
         },
+
+        dynamicClass() {
+            return `ui-dynamic-form-${this.theme}`;
+        },
+
+        dynamicFooterClass() {
+            return `ui-dynamic-form-footer-${this.theme}`;
+        },
     },
     mounted() {
+        const elements = document.querySelectorAll('.formkit-input');
+
+        elements.forEach((element) => {
+            element.classList.add('test');
+        });
+
         this.$socket.on('widget-load:' + this.id, (msg) => {
             this.init();
             this.$store.commit('data/bind', {
@@ -151,9 +211,12 @@ export default {
                             number: 'integer',
                             help: hint,
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'number':
+                    const step = field.customForm ? JSON.parse(field.customForm).step : undefined;
                     return {
                         type: 'FormKit',
                         props: {
@@ -162,8 +225,11 @@ export default {
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
+                            step: step,
                             help: hint,
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'date':
@@ -177,6 +243,8 @@ export default {
                             value: field.defaultValue,
                             help: hint,
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'enum':
@@ -194,6 +262,8 @@ export default {
                             options: enums,
                             help: hint,
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'select':
@@ -212,6 +282,8 @@ export default {
                             placeholder: placeholder,
                             help: hint,
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'string':
@@ -226,6 +298,8 @@ export default {
                             help: hint,
                             placeholder: placeholder,
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'boolean':
@@ -238,6 +312,8 @@ export default {
                             required: field.required,
                             value: field.defaultValue,
                             help: hint,
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'file':
@@ -252,6 +328,8 @@ export default {
                             help: hint,
                             innerClass: 'reset-background',
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'checkbox':
@@ -269,6 +347,8 @@ export default {
                             options: options,
                             help: hint,
                             fieldsetClass: 'custom-fieldset',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'color':
@@ -294,6 +374,8 @@ export default {
                             value: field.defaultValue,
                             help: hint,
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'email':
@@ -310,6 +392,8 @@ export default {
                             validationVisibility: 'live',
                             placeholder: placeholder,
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'header':
@@ -343,6 +427,8 @@ export default {
                             value: field.defaultValue,
                             help: hint,
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'paragraph':
@@ -362,6 +448,8 @@ export default {
                             help: hint,
                             placeholder: placeholder,
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'radio':
@@ -379,23 +467,27 @@ export default {
                             options: radioOptions,
                             help: hint,
                             fieldsetClass: 'custom-fieldset',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'range':
                     const customForm = JSON.parse(field.customForm);
                     return {
-                        type: 'FormKit',
+                        type: 'v-slider',
                         props: {
-                            type: 'range',
                             id: field.id,
-                            label: field.label,
+                            // label: field.label,
                             required: field.required,
-                            value: field.defaultValue,
-                            help: hint,
+                            // value: field.defaultValue,
+                            // help: hint,
                             min: customForm.min,
                             max: customForm.max,
-                            step: customForm.step, //step is not supported by formkit free version
-                            wrapperClass: '$remove:formkit-wrapper',
+                            step: customForm.step,
+                            thumbLabel: true,
+                            // wrapperClass: '$remove:formkit-wrapper',
+                            // inputClass: `input-${this.theme}`,
+                            // innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'tel':
@@ -410,9 +502,12 @@ export default {
                             help: hint,
                             placeholder: placeholder,
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'textarea':
+                    const rows = field.customForm ? JSON.parse(field.customForm).rows : undefined;
                     return {
                         type: 'FormKit',
                         props: {
@@ -421,9 +516,12 @@ export default {
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
+                            rows: rows,
                             help: hint,
                             placeholder: placeholder,
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'time':
@@ -438,6 +536,8 @@ export default {
                             help: hint,
                             placeholder: placeholder,
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'url':
@@ -454,6 +554,8 @@ export default {
                             validation: 'url',
                             validationVisibility: 'live',
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'week':
@@ -468,6 +570,8 @@ export default {
                             help: hint,
                             placeholder: placeholder,
                             wrapperClass: '$remove:formkit-wrapper',
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 default:
@@ -480,6 +584,8 @@ export default {
                             required: field.required,
                             value: field.defaultValue,
                             help: hint,
+                            inputClass: `input-${this.theme}`,
+                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
             }
@@ -526,7 +632,7 @@ export default {
             this.actions = this.props.options;
         },
         actionFn(action) {
-            this.checkFormState();
+            // this.checkFormState();
             if (this.checkCondition(action.condition)) {
                 this.showError(false, '');
                 // TODO: MM - begin
@@ -550,6 +656,7 @@ export default {
             try {
                 const func = Function('fields', 'userTask', 'msg', '"use strict"; return (' + condition + ')');
                 const result = func(this.formData, this.taskInput, this.messages[this.id]);
+                console.log(this.formData, result);
                 return Boolean(result);
             } catch (err) {
                 console.error('Error while evaluating condition: ' + err);
