@@ -329,7 +329,7 @@ export default {
                             innerClass: 'reset-background',
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
-                            innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            // innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                         },
                     };
                 case 'checkbox':

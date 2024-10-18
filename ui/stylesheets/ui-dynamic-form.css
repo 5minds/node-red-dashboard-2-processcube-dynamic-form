@@ -54,6 +54,7 @@ code {
 
 .input-dark {
     background-color: rgba(85, 85, 85, 255);
+    color: white !important;
 }
 
 .ui-dynamic-form-dark {
@@ -65,6 +66,7 @@ code {
     background-color: rgba(44, 44, 44, 255);
     color: rgba(165, 165, 165, 255);
     max-height: 90%;
+    color-scheme: dark;
 }
 
 .ui-dynamic-form-default {
@@ -117,12 +119,11 @@ code {
     --fk-color-input: rgb(var(--v-theme-on-group-background));
     --fk-color-help: rgb(var(--v-theme-on-group-background));
     --fk-color-border-focus: rgb(var(--v-theme-primary));
-    height: full;
+
 }
 
 .reset-background {
-    --fk-bg-input: rgb(var(--does-not-exist, #000));
-    /* i dont know why this works but it works */
+    --fk-bg-input: none; /*maybe none or (revert)*/
 }
 
 .custom-fieldset {
