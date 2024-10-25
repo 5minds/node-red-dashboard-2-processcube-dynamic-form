@@ -12,7 +12,7 @@ export default defineConfig(
         plugins: [vue(), cssInjectedByJsPlugin(), react(), nodePolyfills()],
         build: {
             lib: {
-                entry: resolve(__dirname, 'ui/components/UIDynamicForm.vue'),
+                entry: resolve(__dirname, 'ui/index.js'),
                 name: LIBRARY_NAME,
                 formats: ['umd'],
                 fileName: (format, entryName) => `${LIBRARY_NAME}.${format}.js`,

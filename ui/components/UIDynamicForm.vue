@@ -6,7 +6,7 @@
 import { defineComponent, onMounted, ref, inject } from 'vue';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import UIDynamicForm from './UIDynamicForm.tsx';
+import UIDynamicForm  from './UIDynamicForm.tsx';
 
 export default defineComponent({
     name: 'UIDynamicForm',
