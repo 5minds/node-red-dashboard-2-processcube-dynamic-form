@@ -24,8 +24,6 @@ export default defineConfig(
                     globals: {
                         vue: 'Vue',
                         vuex: 'vuex',
-                        react: 'React',
-                        'react-dom': 'ReactDOM',
                     },
                 },
             },
