@@ -1,0 +1,73 @@
+<script type="text/javascript">
+    RED.plugins.registerPlugin('node-red-dashboard-2-dynamic-form-theme', {
+        type: 'node-red-dashboard-2',
+        tabs: [
+            {
+                id: 'dynamic-form-theme',
+                label: 'Dynamic Form Theme',
+                /**
+                 * Runs when tabs are first created
+                 * @param {object} base - ui-base node for which this sidebar represents
+                 * @param {object} parent - DOM element to append content to
+                 */
+                init(base, parent) {
+                    function mapDefaults(defaults) {
+                        const values = {};
+                        for (const key in defaults) {
+                            if (Object.prototype.hasOwnProperty.call(defaults, key)) {
+                                values[key] = defaults[key].value;
+                            }
+                        }
+                        return values;
+                    }
+
+                    function addConfigNode(node) {
+                        console.log('adding node...');
+                        if (!node.users) {
+                            node.users = [];
+                        }
+                        node.dirty = true;
+                        RED.nodes.add(node);
+                        RED.editor.validateNode(node);
+                        RED.history.push({
+                            t: 'add',
+                            nodes: [node.id],
+                            dirty: RED.nodes.dirty(),
+                        });
+                        RED.nodes.dirty(true);
+                    }
+
+                    function addDefaultTheme() {
+                        console.log('adding default theme...');
+                        const theme = RED.nodes.getType('dynamic-form-theme');
+                        console.log('theme777', theme);
+                        const themeNode = {
+                            _def: theme,
+                            id: RED.nodes.id(),
+                            type: 'dynamic-form-theme',
+                            ...mapDefaults(theme.defaults),
+                            name: 'ProcessCube Default Theme',
+                        };
+
+                        addConfigNode(themeNode);
+                        return themeNode;
+                    }
+
+                    const tab = $('<div>', { class: 'test_class_luis' }).appendTo(parent);
+                    tab.append($('<button>', { text: 'Add DynamicForm Theme', click: () => addDefaultTheme() }));
+                },
+            },
+        ],
+        auth: false,
+        description: '',
+    });
+</script>
+
+<style>
+    .test_class_luis {
+        background-color: aqua;
+        width: 100%;
+        padding: 10px;
+        border-radius: 5px;
+    }
+</style>
