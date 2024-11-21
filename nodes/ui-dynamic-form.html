@@ -6,6 +6,7 @@
             name: { value: '' },
             group: { type: 'ui-group', required: true },
             order: { value: 0 },
+            theme: { value: '', type: 'dynamic-form-theme' },
             options: {
                 value: [{ label: '' }],
                 validate: function (v) {
@@ -173,6 +174,10 @@
         <input type="hidden" id="node-input-height">
         <button class="editor-button" id="node-input-size"></button>
     </div>
+    <div class="form-row">
+        <label for="node-input-theme"><i class="fa fa-table"></i> Theme</label>
+        <input type="text" id="node-input-theme">
+    </div>
 
     <div class="form-row form-row-flex node-input-option-container-row" style="margin-bottom: 0px;width: 100%">
         <label for="node-input-width" style="vertical-align:top"><i class="fa fa-list-alt"></i> Actions</label>
@@ -203,35 +208,34 @@
     </div>
 </script>
 
-
 <script type="text/markdown" data-help-name="ui-dynamic-form">
-A UI-Node to display usertasks forms from the ProcessCube Engine dynamicly.
+    A UI-Node to display usertasks forms from the ProcessCube Engine dynamicly.
 
-## Usage
+    ## Usage
 
-Connect the UI-Node to the usertask input node. Every action in the configuration of the node will display as a button at the bottom of the form.
+    Connect the UI-Node to the usertask input node. Every action in the configuration of the node will display as a button at the bottom of the form.
 
-## Validation
+    ## Validation
 
-### message
+    ### message
 
-Access to the message object is available through _msg_ 
+    Access to the message object is available through _msg_
 
-### form fields
+    ### form fields
 
-Access to the form fields is available through the _fields_ object. A single form field can be accessed by selecting the field id as a key.
-Example: _fields.field_01_
+    Access to the form fields is available through the _fields_ object. A single form field can be accessed by selecting the field id as a key.
+    Example: _fields.field_01_
 
-### usertask
+    ### usertask
 
-Access to the usertask object is available through _usertask_
+    Access to the usertask object is available through _usertask_
 
-## Outputs
+    ## Outputs
 
-: usertask (Object) : The representative object of the usertask.
+    : usertask (Object) : The representative object of the usertask.
 
-### References
+    ### References
 
--   [The ProcessCube Developer Network](https://processcube.io) - All documentation for the ProcessCube&copy; Plattform
--   [Node-RED Integration in ProcessCube&copy;](https://processcube.io/docs/node-red) - Node-RED Integration in ProcessCube&copy;
+    -   [The ProcessCube Developer Network](https://processcube.io) - All documentation for the ProcessCube&copy; Plattform
+    -   [Node-RED Integration in ProcessCube&copy;](https://processcube.io/docs/node-red) - Node-RED Integration in ProcessCube&copy;
 </script>

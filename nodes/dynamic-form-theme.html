@@ -2,21 +2,60 @@
     RED.nodes.registerType('dynamic-form-theme', {
         category: 'config',
         defaults: {
+            name: {
+                value: '',
+                required: true,
+            },
             colors: {
-                value: {
-                    surface: '#ffffff',
-                    primary: '#0094CE',
-                    bgPage: '#eeeeee',
-                    groupBg: '#ffffff',
-                    groupOutline: '#cccccc',
-                },
+                surface: '#ffffff',
+                primary: '#0094CE',
+                bgPage: '#eeeeee',
+                groupBg: '#ffffff',
+                groupOutline: '#cccccc',
             },
         },
         label: function () {
             return this.name || 'DynamicForm Theme';
         },
-        oneditprepare: function () {},
-        oneditsave: function () {},
+        oneditprepare: function () {
+            // loop over keys in this.colors
+            if (!this.colors) {
+                this.colors = {};
+                // set default values
+                this.colors.surface = '#ffffff';
+                this.colors.primary = '#0094CE';
+                // pages
+                this.colors.bgPage = '#eeeeee';
+                // groups
+                this.colors.groupBg = '#ffffff';
+                this.colors.groupOutline = '#cccccc';
+            }
+
+            Object.keys(this.colors).forEach((color) => {
+                // get the value of the key
+                const value = this.colors[color];
+                // set the value of the input
+                $('#node-config-input-' + color).val(value);
+            });
+
+            // update label b/g to match the colour input values
+            // this provides nicer styling than the default browser styling
+            const colorWrappers = $('.color-picker-wrapper');
+            colorWrappers.each(function (i) {
+                const wrapper = $(this);
+                const colorPicker = wrapper.children("input[type='color']").eq(0);
+                colorPicker.on('change', () => {
+                    wrapper.css('background-color', colorPicker.val());
+                });
+                wrapper.css('background-color', colorPicker.val());
+            });
+        },
+        oneditsave: function () {
+            Object.keys(this.colors).forEach((color) => {
+                // set the value of the input
+                this.colors[color] = $('#node-config-input-' + color).val();
+            });
+        },
     });
 </script>
 
@@ -24,6 +63,28 @@
     <div class="form-row">
         <label for="node-config-input-name"><i class="fa fa-tag"></i> Name</label>
         <input type="text" id="node-config-input-name" />
+    </div>
+    <div class="form-row form-row-flex labels-right" style="margin-bottom: 3px; gap: 9px;">
+        <div>
+            <label>Label</label>
+            <label
+                class="color-picker-wrapper"
+                for="node-config-input-primary"
+                style="width: 100px; height: 32px; border-radius: 6px; border: 1px solid #ccc"
+            >
+                <input type="color" id="node-config-input-surface" style="opacity: 0; width: 100%;" />
+            </label>
+        </div>
+        <div>
+            <label>Label</label>
+            <label
+                class="color-picker-wrapper"
+                for="node-config-input-primary"
+                style="width: 100px; height: 32px; border-radius: 6px; border: 1px solid #ccc"
+            >
+                <input type="color" id="node-config-input-primary" style="opacity: 0; width: 100%;" />
+            </label>
+        </div>
     </div>
 </script>
 

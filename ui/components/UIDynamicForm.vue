@@ -1,6 +1,6 @@
 <template>
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
-    <div className="ui-dynamic-form-wrapper">
+    <div className="ui-dynamic-form-wrapper" :style="{ '--luis-bg-footer': primary }">
         <p v-if="hasFields()">
             <v-form ref="form" v-model="form" :class="dynamicClass">
                 <h3 style="padding: 16px">{{ this.props.name }}</h3>
@@ -89,11 +89,13 @@ export default {
             formData: {},
             taskInput: {},
             theme: '',
+            primary: '',
             error: false,
             errorMsg: '',
         };
     },
     created() {
+        this.primary = this.props.theme.colors.primary;
         const currentPath = window.location.pathname;
         const lastPart = currentPath.substring(currentPath.lastIndexOf('/'));
 
@@ -129,7 +131,6 @@ export default {
                 'Der Usertask wird automatisch angezeigt, wenn ein entsprechender Task vorhanden ist.'
             );
         },
-
         dynamicClass() {
             return `ui-dynamic-form-${this.theme}`;
         },

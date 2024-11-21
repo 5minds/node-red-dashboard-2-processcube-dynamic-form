@@ -95,7 +95,8 @@ code {
     flex-direction: column;
     gap: 8px;
     padding: 16px;
-    background-color: rgba(249, 250, 251, 1);
+    /* background-color: rgba(249, 250, 251, 1); */
+    background-color: var(--luis-bg-footer);
     margin: 0;
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;

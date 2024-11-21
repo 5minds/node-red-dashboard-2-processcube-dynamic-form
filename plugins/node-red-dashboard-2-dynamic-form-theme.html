@@ -38,9 +38,7 @@
                     }
 
                     function addDefaultTheme() {
-                        console.log('adding default theme...');
                         const theme = RED.nodes.getType('dynamic-form-theme');
-                        console.log('theme777', theme);
                         const themeNode = {
                             _def: theme,
                             id: RED.nodes.id(),
@@ -50,11 +48,69 @@
                         };
 
                         addConfigNode(themeNode);
+                        console.log('node added');
+
+                        const listItem = $('<div>', { class: 'list-item' }).appendTo(themeList);
+                        listItem.append($('<p>', { class: 'list-item-text', text: theme.name }));
+                        $(
+                            '<button class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-paint-brush"></i> ' +
+                                'Edit' +
+                                '</button>'
+                        )
+                            .click(function (evt) {
+                                RED.editor.editConfig('', theme.type, theme.id);
+                                evt.preventDefault();
+                            })
+                            .appendTo(listItem);
+
                         return themeNode;
                     }
 
-                    const tab = $('<div>', { class: 'test_class_luis' }).appendTo(parent);
-                    tab.append($('<button>', { text: 'Add DynamicForm Theme', click: () => addDefaultTheme() }));
+                    const tab = $('<div>', { class: 'dynamicform-tab' }).appendTo(parent);
+                    const headerDiv = $('<div>', { class: 'header-div' }).appendTo(tab);
+                    const themeList = $('<div>', { class: 'theme-list' }).appendTo(tab);
+
+                    headerDiv.append($('<b>', { text: 'DynamicForm Themes' }));
+                    $(
+                        '<button class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-plus"></i> ' +
+                            'Add DynamicForm Theme' +
+                            '</button>'
+                    )
+                        .click(function (evt) {
+                            const themeResult = addDefaultTheme();
+                            RED.editor.editConfig('', themeResult.type, themeResult.id);
+                        })
+                        .appendTo(headerDiv);
+
+                    let themes = {};
+
+                    RED.nodes.eachConfig(function (n) {
+                        if (n.type === 'dynamic-form-theme') {
+                            themes[n.id] = n;
+                        }
+                    });
+
+                    Object.values(themes).forEach(function (theme) {
+                        const listItem = $('<div>', { class: 'list-item' }).appendTo(themeList);
+                        listItem.append($('<p>', { class: 'list-item-text', text: theme.name }));
+                        $(
+                            '<button class="editor-button editor-button-small nr-db-sb-list-header-button"><i class="fa fa-paint-brush"></i> ' +
+                                'Edit' +
+                                '</button>'
+                        )
+                            .click(function (evt) {
+                                // if (themes.includes(itemc)) {
+                                //     RED.editor.editConfig('', item.type, item.id);
+                                // } else {
+                                //     RED.editor.edit(item?.node);
+                                // }
+
+                                RED.editor.editConfig('', theme.type, theme.id);
+                                evt.stopPropagation();
+                                evt.preventDefault();
+                            })
+                            .appendTo(listItem);
+                    });
                 },
             },
         ],
@@ -64,10 +120,48 @@
 </script>
 
 <style>
-    .test_class_luis {
-        background-color: aqua;
+    .dynamicform-tab {
         width: 100%;
         padding: 10px;
-        border-radius: 5px;
+    }
+
+    .theme-list {
+        padding-top: 20px;
+        width: 95%;
+        justify-content: center;
+    }
+    .list-item-text {
+        margin: 0 !important;
+    }
+
+    .list-item {
+        border: solid;
+        padding: 8px;
+        border-color: rgba(200, 200, 200, 1);
+        border-width: 1px;
+        border-radius: 6px;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .dynamicform-button {
+        height: 20px;
+        min-width: 20px;
+        line-height: 18px;
+        font-size: 10px;
+        border-radius: 2px;
+        padding: 0 5px;
+    }
+
+    .heading {
+        font-weight: 600;
+    }
+
+    .header-div {
+        width: 95%;
+        display: flex;
+        justify-content: space-between;
     }
 </style>

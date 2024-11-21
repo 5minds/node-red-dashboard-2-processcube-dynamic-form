@@ -7,6 +7,8 @@ module.exports = function (RED) {
         // which group are we rendering this widget
         const group = RED.nodes.getNode(config.group);
 
+        config.theme = RED.nodes.getNode(config.theme);
+
         const base = group.getBase();
 
         // server-side event handlers
