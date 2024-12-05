@@ -629,7 +629,6 @@ export default {
             this.$socket.emit('widget-action', this.id, msgArr);
         },
         init() {
-            // this.forceRerender();
             this.actions = this.props.options;
         },
         actionFn(action) {
