@@ -5,7 +5,7 @@
             <v-form ref="form" v-model="form" :class="dynamicClass">
                 <h3 style="padding: 16px">{{ this.props.name }}</h3>
                 <div style="padding: 16px; max-height: 550px; overflow-y: auto">
-                    <v-row v-for="(field, index) in fields()" :key="index">
+                    <v-row v-for="(field, index) in fields()" :key="field">
                         <v-col cols="12">
                             <component
                                 v-if="createComponent(field).innerText"
@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import { markRaw, h } from 'vue';
+import { markRaw, h, getCurrentInstance } from 'vue';
 import { mapState } from 'vuex';
 import { plugin, defaultConfig } from '@formkit/vue';
 import '@formkit/themes/genesis';
@@ -81,6 +81,12 @@ export default {
     setup(props) {
         console.info('UIDynamicForm setup with:', props);
         console.debug('Vue function loaded correctly', markRaw);
+        const instance = getCurrentInstance();
+        const app = instance.appContext.app;
+        const formkitConfig = defaultConfig({
+            theme: 'genesis',
+        });
+        app.use(plugin, formkitConfig);
     },
     data() {
         return {
@@ -112,11 +118,6 @@ export default {
                 break;
             }
         }
-
-        const formkitConfig = defaultConfig({
-            theme: 'genesis',
-        });
-        window.app.use(plugin, formkitConfig);
     },
     computed: {
         ...mapState('data', ['messages']),
