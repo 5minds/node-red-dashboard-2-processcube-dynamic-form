@@ -138,6 +138,10 @@ export default {
         dynamicFooterClass() {
             return `ui-dynamic-form-footer-${this.theme}`;
         },
+
+        formIsValid() {
+          return this.$refs.form ? this.$refs.form.checkValidity() : false;
+        }
     },
     mounted() {
         const elements = document.querySelectorAll('.formkit-input');
@@ -658,17 +662,15 @@ export default {
         init() {
             this.actions = this.props.options;
         },
-        async actionFn(action) {
+        actionFn(action) {
             // this.checkFormState();
-            if (action.label === "Speichern" || action.type === "Speichern und nächster") {
-              const isValid = await this.$refs.form.validate();
+            console.log(action.label)
+            if (action.label === "Speichern" || action.label === "Speichern und nächster") {
+              this.$refs.form.validate();
 
-              if (!isValid) {
-               console.log("Formular ist ungültig, Senden abgebrochen.");
-                return;
-              }
+              if (!this.formIsValid) return
             }
-            
+
             if (this.checkCondition(action.condition)) {
                 this.showError(false, '');
                 // TODO: MM - begin
