@@ -44,6 +44,7 @@
                             <v-btn
                                 :key="index"
                                 style="width: 100% !important; min-height: 36px"
+                                :disabled="!formIsValid"
                                 @click="actionFn(action)"
                             >
                                 {{ action.label }}
@@ -137,6 +138,10 @@ export default {
 
         dynamicFooterClass() {
             return `ui-dynamic-form-footer-${this.theme}`;
+        },
+
+        formIsValid() {
+        return this.$refs.form ? this.$refs.form.checkValidity() : false;
         },
     },
     mounted() {
@@ -310,6 +315,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live"
                         },
                     };
                 case 'boolean':
@@ -324,6 +330,7 @@ export default {
                             help: hint,
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'file':
@@ -340,6 +347,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             // innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'checkbox':
@@ -359,6 +367,7 @@ export default {
                             fieldsetClass: 'custom-fieldset',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'color':
@@ -371,6 +380,7 @@ export default {
                             required: field.required,
                             value: field.defaultValue,
                             help: hint,
+                            validation: validation,
                         },
                     };
                 case 'datetime-local':
@@ -386,6 +396,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'email':
@@ -404,6 +415,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'header':
@@ -439,12 +451,14 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'paragraph':
                     return {
                         type: 'p',
                         innerText: field.defaultValue,
+                        validation: validation,
                     };
                 case 'password':
                     return {
@@ -460,6 +474,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'radio':
@@ -479,6 +494,7 @@ export default {
                             fieldsetClass: 'custom-fieldset',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'range':
@@ -498,6 +514,7 @@ export default {
                             // wrapperClass: '$remove:formkit-wrapper',
                             // inputClass: `input-${this.theme}`,
                             // innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'tel':
@@ -514,6 +531,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'textarea':
@@ -532,6 +550,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'time':
@@ -548,6 +567,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'url':
@@ -566,6 +586,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'week':
@@ -582,6 +603,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 default:
@@ -596,6 +618,7 @@ export default {
                             help: hint,
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
             }
