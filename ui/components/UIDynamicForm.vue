@@ -667,10 +667,10 @@ export default {
             console.log(action.label)
             console.log(action)
             if (action.label === "Speichern" || action.label === "Speichern und nächster") {
-              const isValid = await this.$refs.form.validate();
+              const isValid = await this.$formkit.validate("#dynamic-form");
 
               console.log("Vali Result:", isValid);
-              console.log(this.$refs.form.isValid)
+              console.log(await this.$refs.form.isValid)
               if (!isValid) {
                 console.log("Formular ist ungültig, Senden abgebrochen.");
                 return;
