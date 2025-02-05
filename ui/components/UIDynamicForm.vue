@@ -197,6 +197,7 @@ export default {
     },
     methods: {
         createComponent(field) {
+            console.log(field)
             const hint = field.customForm ? JSON.parse(field.customForm).hint : undefined;
             const placeholder = field.customForm ? JSON.parse(field.customForm).placeholder : undefined;
             switch (field.type) {
