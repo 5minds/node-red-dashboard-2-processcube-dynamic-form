@@ -200,6 +200,8 @@ export default {
             console.log(field)
             const hint = field.customForm ? JSON.parse(field.customForm).hint : undefined;
             const placeholder = field.customForm ? JSON.parse(field.customForm).placeholder : undefined;
+            const validation = field.customForm ? JSON.parse(field.customForm).validation : undefined
+            console.log(validation)
             switch (field.type) {
                 case 'long':
                     return {
