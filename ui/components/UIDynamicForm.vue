@@ -44,7 +44,6 @@
                             <v-btn
                                 :key="index"
                                 style="width: 100% !important; min-height: 36px"
-                                :disabled="!formIsValid"
                                 @click="actionFn(action)"
                             >
                                 {{ action.label }}
@@ -138,10 +137,6 @@ export default {
 
         dynamicFooterClass() {
             return `ui-dynamic-form-footer-${this.theme}`;
-        },
-
-        formIsValid() {
-        return this.$refs.form ? this.$refs.form.checkValidity() : false;
         },
     },
     mounted() {
