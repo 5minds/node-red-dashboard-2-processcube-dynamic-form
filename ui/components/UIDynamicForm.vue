@@ -658,9 +658,17 @@ export default {
         init() {
             this.actions = this.props.options;
         },
-        actionFn(action) {
+        async actionFn(action) {
             // this.checkFormState();
-            console.log(action)
+            if (action.label === "Speichern" || action.type === "Speichern und nächster") {
+              const isValid = await this.$refs.form.validate();
+
+              if (!isValid) {
+               console.log("Formular ist ungültig, Senden abgebrochen.");
+                return;
+              }
+            }
+            
             if (this.checkCondition(action.condition)) {
                 this.showError(false, '');
                 // TODO: MM - begin
