@@ -310,7 +310,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live"
                         },
                     };
                 case 'boolean':
@@ -661,6 +660,7 @@ export default {
         },
         actionFn(action) {
             // this.checkFormState();
+            console.log(action)
             if (this.checkCondition(action.condition)) {
                 this.showError(false, '');
                 // TODO: MM - begin
