@@ -217,6 +217,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'number':
@@ -234,6 +235,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'date':
@@ -249,6 +251,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'enum':
@@ -268,6 +271,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'select':
@@ -288,6 +292,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'string':
@@ -304,6 +309,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            validation: validation,
                         },
                     };
                 case 'boolean':
