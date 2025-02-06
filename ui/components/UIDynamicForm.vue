@@ -2,7 +2,7 @@
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
     <div className="ui-dynamic-form-wrapper">
         <p v-if="hasFields()">
-            <FormKit type="form" ref="form" v-model="formData" :config="{ validationVisibility: 'submit' }" :class="dynamicClass">
+            <v-form ref="form" v-model="form" validate-on="submit" :class="dynamicClass">
                 <h3 style="padding: 16px">{{ this.props.name }}</h3>
                 <div style="padding: 16px; max-height: 550px; overflow-y: auto">
                     <v-row v-for="(field, index) in fields()" :key="field">
@@ -51,7 +51,7 @@
                         </div>
                     </div>
                 </v-row>
-            </FormKit>
+            </v-form>
         </p>
         <p v-else>
             <v-alert :text="waiting_info" :title="waiting_title" />
@@ -666,15 +666,21 @@ export default {
             // this.checkFormState();
             console.log(action.label)
             console.log(action)
-            if (action.label === "Speichern" || action.label === "Speichern und nächster") {
+            // if (action.label === "Speichern" || action.label === "Speichern und nächster") {
 
-                if (this.$refs.form) {
-                    const isValid = await this.$refs.form.submit();
-                    console.log("Validierungsergebnis:", isValid);
+            //     const formkitInputs = this.$refs.form.$el.querySelectorAll("[data-type]");
+            //     let allValid = true;
 
-                    if (!isValid) return;
-                }
-                }
+            //     for (let input of formkitInputs) {
+            //         const node = window.FormKit.getNode(input.getAttribute("data-id"));
+            //         if (node) {
+            //             const valid = await node.validate();
+            //             if (!valid) allValid = false;
+            //         }
+            //     }
+
+            //     if (!allValid) return
+            // }
 
             if (this.checkCondition(action.condition)) {
                 this.showError(false, '');
