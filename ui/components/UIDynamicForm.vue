@@ -139,9 +139,6 @@ export default {
             return `ui-dynamic-form-footer-${this.theme}`;
         },
 
-        formIsValid() {
-          return this.$refs.form ? this.$refs.form.checkValidity() : false;
-        }
     },
     mounted() {
         const elements = document.querySelectorAll('.formkit-input');
@@ -662,7 +659,7 @@ export default {
         init() {
             this.actions = this.props.options;
         },
-        async actionFn(action) {
+        actionFn(action) {
             // this.checkFormState();
             console.log(action.label)
             console.log(action)
