@@ -7,6 +7,9 @@
                 <div style="padding: 16px; max-height: 550px; overflow-y: auto">
                     <v-row v-for="(field, index) in fields()" :key="field">
                         <v-col cols="12">
+                            <script>
+                                console.log("Erzeugte Komponente:", createComponent(field));
+                            </script>
                             <component
                                 v-if="createComponent(field).innerText"
                                 :is="createComponent(field).type"
