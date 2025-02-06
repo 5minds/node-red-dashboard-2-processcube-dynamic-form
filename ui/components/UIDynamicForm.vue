@@ -2,7 +2,7 @@
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
     <div className="ui-dynamic-form-wrapper">
         <p v-if="hasFields()">
-            <v-form ref="form" v-model="form" :class="dynamicClass">
+            <v-form ref="form" v-model="valid" validate-on="submit" @submit.prevent="submitForm">
                 <h3 style="padding: 16px">{{ this.props.name }}</h3>
                 <div style="padding: 16px; max-height: 550px; overflow-y: auto">
                     <v-row v-for="(field, index) in fields()" :key="field">
@@ -45,6 +45,7 @@
                                 :key="index"
                                 style="width: 100% !important; min-height: 36px"
                                 @click="actionFn(action)"
+                                :disabled="action.label !== 'Abbrechen' && !valid"
                             >
                                 {{ action.label }}
                             </v-btn>
@@ -97,6 +98,7 @@ export default {
             theme: '',
             error: false,
             errorMsg: '',
+            valid: null,
         };
     },
     created() {
@@ -663,21 +665,10 @@ export default {
             // this.checkFormState();
             console.log(action.label)
             console.log(action)
-            // if (action.label === "Speichern" || action.label === "Speichern und nächster") {
-
-            //     const formkitInputs = this.$refs.form.$el.querySelectorAll("[data-type]");
-            //     let allValid = true;
-
-            //     for (let input of formkitInputs) {
-            //         const node = window.FormKit.getNode(input.getAttribute("data-id"));
-            //         if (node) {
-            //             const valid = await node.validate();
-            //             if (!valid) allValid = false;
-            //         }
-            //     }
-
-            //     if (!allValid) return
-            // }
+            console.log("Valid: ", this.valid)
+            if (action.label === "Speichern" || action.label === "Speichern und nächster") {
+                if (!this.valid) return
+            }
 
             if (this.checkCondition(action.condition)) {
                 this.showError(false, '');
