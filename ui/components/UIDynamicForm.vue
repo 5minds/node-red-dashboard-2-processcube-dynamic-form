@@ -2,7 +2,7 @@
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
     <div className="ui-dynamic-form-wrapper">
         <p v-if="hasFields()">
-            <v-form validate-on="input" ref="form" v-model="form" :class="dynamicClass">
+            <v-form ref="form" v-model="form" :class="dynamicClass">
                 <h3 style="padding: 16px">{{ this.props.name }}</h3>
                 <div style="padding: 16px; max-height: 550px; overflow-y: auto">
                     <v-row v-for="(field, index) in fields()" :key="field">
@@ -44,7 +44,6 @@
                             <v-btn
                                 :key="index"
                                 style="width: 100% !important; min-height: 36px"
-                                type="submit"
                                 @click="actionFn(action)"
                             >
                                 {{ action.label }}
@@ -660,25 +659,15 @@ export default {
         init() {
             this.actions = this.props.options;
         },
-        actionFn(action) {
+       async actionFn(action) {
             // this.checkFormState();
             console.log(action.label)
             console.log(action)
-            // if (action.label === "Speichern" || action.label === "Speichern und nächster") {
-
-            //     const formkitInputs = this.$refs.form.$el.querySelectorAll("[data-type]");
-            //     let allValid = true;
-
-            //     for (let input of formkitInputs) {
-            //         const node = window.FormKit.getNode(input.getAttribute("data-id"));
-            //         if (node) {
-            //             const valid = await node.validate();
-            //             if (!valid) allValid = false;
-            //         }
-            //     }
-
-            //     if (!allValid) return
-            // }
+            if (action.label === "Speichern" || action.label === "Speichern und nächster") {
+                const { valid } = await this.$refs.form.validate()
+                console.log("valid: ",valid)
+                if (!valid) return
+            }
 
             if (this.checkCondition(action.condition)) {
                 this.showError(false, '');
