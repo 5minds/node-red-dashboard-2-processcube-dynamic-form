@@ -668,16 +668,18 @@ export default {
             console.log(action)
             if (action.label === "Speichern" || action.label === "Speichern und nächster") {
 
-              if (this.$refs.form) {
-                const isValid = await this.$refs.form.validate();
+                const formkitInputs = this.$refs.form.$el.querySelectorAll("[data-type]");
+                let allValid = true;
 
-                console.log("Vali Result:", isValid);
-                console.log(await this.$refs.form.isValid)
-                if (!isValid) {
-                  console.log("Formular ist ungültig, Senden abgebrochen.");
-                  return;
+                for (let input of formkitInputs) {
+                    const node = window.FormKit.getNode(input.getAttribute("data-id"));
+                    if (node) {
+                        const valid = await node.validate();
+                        if (!valid) allValid = false;
+                    }
                 }
-              }
+
+                if (!allValid) return
             }
 
             if (this.checkCondition(action.condition)) {
