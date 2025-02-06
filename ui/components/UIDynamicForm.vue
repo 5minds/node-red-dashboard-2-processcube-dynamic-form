@@ -2,7 +2,7 @@
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
     <div className="ui-dynamic-form-wrapper">
         <p v-if="hasFields()">
-            <FormKit type="form" :config="{ validationVisibility: 'submit' }">
+            <v-form ref="form" v-model="form" :class="dynamicClass">
                 <h3 style="padding: 16px">{{ this.props.name }}</h3>
                 <div style="padding: 16px; max-height: 550px; overflow-y: auto">
                     <v-row v-for="(field, index) in fields()" :key="field">
@@ -51,7 +51,7 @@
                         </div>
                     </div>
                 </v-row>
-            </FormKit>
+            </v-form>
         </p>
         <p v-else>
             <v-alert :text="waiting_info" :title="waiting_title" />
@@ -311,6 +311,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'boolean':
@@ -663,11 +664,21 @@ export default {
             // this.checkFormState();
             console.log(action.label)
             console.log(action)
-            // if (action.label === "Speichern" || action.label === "Speichern und nächster") {
-            //     const { valid } = await this.$refs.form.validate()
-            //     console.log("valid: ",valid)
-            //     if (!valid) return
-            // }
+            if (action.label === "Speichern" || action.label === "Speichern und nächster") {
+                const formkitInputs = this.$refs.form.$el.querySelectorAll("[data-invalid]");
+                let allInvalid = true;
+
+                console.log(formkitInputs)
+                for (let input of formkitInputs) {
+                    const node = window.FormKit.getNode(input.getAttribute("data-invalid"));
+                    console.log(node)
+                    if (!node) {
+                        allInvalid = false;
+                    }
+                }
+
+                if (allInvalid) return
+            }
 
             if (this.checkCondition(action.condition)) {
                 this.showError(false, '');
