@@ -677,7 +677,7 @@ export default {
                     }
                 }
 
-                if (allInvalid) return
+                if (allInvalid && formkitInputs.length != 0) return
             }
 
             if (this.checkCondition(action.condition)) {
