@@ -2,14 +2,11 @@
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
     <div className="ui-dynamic-form-wrapper">
         <p v-if="hasFields()">
-            <v-form ref="form" v-model="form" :class="dynamicClass">
+            <FormKit type="form" :config="{ validationVisibility: 'submit' }">
                 <h3 style="padding: 16px">{{ this.props.name }}</h3>
                 <div style="padding: 16px; max-height: 550px; overflow-y: auto">
                     <v-row v-for="(field, index) in fields()" :key="field">
                         <v-col cols="12">
-                            <script>
-                                console.log("Erzeugte Komponente:", createComponent(field));
-                            </script>
                             <component
                                 v-if="createComponent(field).innerText"
                                 :is="createComponent(field).type"
@@ -54,7 +51,7 @@
                         </div>
                     </div>
                 </v-row>
-            </v-form>
+            </FormKit>
         </p>
         <p v-else>
             <v-alert :text="waiting_info" :title="waiting_title" />
@@ -666,11 +663,11 @@ export default {
             // this.checkFormState();
             console.log(action.label)
             console.log(action)
-            if (action.label === "Speichern" || action.label === "Speichern und nächster") {
-                const { valid } = await this.$refs.form.validate()
-                console.log("valid: ",valid)
-                if (!valid) return
-            }
+            // if (action.label === "Speichern" || action.label === "Speichern und nächster") {
+            //     const { valid } = await this.$refs.form.validate()
+            //     console.log("valid: ",valid)
+            //     if (!valid) return
+            // }
 
             if (this.checkCondition(action.condition)) {
                 this.showError(false, '');
