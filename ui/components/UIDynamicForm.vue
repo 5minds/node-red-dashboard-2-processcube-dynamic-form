@@ -5,35 +5,38 @@
             <v-form ref="form" v-model="form" :class="dynamicClass">
                 <h3 style="padding: 16px">{{ this.props.name }}</h3>
                 <div style="padding: 16px; max-height: 550px; overflow-y: auto">
-                    <v-row v-for="(field, index) in fields()" :key="field">
-                        <v-col cols="12">
-                            <component
-                                v-if="createComponent(field).innerText"
-                                :is="createComponent(field).type"
-                                v-bind="createComponent(field).props"
-                                v-model="formData[field.id]"
-                            >
-                                {{ createComponent(field).innerText }}
-                            </component>
-                            <div v-else-if="createComponent(field).type == 'v-slider'">
-                                <p class="formkit-label">{{ field.label }}</p>
+                    <FormKit type="group">
+                        <v-row v-for="(field, index) in fields()" :key="field">
+                            <v-col cols="12">
                                 <component
+                                    v-if="createComponent(field).innerText"
                                     :is="createComponent(field).type"
                                     v-bind="createComponent(field).props"
-                                    v-model="field.defaultValue"
+                                    v-model="formData[field.id]"
+                                >
+                                    {{ createComponent(field).innerText }}
+                                </component>
+                                <div v-else-if="createComponent(field).type == 'v-slider'">
+                                    <p class="formkit-label">{{ field.label }}</p>
+                                    <component
+                                        :is="createComponent(field).type"
+                                        v-bind="createComponent(field).props"
+                                        v-model="field.defaultValue"
+                                    />
+                                    <p class="formkit-help">
+                                        {{ field.customForm ? JSON.parse(field.customForm).hint : undefined }}
+                                    </p>
+                                </div>
+                                <component
+                                    v-else
+                                    :is="createComponent(field).type"
+                                    v-bind="createComponent(field).props"
+                                    v-model="formData[field.id]"
                                 />
-                                <p class="formkit-help">
-                                    {{ field.customForm ? JSON.parse(field.customForm).hint : undefined }}
-                                </p>
-                            </div>
-                            <component
-                                v-else
-                                :is="createComponent(field).type"
-                                v-bind="createComponent(field).props"
-                                v-model="formData[field.id]"
-                            />
-                        </v-col>
-                    </v-row>
+                            </v-col>
+                        </v-row>
+                    </FormKit>
+                    
                 </div>
                 <v-row :class="dynamicFooterClass">
                     <v-row v-if="error" style="padding: 12px">
