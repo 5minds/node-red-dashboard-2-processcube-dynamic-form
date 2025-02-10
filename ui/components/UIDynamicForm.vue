@@ -62,7 +62,7 @@
     </div>
 </template>
 
-<script>
+<script lang="jsx">
 import { markRaw, h, getCurrentInstance } from 'vue';
 import { mapState } from 'vuex';
 import { plugin, defaultConfig } from '@formkit/vue';
@@ -204,6 +204,7 @@ export default {
             const hint = field.customForm ? JSON.parse(field.customForm).hint : undefined;
             const placeholder = field.customForm ? JSON.parse(field.customForm).placeholder : undefined;
             const validation = field.customForm ? JSON.parse(field.customForm).validation : undefined
+            const name = field.id
 
             switch (field.type) {
                 case 'long':
@@ -212,6 +213,7 @@ export default {
                         props: {
                             type: 'number',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -231,6 +233,7 @@ export default {
                         props: {
                             type: 'number',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -249,6 +252,7 @@ export default {
                         props: {
                             type: 'date',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -269,6 +273,7 @@ export default {
                         props: {
                             type: 'select', // JSON.parse(field.customForm).displayAs
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -290,6 +295,7 @@ export default {
                         props: {
                             type: 'select', // JSON.parse(field.customForm).displayAs
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -309,6 +315,7 @@ export default {
                         props: {
                             type: 'text',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -327,6 +334,7 @@ export default {
                         props: {
                             type: 'checkbox',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -343,6 +351,7 @@ export default {
                         props: {
                             type: 'file',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -364,6 +373,7 @@ export default {
                         props: {
                             type: 'checkbox',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -382,6 +392,7 @@ export default {
                         props: {
                             type: 'color',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -396,6 +407,7 @@ export default {
                         props: {
                             type: 'datetime-local',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -413,6 +425,7 @@ export default {
                         props: {
                             type: 'email',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -453,6 +466,7 @@ export default {
                         props: {
                             type: 'month',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -475,6 +489,7 @@ export default {
                         props: {
                             type: 'password',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -496,6 +511,7 @@ export default {
                         props: {
                             type: 'radio',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -514,6 +530,7 @@ export default {
                         type: 'v-slider',
                         props: {
                             id: field.id,
+                            name: name,
                             // label: field.label,
                             required: field.required,
                             // value: field.defaultValue,
@@ -535,6 +552,7 @@ export default {
                         props: {
                             type: 'tel' /* with pro component mask more good */,
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -554,6 +572,7 @@ export default {
                         props: {
                             type: 'textarea' /* with pro component mask more good */,
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -573,6 +592,7 @@ export default {
                         props: {
                             type: 'time' /* with pro component mask more good */,
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -591,6 +611,7 @@ export default {
                         props: {
                             type: 'url',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -611,6 +632,7 @@ export default {
                         props: {
                             type: 'week',
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
@@ -629,6 +651,7 @@ export default {
                         props: {
                             type: field.type,
                             id: field.id,
+                            name: name,
                             label: field.label,
                             required: field.required,
                             value: field.defaultValue,
