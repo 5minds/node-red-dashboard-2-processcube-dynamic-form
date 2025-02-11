@@ -4,8 +4,8 @@
         <p v-if="hasFields()">
             <v-form ref="form" v-model="form" :class="dynamicClass">
                 <h3 style="padding: 16px">{{ this.props.name }}</h3>
-                <div style="padding: 16px; max-height: 550px; overflow-y: auto">
-                    <v-row v-for="(field, index) in fields()" :key="field">
+                <div style="padding: 16px; max-height: 550px; overflow-y: auto; display: flex; flex-wrap: wrap; flex-direction: row; column-gap: 20px">
+                    <v-row v-for="(field, index) in fields()" :key="field" :style="getRowWidthStyling(field, index)">
                         <v-col cols="12">
                             <component
                                 v-if="createComponent(field).innerText"
@@ -607,6 +607,18 @@ export default {
         },
         userTask() {
             return this.hasUserTask() ? this.messages[this.id].payload.userTask : {};
+        },
+        getRowWidthStyling(field, index) {
+          let style = "";
+          if (index == 0) {
+            style += "margin-top: 12px;";
+          }
+          if (field.type == "header") {
+            style += "flex-basis: 100%;";
+          } else {
+            style += `flex-basis: ${1 / this.props.form_columns * 100}%;`;
+          }
+          return style;
         },
         fields() {
             const aFields = this.hasUserTask() ? this.userTask().userTaskConfig.formFields : [];
