@@ -43,6 +43,10 @@ code {
     color: #ae0000;
 }
 
+.ui-dynamic-form-full-width {
+  max-width: none !important;
+}
+
 .ui-dynamic-form-light {
     max-width: 500px;
     margin-left: auto;

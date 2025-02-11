@@ -132,7 +132,7 @@ export default {
         },
 
         dynamicClass() {
-            return `ui-dynamic-form-${this.theme}`;
+            return `ui-dynamic-form-${this.theme}${this.props.use_full_width ? " ui-dynamic-form-full-width" : ""}`;
         },
 
         dynamicFooterClass() {

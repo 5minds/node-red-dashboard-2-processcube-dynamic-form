@@ -24,6 +24,9 @@
             form_columns: {
               value: 1,
             },
+            use_full_width: {
+              value: false,
+            },
             width: {
                 value: 0,
                 validate: function (v) {
@@ -207,7 +210,11 @@
     <div class="form-row">
       <label for="node-input-form_columns"><i class="fa fa-hand"></i>Columns in form.</label>
       <input type="number" min="1" id="node-input-form_columns">
-  </div>
+    </div>
+    <div class="form-row">
+      <label for="node-input-use_full_width"><i class="fa fa-hand"></i>Use full width.</label>
+      <input type="checkbox" id="node-input-use_full_width">
+    </div>
 </script>
 
 
