@@ -711,7 +711,7 @@ export default {
             const dataComplete = input.getAttribute('data-complete');
             const dataInvalid = input.getAttribute('data-invalid')
             
-            if (dataComplete == null && dataInvalid === "false") {
+            if (dataComplete == null && dataInvalid === "true") {
                 allComplete = false;
             }
         });
