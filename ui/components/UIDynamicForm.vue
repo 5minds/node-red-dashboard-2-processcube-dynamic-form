@@ -68,7 +68,6 @@ import { mapState } from 'vuex';
 import { plugin, defaultConfig } from '@formkit/vue';
 import '@formkit/themes/genesis';
 import { FormKit } from '@formkit/vue';
-import { getNode } from '@formkit/core';
 
 
 export default {
@@ -143,7 +142,6 @@ export default {
         dynamicFooterClass() {
             return `ui-dynamic-form-footer-${this.theme}`;
         },
-
     },
     mounted() {
         const elements = document.querySelectorAll('.formkit-input');
@@ -225,6 +223,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'number':
@@ -244,6 +243,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'date':
@@ -261,6 +261,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'enum':
@@ -282,6 +283,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'select':
@@ -304,6 +306,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'string':
@@ -322,6 +325,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'boolean':
@@ -338,6 +342,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'file':
@@ -356,6 +361,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             // innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'checkbox':
@@ -377,6 +383,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'color':
@@ -391,6 +398,7 @@ export default {
                             value: field.defaultValue,
                             help: hint,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'datetime-local':
@@ -408,6 +416,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'email':
@@ -428,6 +437,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'header':
@@ -465,6 +475,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'paragraph':
@@ -488,6 +499,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'radio':
@@ -509,6 +521,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'range':
@@ -530,6 +543,7 @@ export default {
                             // inputClass: `input-${this.theme}`,
                             // innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'tel':
@@ -548,6 +562,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'textarea':
@@ -568,6 +583,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'time':
@@ -586,6 +602,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'url':
@@ -606,6 +623,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 case 'week':
@@ -624,6 +642,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
                 default:
@@ -640,6 +659,7 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
+                            validationVisibility: "live",
                         },
                     };
             }
@@ -685,7 +705,7 @@ export default {
         init() {
             this.actions = this.props.options;
         },
-       async actionFn(action) {
+        actionFn(action) {
             // this.checkFormState();
 
             if (action.label === "Speichern" || action.label === "Speichern und nächster") {
