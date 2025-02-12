@@ -5,7 +5,7 @@
             <v-form ref="form" v-model="form" :class="dynamicClass">
                 <h3 style="padding: 16px">{{ this.props.name }}</h3>
                 <div style="padding: 16px; max-height: 550px; overflow-y: auto">
-                    <FormKit type="group">
+                    <FormKit type="group" id="form">
                         <v-row v-for="(field, index) in fields()" :key="field">
                             <v-col cols="12">
                                 <component
@@ -62,12 +62,14 @@
     </div>
 </template>
 
-<script lang="jsx">
+<script>
 import { markRaw, h, getCurrentInstance } from 'vue';
 import { mapState } from 'vuex';
 import { plugin, defaultConfig } from '@formkit/vue';
 import '@formkit/themes/genesis';
 import { FormKit } from '@formkit/vue';
+import { getNode } from '@formkit/core';
+
 
 export default {
     name: 'UIDynamicForm',
@@ -223,7 +225,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'number':
@@ -243,7 +244,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'date':
@@ -261,7 +261,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'enum':
@@ -283,7 +282,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'select':
@@ -306,7 +304,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'string':
@@ -325,7 +322,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'boolean':
@@ -342,7 +338,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'file':
@@ -361,7 +356,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             // innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'checkbox':
@@ -383,7 +377,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'color':
@@ -398,7 +391,6 @@ export default {
                             value: field.defaultValue,
                             help: hint,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'datetime-local':
@@ -416,7 +408,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'email':
@@ -437,7 +428,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'header':
@@ -475,7 +465,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'paragraph':
@@ -499,7 +488,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'radio':
@@ -521,7 +509,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'range':
@@ -543,7 +530,6 @@ export default {
                             // inputClass: `input-${this.theme}`,
                             // innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'tel':
@@ -562,7 +548,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'textarea':
@@ -583,7 +568,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'time':
@@ -602,7 +586,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'url':
@@ -623,7 +606,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 case 'week':
@@ -642,7 +624,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
                 default:
@@ -659,7 +640,6 @@ export default {
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
                             validation: validation,
-                            validationVisibility: "live",
                         },
                     };
             }
@@ -707,19 +687,20 @@ export default {
         },
        async actionFn(action) {
             // this.checkFormState();
+
             if (action.label === "Speichern" || action.label === "Speichern und nächster") {
-                const formkitInputs = this.$refs.form.$el.querySelectorAll("[data-invalid]");
-                let allInvalid = true;
+                const formkitInputs = this.$refs.form.$el.querySelectorAll(".formkit-outer");
+                let allComplete = true;
 
-                for (let input of formkitInputs) {
-                    const node = window.FormKit.getNode(input.getAttribute("data-invalid"));
+                formkitInputs.forEach((input) => {
+                    const isComplete = input.getAttribute("data-complete") === "true";
 
-                    if (!node) {
-                        allInvalid = false;
+                    if (!isComplete) {
+                        allComplete = false;
                     }
-                }
+                });
 
-                if (allInvalid && formkitInputs.length != 0) return
+                if (!allComplete) return;
             }
 
             if (this.checkCondition(action.condition)) {
