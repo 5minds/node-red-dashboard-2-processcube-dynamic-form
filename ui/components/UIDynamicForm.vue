@@ -709,8 +709,9 @@ export default {
 
         formkitInputs.forEach((input) => {
             const dataComplete = input.getAttribute('data-complete');
-
-            if (dataComplete !== null && dataComplete !== "true") {
+            const dataInvalid = input.getAttribute('data-invalid')
+            
+            if (dataComplete == null && dataInvalid === "false") {
                 allComplete = false;
             }
         });
