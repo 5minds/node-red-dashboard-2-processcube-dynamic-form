@@ -1,7 +1,7 @@
 <template>
     <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
     <div className="ui-dynamic-form-wrapper">
-        <p v-if="hasFields()">
+        <p v-if="hasUserTask()">
             <v-form ref="form" v-model="form" :class="dynamicClass">
                 <h3 style="padding: 16px">{{ this.props.name }}</h3>
                 <div style="padding: 16px; max-height: 550px; overflow-y: auto; display: flex; flex-wrap: wrap; flex-direction: row; column-gap: 20px">
@@ -214,6 +214,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'number':
@@ -231,6 +232,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'date':
@@ -246,6 +248,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'enum':
@@ -265,6 +268,8 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
+                            disabled: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'select':
@@ -285,6 +290,8 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
+                            disabled: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'string':
@@ -301,6 +308,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'boolean':
@@ -315,6 +323,8 @@ export default {
                             help: hint,
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
+                            disabled: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'file':
@@ -331,6 +341,8 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             // innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
+                            disabled: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'checkbox':
@@ -350,6 +362,8 @@ export default {
                             fieldsetClass: 'custom-fieldset',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
+                            disabled: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'color':
@@ -362,6 +376,8 @@ export default {
                             required: field.required,
                             value: field.defaultValue,
                             help: hint,
+                            readonly: this.props.readonly ? "true" : undefined,
+                            disabled: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'datetime-local':
@@ -377,6 +393,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'email':
@@ -395,6 +412,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'header':
@@ -430,6 +448,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'paragraph':
@@ -451,6 +470,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'radio':
@@ -470,6 +490,8 @@ export default {
                             fieldsetClass: 'custom-fieldset',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
+                            disabled: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'range':
@@ -489,6 +511,8 @@ export default {
                             // wrapperClass: '$remove:formkit-wrapper',
                             // inputClass: `input-${this.theme}`,
                             // innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
+                            disabled: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'tel':
@@ -505,6 +529,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'textarea':
@@ -523,6 +548,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'time':
@@ -539,6 +565,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'url':
@@ -557,6 +584,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
                         },
                     };
                 case 'week':
@@ -573,6 +601,7 @@ export default {
                             wrapperClass: '$remove:formkit-wrapper',
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
                         },
                     };
                 default:
@@ -587,6 +616,7 @@ export default {
                             help: hint,
                             inputClass: `input-${this.theme}`,
                             innerClass: `${this.theme == 'dark' ? '$remove:formkit-inner' : ''}`,
+                            readonly: this.props.readonly ? "true" : undefined,
                         },
                     };
             }
@@ -603,7 +633,7 @@ export default {
             // \_ vllt macht es sinn das schema von formkit zu übernehmen oder alternativ nur unsere validierung zu nutzen.
         },
         hasUserTask() {
-            return this.messages && this.messages[this.id] && this.messages[this.id].payload.userTask;
+            return this.messages && this.messages[this.id] && this.messages[this.id].payload?.userTask;
         },
         userTask() {
             return this.hasUserTask() ? this.messages[this.id].payload.userTask : {};
@@ -621,16 +651,13 @@ export default {
           return style;
         },
         fields() {
-            const aFields = this.hasUserTask() ? this.userTask().userTaskConfig.formFields : [];
+            const aFields = this.userTask()?.userTaskConfig?.formFields ?? [];
             const fieldMap = aFields.map((field) => ({
                 ...field,
                 items: mapItems(field.type, field),
             }));
 
             return fieldMap;
-        },
-        hasFields() {
-            return this.messages && this.messages[this.id] && this.messages[this.id].payload.userTask !== undefined;
         },
         /*
             widget-action just sends a msg to Node-RED, it does not store the msg state server-side
