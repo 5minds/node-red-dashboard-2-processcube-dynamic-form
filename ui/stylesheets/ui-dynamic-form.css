@@ -116,6 +116,21 @@ code {
     border-bottom-right-radius: 12px;
 }
 
+.ui-dynamic-form-footer-action-primary {
+  border-radius: 8px;
+  background-color: rgb(var(--v-theme-primary));
+  padding: 8px;
+}
+
+.ui-dynamic-form-footer-action-secondary {
+  border-radius: 8px;
+  background-color: transparent !important;
+  border-color: rgb(var(--v-theme-primary));
+  border: 2px solid;
+  color: rgb(var(--v-theme-primary));
+  padding: 8px;
+}
+
 .ui-dynamic-form-wrapper {
     --fk-color-primary: rgb(var(--v-theme-primary)) !important;
     --fk-color-border: rgb(var(--v-theme-group-outline)); /* Does not work somehow */

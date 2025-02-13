@@ -39,15 +39,32 @@
                     <v-row v-if="error" style="padding: 12px">
                         <v-alert v-if="error" type="error">Error: {{ errorMsg }}</v-alert>
                     </v-row>
-                    <div style="display: flex; gap: 8px">
-                        <div v-for="(action, index) in actions" :key="index" style="flex-grow: 1">
-                            <v-btn
-                                :key="index"
-                                style="width: 100% !important; min-height: 36px"
-                                @click="actionFn(action)"
-                            >
-                                {{ action.label }}
-                            </v-btn>
+                    <div style="display: flex; justify-content: space-between; width: 100%">
+                        <div style="display: flex; gap: 8px;">
+                            <div v-for="(action, index) in actions" :key="index">
+                                <v-btn
+                                    v-if="action.alignment === 'left' || !action.alignment"
+                                    :key="index"
+                                    style="min-height: 36px"
+                                    :class="getActionButtonClass(action)"
+                                    @click="actionFn(action)"
+                                >
+                                    {{ action.label }}
+                                </v-btn>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <div v-for="(action, index) in actions" :key="index">
+                                <v-btn
+                                    v-if="action.alignment === 'right'"
+                                    :key="index"
+                                    style="min-height: 36px"
+                                    :class="getActionButtonClass(action)"
+                                    @click="actionFn(action)"
+                                >
+                                    {{ action.label }}
+                                </v-btn>
+                            </div>
                         </div>
                     </div>
                 </v-row>
@@ -638,6 +655,9 @@ export default {
         },
         userTask () {
             return this.hasUserTask() ? this.messages[this.id].payload.userTask : {}
+        },
+        getActionButtonClass (action) {
+            return action.primary === 'true' ? 'ui-dynamic-form-footer-action-primary' : 'ui-dynamic-form-footer-action-secondary'
         },
         getRowWidthStyling (field, index) {
             let style = ''

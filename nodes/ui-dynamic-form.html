@@ -106,6 +106,26 @@
                         types: ['str'],
                     });
 
+                $('<select>', {
+                    class: 'node-input-option-alignment',
+                    style: 'margin-left:7px; width:calc(29%);',
+                    placeholder: 'Alignment',
+                    value: option.alignment
+                })
+                    .append($('<option>', { value: 'left', selected: option.alignment === 'left' }).text('Align left'))
+                    .append($('<option>', { value: 'right', selected: option.alignment === 'right' }).text('Align right'))
+                    .appendTo(row);
+
+                $('<select>', {
+                    class: 'node-input-option-primary',
+                    style: 'margin-left:7px; width:calc(29%);',
+                    placeholder: 'Action type',
+                    value: option.primary,
+                })
+                    .append($('<option>', { value: 'false', selected: option.primary !== 'true' }).text('Secondary action'))
+                    .append($('<option>', { value: 'true', selected: option.primary === 'true' }).text('Primary action'))
+                    .appendTo(row);
+
                 // Create delete button for the option
                 const finalSpan = $('<span/>', {
                     style: 'float:right; margin-right:8px;',
@@ -157,6 +177,8 @@
                     label: option.find('.node-input-option-label').val(),
                     condition: option.find('.node-input-option-condition').val(),
                     errorMessage: option.find('.node-input-option-error').val(),
+                    alignment: option.find('.node-input-option-alignment').val(),
+                    primary: option.find('.node-input-option-primary').val(),
                 };
 
                 node.options.push(o);
@@ -236,7 +258,7 @@ Connect the UI-Node to the usertask input node. Every action in the configuratio
 
 ### message
 
-Access to the message object is available through _msg_ 
+Access to the message object is available through _msg_
 
 ### form fields
 
