@@ -43,15 +43,8 @@ code {
     color: #ae0000;
 }
 
-.ui-dynamic-form-external-sizing-wrapper {
-    margin-left: 92px;
-    margin-right: 92px;
-    max-width: none;
-    max-height: 90%;
-}
-
 .ui-dynamic-form-common {
-    border-radius: 12px;
+    border-radius: 8px;
 }
 
 .ui-dynamic-form-light {
@@ -66,9 +59,34 @@ code {
 }
 
 .ui-dynamic-form-default {
-    box-shadow: 0 4px 16px -3px rgb(var(--v-theme-on-group-background));
+    border-bottom: 4px solid rgb(var(--v-theme-primary));
+    box-shadow: 0px 0px 32px 0px #BABABA;
     background-color: rgb(var(--v-theme-group-background));
     color: rgb(var(--v-theme-on-group-background));
+}
+
+.ui-dynamic-form-title-default {
+    background: linear-gradient(131deg, #18181A 26.76%, #242326 100.16%);
+    padding: 32px;
+    color: #ffffff;
+    font-size: 36px;
+    font-weight: 700;
+    border-radius: 8px 8px 0px 0px;
+}
+
+.ui-dynamic-form-title-default hr {
+    border: 4px solid rgb(var(--v-theme-primary));
+}
+
+.ui-dynamic-form-title-minimal {
+    padding: 16px;
+}
+
+.ui-dynamic-form-title-outside {
+    padding-bottom: 24px;
+    padding-top: 24px;
+    font-size: 24px;
+    font-weight: 700;
 }
 
 .ui-dynamic-form-footer-common {
@@ -76,8 +94,8 @@ code {
     flex-direction: column;
     gap: 8px;
     margin: 0;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 }
 
 .ui-dynamic-form-footer-default {}
@@ -112,6 +130,24 @@ code {
     --fk-color-input: rgb(var(--v-theme-on-group-background));
     --fk-color-help: rgb(var(--v-theme-on-group-background));
     --fk-color-border-focus: rgb(var(--v-theme-primary));
+}
+
+.ui-dynamic-form-external-sizing-wrapper {
+    margin-left: 92px;
+    margin-right: 92px;
+    max-width: none;
+    max-height: 90%;
+}
+
+.ui-dynamic-form-formfield-positioner {
+    padding: 16px;
+    padding-top: 0px;
+    max-height: 550px;
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    column-gap: 20px
 }
 
 .reset-background {

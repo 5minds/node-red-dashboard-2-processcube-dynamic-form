@@ -1,11 +1,12 @@
 <template>
     <div className="ui-dynamic-form-external-sizing-wrapper" :style="props.card_size_styling">
         <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
+        <UIDynamicFormTitleText v-if="props.title_style === 'outside' && hasUserTask()" :style="props.title_style" :title="props.title_text" :customStyles="props.title_custom_text_styling" :titleIcon="props.title_icon" />
         <div className="ui-dynamic-form-wrapper">
             <p v-if="hasUserTask()">
                 <v-form ref="form" v-model="form" :class="dynamicClass">
-                    <h3 v-if="props.name?.length > 0" style="padding: 16px">{{ props.name }}</h3>
-                    <div style="padding: 16px; max-height: 550px; overflow-y: auto; display: flex; flex-wrap: wrap; flex-direction: row; column-gap: 20px">
+                    <UIDynamicFormTitleText v-if="props.title_style != 'outside'" :style="props.title_style" :title="props.title_text" :customStyles="props.title_custom_text_styling" :titleIcon="props.title_icon" />
+                    <div className="ui-dynamic-form-formfield-positioner">
                         <v-row v-for="(field, index) in fields()" :key="field" :style="getRowWidthStyling(field, index)">
                             <v-col cols="12">
                                 <component
@@ -63,11 +64,12 @@ import { mapState } from 'vuex'
 // eslint-disable-next-line import/no-unresolved
 import '@formkit/themes/genesis'
 import UIDynamicFormFooterAction from './FooterActions.vue'
+import UIDynamicFormTitleText from './TitleText.vue'
 
 export default {
     name: 'UIDynamicForm',
     components: {
-        FormKit, UIDynamicFormFooterAction
+        FormKit, UIDynamicFormFooterAction, UIDynamicFormTitleText
     },
     inject: ['$socket'],
     props: {

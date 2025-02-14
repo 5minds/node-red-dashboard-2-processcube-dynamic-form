@@ -33,6 +33,18 @@
             card_size_styling: {
               value: "",
             },
+            title_text: {
+              value: "",
+            },
+            title_style: {
+              value: "default",
+            },
+            title_custom_text_styling: {
+                value: "",
+            },
+            title_icon: {
+                value: "",
+            },
             width: {
                 value: 0,
                 validate: function (v) {
@@ -62,6 +74,18 @@
                 height: '#node-input-height',
                 group: '#node-input-group',
             });
+            $('#node-input-title_style').typedInput({
+              types: [
+                  {
+                    value: 'title_style',
+                    options: [
+                        { value: 'default', label: 'Default' },
+                        { value: 'minimal', label: 'Minimal' },
+                        { value: 'outside', label: 'Outside of card' },
+                    ]
+                  }
+              ]
+            })
 
             function generateOption(i, option) {
                 const container = $('<li/>', {
@@ -241,6 +265,25 @@
     </div>
     <hr />
 
+    <h4>Title Configuration</h4>
+    <div class="form-row">
+        <label for="node-input-title_text"><i class="fa fa-hand"></i>Title text</label>
+        <input type="text" id="node-input-title_text" title="Enter the text to show as a title.">
+    </div>
+    <div class="form-row">
+        <label for="node-input-title_style"><i class="fa fa-hand"></i>Style</label>
+        <input type="text" id="node-input-title_style" title="Select the base styling layout for your title.">
+    </div>
+    <div class="form-row">
+        <label for="node-input-title_custom_text_styling"><i class="fa fa-hand"></i>Custom text styling</label>
+        <input type="text" id="node-input-title_custom_text_styling" title="Use CSS properties like font-size, color or padding to influence the appearance of the title">
+    </div>
+    <div class="form-row">
+        <label for="node-input-title_icon"><i class="fa fa-hand"></i>Title icon</label>
+        <input type="text" id="node-input-title_icon" title="Enter an URL to fetch an icon from. Use a dataurl for images, that are not available online. This value will be used as a HTML <img>'s src value.">
+    </div>
+    <hr />
+
     <h4>Appearance</h4>
     <div class="form-row">
       <label for="node-input-form_columns"><i class="fa fa-hand"></i>Card size styling</label>
@@ -250,6 +293,10 @@
       <label for="node-input-form_columns"><i class="fa fa-hand"></i>Columns in form</label>
       <input type="number" min="1" id="node-input-form_columns" title="Control the amount of columns, that your form fields should be placed in.">
     </div>
+
+    <hr />
+
+    <h4>Other</h4>
     <div class="form-row">
       <label for="node-input-readonly"><i class="fa fa-hand"></i>Readonly</label>
       <input type="checkbox" id="node-input-readonly" title="Makes all form fields read only.">
