@@ -74,11 +74,7 @@
                     placeholder: 'Label',
                     value: option.label,
                 })
-                    .appendTo(row)
-                    .typedInput({
-                        type: 'str',
-                        types: ['str'],
-                    });
+                    .appendTo(row);
 
                 $('<input/>', {
                     class: 'node-input-option-condition',
@@ -87,11 +83,7 @@
                     placeholder: 'Condition',
                     value: option.condition,
                 })
-                    .appendTo(row)
-                    .typedInput({
-                        type: 'str',
-                        types: ['str'],
-                    });
+                    .appendTo(row);
 
                 $('<input/>', {
                     class: 'node-input-option-error',
@@ -100,31 +92,47 @@
                     placeholder: 'Error message',
                     value: option.errorMessage,
                 })
-                    .appendTo(row)
-                    .typedInput({
-                        type: 'str',
-                        types: ['str'],
-                    });
+                    .appendTo(row);
 
-                $('<select>', {
+                $('<input/>', {
                     class: 'node-input-option-alignment',
+                    type: 'text',
                     style: 'margin-left:7px; width:calc(29%);',
                     placeholder: 'Alignment',
                     value: option.alignment
                 })
-                    .append($('<option>', { value: 'left', selected: option.alignment === 'left' }).text('Align left'))
-                    .append($('<option>', { value: 'right', selected: option.alignment === 'right' }).text('Align right'))
-                    .appendTo(row);
+                    .appendTo(row)
+                    .typedInput({
+                        types: [
+                            {
+                                value: 'alignment',
+                                options: [
+                                    { value: 'left', label: 'Align left' },
+                                    { value: 'right', label: 'Align right' },
+                                ]
+                            }
+                        ]
+                    });
 
-                $('<select>', {
+                $('<input/>', {
                     class: 'node-input-option-primary',
+                    type: 'text',
                     style: 'margin-left:7px; width:calc(29%);',
                     placeholder: 'Action type',
                     value: option.primary,
                 })
-                    .append($('<option>', { value: 'false', selected: option.primary !== 'true' }).text('Secondary action'))
-                    .append($('<option>', { value: 'true', selected: option.primary === 'true' }).text('Primary action'))
-                    .appendTo(row);
+                    .appendTo(row)
+                    .typedInput({
+                        types: [
+                            {
+                                value: 'primary',
+                                options: [
+                                    { value: 'false', label: 'Secondary action'},
+                                    { value: 'true', label: 'Primary action'},
+                                ]
+                            }
+                        ]
+                    });
 
                 // Create delete button for the option
                 const finalSpan = $('<span/>', {
@@ -205,6 +213,7 @@
         <button class="editor-button" id="node-input-size"></button>
     </div>
 
+    <h4>Footer Configuration</h4>
     <div class="form-row form-row-flex node-input-option-container-row" style="margin-bottom: 0px;width: 100%">
         <label for="node-input-width" style="vertical-align:top"><i class="fa fa-list-alt"></i> Actions</label>
         <div id="node-input-option-container-div" style="box-sizing:border-box; border-radius:5px; height:257px; padding:5px; border:1px solid var(--red-ui-form-input-border-color, #ccc); overflow-y:scroll; display:inline-block; width: 70%;">
@@ -223,25 +232,26 @@
     <div class="form-row">
         <a href="#" class="editor-button editor-button-small" id="node-input-add-option" style="margin-top:4px; margin-left:103px;"><i class="fa fa-plus"></i> <span>action</span></a>
     </div>
+    <hr />
 
     <div class="form-row">
-        <label for="node-input-waiting_title"><i class="fa fa-hand"></i>Title for waiting text.</label>
+        <label for="node-input-waiting_title"><i class="fa fa-hand"></i>Title for waiting text</label>
         <input type="text" id="node-input-waiting_title">
     </div>
     <div class="form-row">
-        <label for="node-input-waiting_info"><i class="fa fa-hand"></i>Text for waiting text.</label>
+        <label for="node-input-waiting_info"><i class="fa fa-hand"></i>Text for waiting text</label>
         <input type="text" id="node-input-waiting_info">
     </div>
     <div class="form-row">
-      <label for="node-input-form_columns"><i class="fa fa-hand"></i>Columns in form.</label>
+      <label for="node-input-form_columns"><i class="fa fa-hand"></i>Columns in form</label>
       <input type="number" min="1" id="node-input-form_columns">
     </div>
     <div class="form-row">
-      <label for="node-input-use_full_width"><i class="fa fa-hand"></i>Use full width.</label>
+      <label for="node-input-use_full_width"><i class="fa fa-hand"></i>Use full width</label>
       <input type="checkbox" id="node-input-use_full_width">
     </div>
     <div class="form-row">
-      <label for="node-input-readonly"><i class="fa fa-hand"></i>Readonly.</label>
+      <label for="node-input-readonly"><i class="fa fa-hand"></i>Readonly</label>
       <input type="checkbox" id="node-input-readonly">
     </div>
 </script>
