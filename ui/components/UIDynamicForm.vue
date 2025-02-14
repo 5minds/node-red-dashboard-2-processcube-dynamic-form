@@ -1,5 +1,5 @@
 <template>
-    <div className="ui-dynamic-form-external-sizing-wrapper">
+    <div className="ui-dynamic-form-external-sizing-wrapper" :style="props.card_size_styling">
         <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
         <div className="ui-dynamic-form-wrapper">
             <p v-if="hasUserTask()">

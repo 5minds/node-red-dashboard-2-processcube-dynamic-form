@@ -30,6 +30,9 @@
             actions_inside_card: {
                 value: true,
             },
+            card_size_styling: {
+              value: "",
+            },
             width: {
                 value: 0,
                 validate: function (v) {
@@ -240,12 +243,16 @@
 
     <h4>Appearance</h4>
     <div class="form-row">
+      <label for="node-input-form_columns"><i class="fa fa-hand"></i>Card size styling</label>
+      <input type="text" id="node-input-card_size_styling" title="Use CSS properties like margin, padding or max-width to influence sizing and positioning of the component">
+    </div>
+    <div class="form-row">
       <label for="node-input-form_columns"><i class="fa fa-hand"></i>Columns in form</label>
-      <input type="number" min="1" id="node-input-form_columns">
+      <input type="number" min="1" id="node-input-form_columns" title="Control the amount of columns, that your form fields should be placed in.">
     </div>
     <div class="form-row">
       <label for="node-input-readonly"><i class="fa fa-hand"></i>Readonly</label>
-      <input type="checkbox" id="node-input-readonly">
+      <input type="checkbox" id="node-input-readonly" title="Makes all form fields read only.">
     </div>
     <div class="form-row">
       <label for="node-input-waiting_title"><i class="fa fa-hand"></i>Title for waiting text</label>
