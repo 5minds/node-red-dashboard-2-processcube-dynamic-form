@@ -41,7 +41,7 @@
                         <v-row v-if="error" style="padding: 12px">
                             <v-alert v-if="error" type="error">Error: {{ errorMsg }}</v-alert>
                         </v-row>
-                        <UIDynamicFormFooterAction v-if="props.actions_inside_card" :actions="actions" :actionCallback="actionFn" style="padding: 16px" />
+                        <UIDynamicFormFooterAction v-if="props.actions_inside_cardv && actions.length > 0" :actions="actions" :actionCallback="actionFn" style="padding: 16px" />
                     </v-row>
                 </v-form>
             </p>
@@ -49,7 +49,7 @@
                 <v-alert :text="waiting_info" :title="waiting_title" />
             </p>
         </div>
-        <div v-if="!props.actions_inside_card && hasUserTask()" style="padding-top: 32px;">
+        <div v-if="!props.actions_inside_card && actions.length > 0 && hasUserTask()" style="padding-top: 32px;">
             <UIDynamicFormFooterAction :actions="actions" :actionCallback="actionFn" />
         </div>
     </div>
