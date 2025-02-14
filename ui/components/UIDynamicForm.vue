@@ -39,40 +39,16 @@
                     <v-row v-if="error" style="padding: 12px">
                         <v-alert v-if="error" type="error">Error: {{ errorMsg }}</v-alert>
                     </v-row>
-                    <div style="display: flex; justify-content: space-between; width: 100%">
-                        <div style="display: flex; gap: 8px;">
-                            <div v-for="(action, index) in actions" :key="index">
-                                <v-btn
-                                    v-if="action.alignment === 'left' || !action.alignment"
-                                    :key="index"
-                                    style="min-height: 36px"
-                                    :class="getActionButtonClass(action)"
-                                    @click="actionFn(action)"
-                                >
-                                    {{ action.label }}
-                                </v-btn>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <div v-for="(action, index) in actions" :key="index">
-                                <v-btn
-                                    v-if="action.alignment === 'right'"
-                                    :key="index"
-                                    style="min-height: 36px"
-                                    :class="getActionButtonClass(action)"
-                                    @click="actionFn(action)"
-                                >
-                                    {{ action.label }}
-                                </v-btn>
-                            </div>
-                        </div>
-                    </div>
+                    <UIDynamicFormFooterAction v-if="props.actions_inside_card" :actions="actions" :actionCallback="actionFn" />
                 </v-row>
             </v-form>
         </p>
         <p v-else>
             <v-alert :text="waiting_info" :title="waiting_title" />
         </p>
+    </div>
+    <div v-if="!props.actions_inside_card && hasUserTask()" style="padding-top: 32px;">
+        <UIDynamicFormFooterAction :actions="actions" :actionCallback="actionFn" />
     </div>
 </template>
 
@@ -81,13 +57,15 @@
 import { FormKit, defaultConfig, plugin } from '@formkit/vue'
 import { getCurrentInstance, markRaw } from 'vue'
 import { mapState } from 'vuex'
+
 // eslint-disable-next-line import/no-unresolved
 import '@formkit/themes/genesis'
+import UIDynamicFormFooterAction from './FooterActions.vue'
 
 export default {
     name: 'UIDynamicForm',
     components: {
-        FormKit
+        FormKit, UIDynamicFormFooterAction
     },
     inject: ['$socket'],
     props: {
@@ -133,7 +111,10 @@ export default {
         },
 
         dynamicClass () {
-            return `ui-dynamic-form-${this.theme}${this.props.use_full_width ? ' ui-dynamic-form-full-width' : ''}`
+            return {
+                [`ui-dynamic-form-${this.theme}`]: true,
+                'ui-dynamic-form-full-width': this.props.use_full_width
+            }
         },
 
         dynamicFooterClass () {
@@ -655,9 +636,6 @@ export default {
         },
         userTask () {
             return this.hasUserTask() ? this.messages[this.id].payload.userTask : {}
-        },
-        getActionButtonClass (action) {
-            return action.primary === 'true' ? 'ui-dynamic-form-footer-action-primary' : 'ui-dynamic-form-footer-action-secondary'
         },
         getRowWidthStyling (field, index) {
             let style = ''
