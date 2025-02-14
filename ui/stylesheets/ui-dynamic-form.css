@@ -43,92 +43,66 @@ code {
     color: #ae0000;
 }
 
-.ui-dynamic-form-full-width {
-  max-width: none !important;
+.ui-dynamic-form-external-sizing-wrapper {
+    margin-left: 92px;
+    margin-right: 92px;
+    max-width: none;
+    max-height: 90%;
+}
+
+.ui-dynamic-form-common {
+    border-radius: 12px;
 }
 
 .ui-dynamic-form-light {
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-    border-radius: 12px;
     box-shadow: 0 4px 16px -3px rgba(0, 0, 0, 0.5);
-    max-height: 90%;
-}
-
-.input-dark {
-    background-color: rgba(85, 85, 85, 255);
-    color: white !important;
 }
 
 .ui-dynamic-form-dark {
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-    border-radius: 12px;
     box-shadow: 0 4px 16px -3px rgba(255, 255, 255, 0.9);
     background-color: rgba(44, 44, 44, 255);
     color: rgba(165, 165, 165, 255);
-    max-height: 90%;
     color-scheme: dark;
 }
 
 .ui-dynamic-form-default {
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-    border-radius: 12px;
     box-shadow: 0 4px 16px -3px rgb(var(--v-theme-on-group-background));
     background-color: rgb(var(--v-theme-group-background));
     color: rgb(var(--v-theme-on-group-background));
-    max-height: 90%;
 }
 
-.ui-dynamic-form-footer-default {
+.ui-dynamic-form-footer-common {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    padding: 16px;
     margin: 0;
     border-bottom-left-radius: 12px;
     border-bottom-right-radius: 12px;
 }
+
+.ui-dynamic-form-footer-default {}
 
 .ui-dynamic-form-footer-light {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 16px;
     background-color: rgba(249, 250, 251, 1);
-    margin: 0;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
 }
 
 .ui-dynamic-form-footer-dark {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 16px;
     background-color: rgba(35, 35, 35, 255);
-    margin: 0;
-    border-bottom-left-radius: 12px;
-    border-bottom-right-radius: 12px;
 }
 
 .ui-dynamic-form-footer-action-primary {
-  border-radius: 8px;
-  background-color: rgb(var(--v-theme-primary));
-  padding: 8px;
+    border-radius: 8px;
+    background-color: rgb(var(--v-theme-primary));
+    padding: 8px;
 }
 
 .ui-dynamic-form-footer-action-secondary {
-  border-radius: 8px;
-  background-color: transparent !important;
-  border-color: rgb(var(--v-theme-primary));
-  border: 2px solid;
-  color: rgb(var(--v-theme-primary));
-  padding: 8px;
+    border-radius: 8px;
+    background-color: transparent !important;
+    border-color: rgb(var(--v-theme-primary));
+    border: 2px solid;
+    color: rgb(var(--v-theme-primary));
+    padding: 8px;
 }
 
 .ui-dynamic-form-wrapper {
@@ -146,4 +120,9 @@ code {
 
 .custom-fieldset {
     max-width: none !important;
+}
+
+.input-dark {
+    background-color: rgba(85, 85, 85, 255);
+    color: white !important;
 }

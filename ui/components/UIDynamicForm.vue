@@ -1,54 +1,56 @@
 <template>
-    <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
-    <div className="ui-dynamic-form-wrapper">
-        <p v-if="hasUserTask()">
-            <v-form ref="form" v-model="form" :class="dynamicClass">
-                <h3 style="padding: 16px">{{ props.name }}</h3>
-                <div style="padding: 16px; max-height: 550px; overflow-y: auto; display: flex; flex-wrap: wrap; flex-direction: row; column-gap: 20px">
-                    <v-row v-for="(field, index) in fields()" :key="field" :style="getRowWidthStyling(field, index)">
-                        <v-col cols="12">
-                            <component
-                                :is="createComponent(field).type"
-                                v-if="createComponent(field).innerText"
-                                v-bind="createComponent(field).props"
-                                v-model="formData[field.id]"
-                            >
-                                {{ createComponent(field).innerText }}
-                            </component>
-                            <div v-else-if="createComponent(field).type == 'v-slider'">
-                                <p class="formkit-label">{{ field.label }}</p>
+    <div className="ui-dynamic-form-external-sizing-wrapper">
+        <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
+        <div className="ui-dynamic-form-wrapper">
+            <p v-if="hasUserTask()">
+                <v-form ref="form" v-model="form" :class="dynamicClass">
+                    <h3 v-if="props.name?.length > 0" style="padding: 16px">{{ props.name }}</h3>
+                    <div style="padding: 16px; max-height: 550px; overflow-y: auto; display: flex; flex-wrap: wrap; flex-direction: row; column-gap: 20px">
+                        <v-row v-for="(field, index) in fields()" :key="field" :style="getRowWidthStyling(field, index)">
+                            <v-col cols="12">
                                 <component
                                     :is="createComponent(field).type"
+                                    v-if="createComponent(field).innerText"
                                     v-bind="createComponent(field).props"
-                                    v-model="field.defaultValue"
+                                    v-model="formData[field.id]"
+                                >
+                                    {{ createComponent(field).innerText }}
+                                </component>
+                                <div v-else-if="createComponent(field).type == 'v-slider'">
+                                    <p class="formkit-label">{{ field.label }}</p>
+                                    <component
+                                        :is="createComponent(field).type"
+                                        v-bind="createComponent(field).props"
+                                        v-model="field.defaultValue"
+                                    />
+                                    <p class="formkit-help">
+                                        {{ field.customForm ? JSON.parse(field.customForm).hint : undefined }}
+                                    </p>
+                                </div>
+                                <component
+                                    :is="createComponent(field).type"
+                                    v-else
+                                    v-bind="createComponent(field).props"
+                                    v-model="formData[field.id]"
                                 />
-                                <p class="formkit-help">
-                                    {{ field.customForm ? JSON.parse(field.customForm).hint : undefined }}
-                                </p>
-                            </div>
-                            <component
-                                :is="createComponent(field).type"
-                                v-else
-                                v-bind="createComponent(field).props"
-                                v-model="formData[field.id]"
-                            />
-                        </v-col>
+                            </v-col>
+                        </v-row>
+                    </div>
+                    <v-row :class="dynamicFooterClass">
+                        <v-row v-if="error" style="padding: 12px">
+                            <v-alert v-if="error" type="error">Error: {{ errorMsg }}</v-alert>
+                        </v-row>
+                        <UIDynamicFormFooterAction v-if="props.actions_inside_card" :actions="actions" :actionCallback="actionFn" style="padding: 16px" />
                     </v-row>
-                </div>
-                <v-row :class="dynamicFooterClass">
-                    <v-row v-if="error" style="padding: 12px">
-                        <v-alert v-if="error" type="error">Error: {{ errorMsg }}</v-alert>
-                    </v-row>
-                    <UIDynamicFormFooterAction v-if="props.actions_inside_card" :actions="actions" :actionCallback="actionFn" />
-                </v-row>
-            </v-form>
-        </p>
-        <p v-else>
-            <v-alert :text="waiting_info" :title="waiting_title" />
-        </p>
-    </div>
-    <div v-if="!props.actions_inside_card && hasUserTask()" style="padding-top: 32px;">
-        <UIDynamicFormFooterAction :actions="actions" :actionCallback="actionFn" />
+                </v-form>
+            </p>
+            <p v-else>
+                <v-alert :text="waiting_info" :title="waiting_title" />
+            </p>
+        </div>
+        <div v-if="!props.actions_inside_card && hasUserTask()" style="padding-top: 32px;">
+            <UIDynamicFormFooterAction :actions="actions" :actionCallback="actionFn" />
+        </div>
     </div>
 </template>
 
@@ -111,14 +113,11 @@ export default {
         },
 
         dynamicClass () {
-            return {
-                [`ui-dynamic-form-${this.theme}`]: true,
-                'ui-dynamic-form-full-width': this.props.use_full_width
-            }
+            return `ui-dynamic-form-${this.theme} ui-dynamic-form-common`
         },
 
         dynamicFooterClass () {
-            return `ui-dynamic-form-footer-${this.theme}`
+            return `ui-dynamic-form-footer-${this.theme} ui-dynamic-form-footer-common`
         }
     },
     created () {
