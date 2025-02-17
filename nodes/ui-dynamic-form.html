@@ -45,6 +45,9 @@
             title_icon: {
                 value: "",
             },
+            trigger_on_change: {
+                value: false,
+            },
             width: {
                 value: 0,
                 validate: function (v) {
@@ -60,9 +63,9 @@
             outputs: { value: 1 },
         },
         inputs: 1,
-        outputs: 1,
+        outputs: 0,
         outputLabels: function (index) {
-            return this.options[index].label;
+            return index < this.options.length ? this.options[index].label : 'Triggered on change';
         },
         icon: 'ui_dynamic_form.svg',
         label: function () {
@@ -219,7 +222,11 @@
                 node.options.push(o);
             });
 
-            this.outputs = node.options.length || 1;
+            this.outputs = node.options.length || 0;
+
+            if ($('#node-input-trigger_on_change').is(':checked')) {
+              this.outputs++;
+            }
         },
     });
 </script>
@@ -300,6 +307,10 @@
     <div class="form-row">
       <label for="node-input-readonly"><i class="fa fa-hand"></i>Readonly</label>
       <input type="checkbox" id="node-input-readonly" title="Makes all form fields read only.">
+    </div>
+    <div class="form-row">
+      <label for="node-input-trigger_on_change"><i class="fa fa-hand"></i>Trigger on change</label>
+      <input type="checkbox" id="node-input-trigger_on_change" title="A new output will be added. Each time a value inside the form changes, this output will be triggered.">
     </div>
     <div class="form-row">
       <label for="node-input-waiting_title"><i class="fa fa-hand"></i>Title for waiting text</label>

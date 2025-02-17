@@ -61,7 +61,7 @@ code {
 .ui-dynamic-form-default {
     border-bottom: 4px solid rgb(var(--v-theme-primary));
     box-shadow: 0px 0px 32px 0px #BABABA;
-    background-color: rgb(var(--v-theme-group-background));
+    background-color: #FFF;
     color: rgb(var(--v-theme-on-group-background));
 }
 
@@ -132,7 +132,7 @@ code {
 .ui-dynamic-form-wrapper {
     --fk-color-primary: rgb(var(--v-theme-primary)) !important;
     --fk-color-border: rgb(var(--v-theme-group-outline)); /* Does not work somehow */
-    --fk-bg-input: rgb(var(--v-theme-group-background));
+    --fk-bg-input: #FFF;
     --fk-color-input: rgb(var(--v-theme-on-group-background));
     --fk-color-help: rgb(var(--v-theme-on-group-background));
     --fk-color-border-focus: rgb(var(--v-theme-primary));

@@ -122,6 +122,17 @@ export default {
             return `ui-dynamic-form-footer-${this.theme} ui-dynamic-form-footer-common`
         }
     },
+    watch: {
+        formData: {
+            handler (newData, oldData) {
+                if (this.props.trigger_on_change) {
+                    const res = { payload: { formData: newData, userTask: this.taskInput } }
+                    this.send(res, this.actions.length)
+                }
+            },
+            deep: true
+        }
+    },
     created () {
         const currentPath = window.location.pathname
         const lastPart = currentPath.substring(currentPath.lastIndexOf('/'))
@@ -163,21 +174,22 @@ export default {
             this.messages[this.id] = msg
 
             const hasTask = msg.payload && msg.payload.userTask
-            const defaultValues = msg.payload.userTask.userTaskConfig.formFields
+            const formFields = msg.payload.userTask.userTaskConfig.formFields
+            const formFieldIds = formFields.map(ff => ff.id)
             const initialValues = msg.payload.userTask.startToken
 
             if (hasTask) {
                 this.taskInput = msg.payload.userTask
             }
 
-            if (hasTask && defaultValues) {
-                defaultValues.forEach((field) => {
+            if (hasTask && formFields) {
+                formFields.forEach((field) => {
                     this.formData[field.id] = field.defaultValue
                 })
             }
 
             if (hasTask && initialValues) {
-                Object.keys(initialValues).forEach((key) => {
+                Object.keys(initialValues).filter(key => formFieldIds.includes(key)).forEach((key) => {
                     this.formData[key] = initialValues[key]
                 })
             }
