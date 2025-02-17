@@ -72,6 +72,9 @@ code {
     font-size: 36px;
     font-weight: 700;
     border-radius: 8px 8px 0px 0px;
+    margin-top: 0px;
+    border: 2px solid #F6F5FA;
+    border-bottom: none;
 }
 
 .ui-dynamic-form-title-default hr {
@@ -80,6 +83,9 @@ code {
 
 .ui-dynamic-form-title-minimal {
     padding: 16px;
+    margin-top: 0px;
+    border: 2px solid #F6F5FA;
+    border-bottom: none;
 }
 
 .ui-dynamic-form-title-outside {
@@ -140,14 +146,21 @@ code {
 }
 
 .ui-dynamic-form-formfield-positioner {
-    padding: 16px;
+    padding: 32px;
     padding-top: 0px;
     max-height: 550px;
     overflow-y: auto;
     display: flex;
     flex-wrap: wrap;
     flex-direction: row;
-    column-gap: 20px
+    column-gap: 20px;
+    border-left: 2px solid #F6F5FA;
+    border-right: 2px solid #F6F5FA;
+    border-radius: 0px 0px 6px 6px;
+}
+
+.ui-dynamic-form-formfield-positioner h1, .ui-dynamic-form-formfield-positioner h2, .ui-dynamic-form-formfield-positioner h3 {
+  margin: 0px;
 }
 
 .reset-background {

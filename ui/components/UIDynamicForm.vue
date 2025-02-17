@@ -3,7 +3,7 @@
         <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
         <UIDynamicFormTitleText v-if="props.title_style === 'outside' && hasUserTask()" :style="props.title_style" :title="props.title_text" :customStyles="props.title_custom_text_styling" :titleIcon="props.title_icon" />
         <div className="ui-dynamic-form-wrapper">
-            <p v-if="hasUserTask()">
+            <p v-if="hasUserTask()" style="margin-bottom: 0px;">
                 <v-form ref="form" v-model="form" :class="dynamicClass">
                     <UIDynamicFormTitleText v-if="props.title_style != 'outside'" :style="props.title_style" :title="props.title_text" :customStyles="props.title_custom_text_styling" :titleIcon="props.title_icon" />
                     <div className="ui-dynamic-form-formfield-positioner">
@@ -41,7 +41,7 @@
                         <v-row v-if="error" style="padding: 12px">
                             <v-alert v-if="error" type="error">Error: {{ errorMsg }}</v-alert>
                         </v-row>
-                        <UIDynamicFormFooterAction v-if="props.actions_inside_cardv && actions.length > 0" :actions="actions" :actionCallback="actionFn" style="padding: 16px" />
+                        <UIDynamicFormFooterAction v-if="props.actions_inside_card && actions.length > 0" :actions="actions" :actionCallback="actionFn" style="padding: 16px; padding-top: 0px;" />
                     </v-row>
                 </v-form>
             </p>
