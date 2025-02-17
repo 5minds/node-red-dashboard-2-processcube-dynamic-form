@@ -161,4 +161,38 @@ code {
 .input-dark {
     background-color: rgba(85, 85, 85, 255);
     color: white !important;
+  }
+
+.input-light, .input-default, .input-dark {
+  border-radius: 0px 0px 0px 8px;
+  font-size: 18px;
+  font-weight: 400;
+  font-style: normal;
+  padding: 4px 8px;
+}
+
+.input-light:focus, .input-dark:focus, .input-default:focus {
+  background-color: #F6F5FA;
+  border-radius: 0 8px 0px 5px;
+}
+
+.ui-dynamic-form-input-outlines {
+  box-shadow: none !important;
+  border-radius: 0px 0px 0px 8px;
+  border-bottom: 2px solid rgb(var(--v-theme-primary));
+  border-left: 2px solid rgb(var(--v-theme-primary));
+  padding-bottom: 2px;
+}
+
+.ui-dynamic-form-input-outlines:focus-within {
+  transition: padding-bottom 0.1s ease-in-out, border-width 0.1s ease-in-out;
+  border-width: 4px;
+  padding-bottom: 0px;
+}
+
+.ui-dynamic-form-input-label {
+  font-size: 18px;
+  font-weight: 400;
+  font-style: normal;
+  padding-bottom: 16px;
 }

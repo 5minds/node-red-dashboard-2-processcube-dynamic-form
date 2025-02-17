@@ -212,8 +212,9 @@ export default {
                         number: 'integer',
                         help: hint,
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined
                     }
                 }
@@ -230,8 +231,9 @@ export default {
                         step,
                         help: hint,
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined
                     }
                 }
@@ -246,8 +248,9 @@ export default {
                         value: field.defaultValue,
                         help: hint,
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined
                     }
                 }
@@ -266,8 +269,9 @@ export default {
                         options: enums,
                         help: hint,
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined,
                         disabled: this.props.readonly ? 'true' : undefined
                     }
@@ -288,8 +292,9 @@ export default {
                         placeholder,
                         help: hint,
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined,
                         disabled: this.props.readonly ? 'true' : undefined
                     }
@@ -306,8 +311,9 @@ export default {
                         help: hint,
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined
                     }
                 }
@@ -321,8 +327,9 @@ export default {
                         required: field.required,
                         value: field.defaultValue,
                         help: hint,
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined,
                         disabled: this.props.readonly ? 'true' : undefined
                     }
@@ -339,8 +346,9 @@ export default {
                         help: hint,
                         innerClass: 'reset-background',
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        // innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        // innerClass: ui-dynamic-form-input-outlines `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined,
                         disabled: this.props.readonly ? 'true' : undefined
                     }
@@ -360,8 +368,9 @@ export default {
                         options,
                         help: hint,
                         fieldsetClass: 'custom-fieldset',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined,
                         disabled: this.props.readonly ? 'true' : undefined
                     }
@@ -391,8 +400,9 @@ export default {
                         value: field.defaultValue,
                         help: hint,
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined
                     }
                 }
@@ -410,8 +420,9 @@ export default {
                         validationVisibility: 'live',
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined
                     }
                 }
@@ -446,8 +457,9 @@ export default {
                         value: field.defaultValue,
                         help: hint,
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined
                     }
                 }
@@ -468,8 +480,9 @@ export default {
                         help: hint,
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined
                     }
                 }
@@ -488,8 +501,9 @@ export default {
                         options: radioOptions,
                         help: hint,
                         fieldsetClass: 'custom-fieldset',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined,
                         disabled: this.props.readonly ? 'true' : undefined
                     }
@@ -509,8 +523,9 @@ export default {
                         step: customForm.step,
                         thumbLabel: true,
                         // wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         // inputClass: `input-${this.theme}`,
-                        // innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        // innerClass: ui-dynamic-form-input-outlines `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined,
                         disabled: this.props.readonly ? 'true' : undefined
                     }
@@ -527,8 +542,9 @@ export default {
                         help: hint,
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined
                     }
                 }
@@ -546,8 +562,9 @@ export default {
                         help: hint,
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined
                     }
                 }
@@ -563,8 +580,9 @@ export default {
                         help: hint,
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined
                     }
                 }
@@ -582,8 +600,9 @@ export default {
                         validation: 'url',
                         validationVisibility: 'live',
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined
                     }
                 }
@@ -599,8 +618,9 @@ export default {
                         help: hint,
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined
                     }
                 }
@@ -614,8 +634,9 @@ export default {
                         required: field.required,
                         value: field.defaultValue,
                         help: hint,
+                        labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
-                        innerClass: `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                        innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: this.props.readonly ? 'true' : undefined
                     }
                 }
