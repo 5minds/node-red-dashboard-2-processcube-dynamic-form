@@ -209,8 +209,14 @@ export default {
     },
     methods: {
         createComponent (field) {
-            const hint = field.customForm ? JSON.parse(field.customForm).hint : undefined
-            const placeholder = field.customForm ? JSON.parse(field.customForm).placeholder : undefined
+            const customForm = field.customForm ? JSON.parse(field.customForm) : {}
+            const hint = customForm.hint
+            const placeholder = customForm.placeholder
+            const customProperties = customForm.customProperties ?? []
+            const isReadOnly = (
+                this.props.readonly || customProperties.find(entry => ['readOnly', 'readonly'].includes(entry.name) && entry.value === 'true'))
+                ? 'true'
+                : undefined
             switch (field.type) {
             case 'long':
                 return {
@@ -227,7 +233,7 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly
                     }
                 }
             case 'number':
@@ -246,7 +252,7 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly
                     }
                 }
             case 'date':
@@ -263,7 +269,7 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly
                     }
                 }
             case 'enum':
@@ -284,8 +290,8 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined,
-                        disabled: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly,
+                        disabled: isReadOnly
                     }
                 }
             case 'select':
@@ -307,8 +313,8 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined,
-                        disabled: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly,
+                        disabled: isReadOnly
                     }
                 }
             case 'string':
@@ -326,7 +332,7 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly
                     }
                 }
             case 'boolean':
@@ -342,8 +348,8 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined,
-                        disabled: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly,
+                        disabled: isReadOnly
                     }
                 }
             case 'file':
@@ -361,8 +367,8 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         // innerClass: ui-dynamic-form-input-outlines `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined,
-                        disabled: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly,
+                        disabled: isReadOnly
                     }
                 }
             case 'checkbox':
@@ -383,8 +389,8 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined,
-                        disabled: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly,
+                        disabled: isReadOnly
                     }
                 }
             case 'color':
@@ -397,8 +403,8 @@ export default {
                         required: field.required,
                         value: field.defaultValue,
                         help: hint,
-                        readonly: this.props.readonly ? 'true' : undefined,
-                        disabled: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly,
+                        disabled: isReadOnly
                     }
                 }
             case 'datetime-local':
@@ -415,7 +421,7 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly
                     }
                 }
             case 'email':
@@ -435,7 +441,7 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly
                     }
                 }
             case 'header':
@@ -472,7 +478,7 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly
                     }
                 }
             case 'paragraph':
@@ -495,7 +501,7 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly
                     }
                 }
             case 'radio':
@@ -516,8 +522,8 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined,
-                        disabled: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly,
+                        disabled: isReadOnly
                     }
                 }
             case 'range':
@@ -538,8 +544,8 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         // inputClass: `input-${this.theme}`,
                         // innerClass: ui-dynamic-form-input-outlines `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined,
-                        disabled: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly,
+                        disabled: isReadOnly
                     }
                 }
             case 'tel':
@@ -557,7 +563,7 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly
                     }
                 }
             case 'textarea':
@@ -577,7 +583,7 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly
                     }
                 }
             case 'time':
@@ -595,7 +601,7 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly
                     }
                 }
             case 'url':
@@ -615,7 +621,7 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly
                     }
                 }
             case 'week':
@@ -633,7 +639,7 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly
                     }
                 }
             default:
@@ -649,7 +655,7 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: this.props.readonly ? 'true' : undefined
+                        readonly: isReadOnly
                     }
                 }
             }
