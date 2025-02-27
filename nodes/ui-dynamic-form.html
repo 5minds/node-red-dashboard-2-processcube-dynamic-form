@@ -324,32 +324,92 @@
 
 
 <script type="text/markdown" data-help-name="ui-dynamic-form">
-A UI-Node to display usertasks forms from the ProcessCube Engine dynamicly.
+A UI-Node to display Forms for UserTasks from the ProcessCube Engine.
 
 ## Usage
 
-Connect the UI-Node to the usertask input node. Every action in the configuration of the node will display as a button at the bottom of the form.
+Connect the UI-Node to the `usertask-input` or `wait-for-usertask` node. It will use the UserTasks FormFields configuration to display a dynamically generated Form inside a Card.
+After configuring an action, connect it's output to an `usertask-output` node.
 
-## Validation
+## Action Configuration
 
-### message
+Actions are buttons displayed at the bottom of the Form.
+
+### Actions
+
+A Form can have any amount of actions. Each action is specified with a:
+
+- **Label**: The buttons text.
+- **Condition (optional)**: An expression that evaluates to true or false. It controls whether the action is enabled or not.
+- **Error message (optional)**: Will be displayed, when Condition evaluates to false.
+- **Alignment**: Controls the buttons position. It can be placed on the left or right side of the form.
+- **Action type**: Controls the styling of the button. There should always be one primary action.
+
+For each action configured, the node will gain a new output, that is named as the linked action.
+
+#### Condition
+
+Various values can be accessed inside the condition through following constants:
 
 Access to the message object is available through _msg_
-
-### form fields
 
 Access to the form fields is available through the _fields_ object. A single form field can be accessed by selecting the field id as a key.
 Example: _fields.field_01_
 
-### usertask
-
 Access to the usertask object is available through _usertask_
 
-## Outputs
+### Inside of card
 
-: usertask (Object) : The representative object of the usertask.
+This property controls the positioning of the action buttons. They can be palced inside of the card, right below the FormFields, or below the whole Card containing the Form.
 
-### References
+## Title Configuration
+
+### Title
+
+The text displayed above the FormFields in the Cards header. When left empty, there will be no header in the Card.
+
+### Style
+
+Controls the headers styling. `Default` is the recommended 5Minds theming. `Minimal` might be used to apply custom stylings and `Outside of card` places the title right above the card.
+
+### Custom text styling
+
+Enter custom css rules to modifiy how the title text is displayed. This can be used particulary well together with the style `Minimal`.
+
+### Title icon
+
+An URL for an image, that should be displayed before the text. This will be used as the `src`-Property of a HTML `img`-Element. Therefore DataURLs can be used to add images/svgs etc., that are not available online.
+
+## Appearance
+
+### Card size styling
+
+Enter custom css rules to control the size and placement of the whole card. It can be used to set a `max-width` for the Card, apply a `margin` etc.
+
+### Columns in form
+
+This value controls the amount of columns the card will have. It can be used to place multiple FormFields in one row.
+Configure `hidden` FormFields in your UserTask configuration to leave spaces open between FormFields. FormFields with type `heading` will always take up a whole line regardless of the `Columns in Form` value.
+
+## Other
+
+### Readonly
+
+When checked, all fields in the Form will not be editable. To mark single FormFields as readOnly, add the custom property `readOnly` with the value `true` to the FormField configuration of the UserTask.
+
+### Trigger on change
+
+Adds a new output to the node. This output will be triggered each time a FormFields value changes. This can be used for live, server-side validation or for Forms without action buttons.
+
+### Title for waiting text
+
+While no UserTask is present, this text will be displayed.
+
+### Text for waiting text
+
+While no UserTask is present, this text will be displayed.
+
+## References
 
 -   [The ProcessCube Developer Network](https://processcube.io) - All documentation for the ProcessCube&copy; Plattform
 -   [Node-RED Integration in ProcessCube&copy;](https://processcube.io/docs/node-red) - Node-RED Integration in ProcessCube&copy;
