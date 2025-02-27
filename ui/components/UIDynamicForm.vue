@@ -7,35 +7,37 @@
                 <v-form ref="form" v-model="form" :class="dynamicClass">
                     <UIDynamicFormTitleText v-if="props.title_style != 'outside'" :style="props.title_style" :title="props.title_text" :customStyles="props.title_custom_text_styling" :titleIcon="props.title_icon" />
                     <div className="ui-dynamic-form-formfield-positioner">
-                        <v-row v-for="(field, index) in fields()" :key="field" :style="getRowWidthStyling(field, index)">
-                            <v-col cols="12">
-                                <component
-                                    :is="createComponent(field).type"
-                                    v-if="createComponent(field).innerText"
-                                    v-bind="createComponent(field).props"
-                                    v-model="formData[field.id]"
-                                >
-                                    {{ createComponent(field).innerText }}
-                                </component>
-                                <div v-else-if="createComponent(field).type == 'v-slider'">
-                                    <p class="formkit-label">{{ field.label }}</p>
+                        <FormKit id="form" type="group">
+                            <v-row v-for="(field, index) in fields()" :key="field" :style="getRowWidthStyling(field, index)">
+                                <v-col cols="12">
                                     <component
                                         :is="createComponent(field).type"
+                                        v-if="createComponent(field).innerText"
                                         v-bind="createComponent(field).props"
-                                        v-model="field.defaultValue"
+                                        v-model="formData[field.id]"
+                                    >
+                                        {{ createComponent(field).innerText }}
+                                    </component>
+                                    <div v-else-if="createComponent(field).type == 'v-slider'">
+                                        <p class="formkit-label">{{ field.label }}</p>
+                                        <component
+                                            :is="createComponent(field).type"
+                                            v-bind="createComponent(field).props"
+                                            v-model="field.defaultValue"
+                                        />
+                                        <p class="formkit-help">
+                                            {{ field.customForm ? JSON.parse(field.customForm).hint : undefined }}
+                                        </p>
+                                    </div>
+                                    <component
+                                        :is="createComponent(field).type"
+                                        v-else
+                                        v-bind="createComponent(field).props"
+                                        v-model="formData[field.id]"
                                     />
-                                    <p class="formkit-help">
-                                        {{ field.customForm ? JSON.parse(field.customForm).hint : undefined }}
-                                    </p>
-                                </div>
-                                <component
-                                    :is="createComponent(field).type"
-                                    v-else
-                                    v-bind="createComponent(field).props"
-                                    v-model="formData[field.id]"
-                                />
-                            </v-col>
-                        </v-row>
+                                </v-col>
+                            </v-row>
+                        </FormKit>
                     </div>
                     <v-row :class="dynamicFooterClass">
                         <v-row v-if="error" style="padding: 12px">
@@ -73,7 +75,7 @@ export default {
     },
     inject: ['$socket'],
     props: {
-        /* do not remove entries from this - Dashboard's Layout Manager's will pass this data to your component */
+    /* do not remove entries from this - Dashboard's Layout Manager's will pass this data to your component */
         id: { type: String, required: true },
         props: { type: Object, default: () => ({}) },
         state: {
@@ -212,6 +214,8 @@ export default {
             const customForm = field.customForm ? JSON.parse(field.customForm) : {}
             const hint = customForm.hint
             const placeholder = customForm.placeholder
+            const validation = customForm.validation
+            const name = field.id
             const customProperties = customForm.customProperties ?? []
             const isReadOnly = (
                 this.props.readonly || customProperties.find(entry => ['readOnly', 'readonly'].includes(entry.name) && entry.value === 'true'))
@@ -224,6 +228,7 @@ export default {
                     props: {
                         type: 'number',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -233,7 +238,9 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: isReadOnly
+                        readonly: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'number':
@@ -243,6 +250,7 @@ export default {
                     props: {
                         type: 'number',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -252,7 +260,9 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: isReadOnly
+                        readonly: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'date':
@@ -261,6 +271,7 @@ export default {
                     props: {
                         type: 'date',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -269,7 +280,9 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: isReadOnly
+                        readonly: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'enum':
@@ -281,6 +294,7 @@ export default {
                     props: {
                         type: 'select', // JSON.parse(field.customForm).displayAs
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -291,7 +305,9 @@ export default {
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: isReadOnly,
-                        disabled: isReadOnly
+                        disabled: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'select':
@@ -303,6 +319,7 @@ export default {
                     props: {
                         type: 'select', // JSON.parse(field.customForm).displayAs
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -314,7 +331,9 @@ export default {
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: isReadOnly,
-                        disabled: isReadOnly
+                        disabled: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'string':
@@ -323,6 +342,7 @@ export default {
                     props: {
                         type: 'text',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -332,7 +352,9 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: isReadOnly
+                        readonly: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'boolean':
@@ -341,6 +363,7 @@ export default {
                     props: {
                         type: 'checkbox',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -349,7 +372,9 @@ export default {
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: isReadOnly,
-                        disabled: isReadOnly
+                        disabled: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'file':
@@ -358,6 +383,7 @@ export default {
                     props: {
                         type: 'file',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -368,7 +394,9 @@ export default {
                         inputClass: `input-${this.theme}`,
                         // innerClass: ui-dynamic-form-input-outlines `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: isReadOnly,
-                        disabled: isReadOnly
+                        disabled: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'checkbox':
@@ -380,6 +408,7 @@ export default {
                     props: {
                         type: 'checkbox',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -390,7 +419,9 @@ export default {
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: isReadOnly,
-                        disabled: isReadOnly
+                        disabled: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'color':
@@ -399,12 +430,15 @@ export default {
                     props: {
                         type: 'color',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
                         help: hint,
                         readonly: isReadOnly,
-                        disabled: isReadOnly
+                        disabled: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'datetime-local':
@@ -413,6 +447,7 @@ export default {
                     props: {
                         type: 'datetime-local',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -421,7 +456,9 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: isReadOnly
+                        readonly: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'email':
@@ -430,18 +467,19 @@ export default {
                     props: {
                         type: 'email',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
                         help: hint,
-                        validation: 'email',
-                        validationVisibility: 'live',
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: isReadOnly
+                        readonly: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'header':
@@ -470,6 +508,7 @@ export default {
                     props: {
                         type: 'month',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -478,7 +517,9 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: isReadOnly
+                        readonly: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'paragraph':
@@ -492,6 +533,7 @@ export default {
                     props: {
                         type: 'password',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -501,7 +543,9 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: isReadOnly
+                        readonly: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'radio':
@@ -513,6 +557,7 @@ export default {
                     props: {
                         type: 'radio',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -523,7 +568,9 @@ export default {
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: isReadOnly,
-                        disabled: isReadOnly
+                        disabled: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'range':
@@ -532,6 +579,7 @@ export default {
                     type: 'v-slider',
                     props: {
                         id: field.id,
+                        name,
                         // label: field.label,
                         required: field.required,
                         // value: field.defaultValue,
@@ -545,7 +593,9 @@ export default {
                         // inputClass: `input-${this.theme}`,
                         // innerClass: ui-dynamic-form-input-outlines `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: isReadOnly,
-                        disabled: isReadOnly
+                        disabled: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'tel':
@@ -554,6 +604,7 @@ export default {
                     props: {
                         type: 'tel' /* with pro component mask more good */,
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -563,7 +614,9 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: isReadOnly
+                        readonly: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'textarea':
@@ -573,6 +626,7 @@ export default {
                     props: {
                         type: 'textarea' /* with pro component mask more good */,
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -583,7 +637,9 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: isReadOnly
+                        readonly: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'time':
@@ -592,6 +648,7 @@ export default {
                     props: {
                         type: 'time' /* with pro component mask more good */,
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -601,7 +658,9 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: isReadOnly
+                        readonly: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'url':
@@ -610,18 +669,19 @@ export default {
                     props: {
                         type: 'url',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
                         help: hint,
                         placeholder,
-                        validation: 'url',
-                        validationVisibility: 'live',
                         wrapperClass: '$remove:formkit-wrapper',
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: isReadOnly
+                        readonly: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             case 'week':
@@ -630,6 +690,7 @@ export default {
                     props: {
                         type: 'week',
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -639,7 +700,9 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: isReadOnly
+                        readonly: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             default:
@@ -648,6 +711,7 @@ export default {
                     props: {
                         type: field.type,
                         id: field.id,
+                        name,
                         label: field.label,
                         required: field.required,
                         value: field.defaultValue,
@@ -655,7 +719,9 @@ export default {
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
                         innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
-                        readonly: isReadOnly
+                        readonly: isReadOnly,
+                        validation,
+                        validationVisibility: 'live'
                     }
                 }
             }
@@ -712,6 +778,23 @@ export default {
         },
         actionFn (action) {
             // this.checkFormState();
+
+            if (action.label === 'Speichern' || action.label === 'Speichern und nächster') {
+                const formkitInputs = this.$refs.form.$el.querySelectorAll('.formkit-outer')
+                let allComplete = true
+
+                formkitInputs.forEach((input) => {
+                    const dataComplete = input.getAttribute('data-complete')
+                    const dataInvalid = input.getAttribute('data-invalid')
+
+                    if (dataComplete == null && dataInvalid === 'true') {
+                        allComplete = false
+                    }
+                })
+
+                if (!allComplete) return
+            }
+
             if (this.checkCondition(action.condition)) {
                 this.showError(false, '')
                 // TODO: MM - begin
