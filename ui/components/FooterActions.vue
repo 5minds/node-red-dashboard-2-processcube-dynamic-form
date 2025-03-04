@@ -7,6 +7,7 @@
                     :key="index"
                     style="min-height: 36px"
                     :class="getActionButtonClass(action)"
+                    :disabled="formIsFinished"
                     @click="actionCallback(action)"
                 >
                     {{ action.label }}
@@ -20,6 +21,7 @@
                     :key="index"
                     style="min-height: 36px"
                     :class="getActionButtonClass(action)"
+                    :disabled="formIsFinished"
                     @click="actionCallback(action)"
                 >
                     {{ action.label }}
@@ -35,7 +37,8 @@ export default {
     name: 'UIDynamicFormFooterAction',
     props: {
         actions: { type: Array, default () { return [] } },
-        actionCallback: { type: Function, default (action) {} }
+        actionCallback: { type: Function, default (action) {} },
+        formIsFinished: { type: Boolean, default () { return false } }
     },
     methods: {
         getActionButtonClass (action) {

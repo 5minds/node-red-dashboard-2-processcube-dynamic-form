@@ -1,9 +1,9 @@
 <template>
     <div className="ui-dynamic-form-external-sizing-wrapper" :style="props.card_size_styling">
         <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
-        <UIDynamicFormTitleText v-if="props.title_style === 'outside' && hasUserTask()" :style="props.title_style" :title="props.title_text" :customStyles="props.title_custom_text_styling" :titleIcon="props.title_icon" />
+        <UIDynamicFormTitleText v-if="props.title_style === 'outside' && hasUserTask" :style="props.title_style" :title="props.title_text" :customStyles="props.title_custom_text_styling" :titleIcon="props.title_icon" />
         <div className="ui-dynamic-form-wrapper">
-            <p v-if="hasUserTask()" style="margin-bottom: 0px;">
+            <p v-if="hasUserTask" style="margin-bottom: 0px;">
                 <v-form ref="form" v-model="form" :class="dynamicClass">
                     <UIDynamicFormTitleText v-if="props.title_style != 'outside'" :style="props.title_style" :title="props.title_text" :customStyles="props.title_custom_text_styling" :titleIcon="props.title_icon" />
                     <div className="ui-dynamic-form-formfield-positioner">
@@ -40,18 +40,18 @@
                         </FormKit>
                     </div>
                     <v-row :class="dynamicFooterClass">
-                        <v-row v-if="error" style="padding: 12px">
-                            <v-alert v-if="error" type="error">Error: {{ errorMsg }}</v-alert>
+                        <v-row v-if="errorMsg.length > 0" style="padding: 12px">
+                            <v-alert type="error">Error: {{ errorMsg }}</v-alert>
                         </v-row>
-                        <UIDynamicFormFooterAction v-if="props.actions_inside_card && actions.length > 0" :actions="actions" :actionCallback="actionFn" style="padding: 16px; padding-top: 0px;" />
+                        <UIDynamicFormFooterAction v-if="props.actions_inside_card && actions.length > 0" :actions="actions" :actionCallback="actionFn" :formIsFinished="formIsFinished" style="padding: 16px; padding-top: 0px;" />
                     </v-row>
                 </v-form>
             </p>
             <p v-else>
-                <v-alert :text="waiting_info" :title="waiting_title" />
+                <v-alert v-if="props.waiting_info.length > 0 || props.waiting_title.length > 0" :text="props.waiting_info" :title="props.waiting_title" />
             </p>
         </div>
-        <div v-if="!props.actions_inside_card && actions.length > 0 && hasUserTask()" style="padding-top: 32px;">
+        <div v-if="!props.actions_inside_card && actions.length > 0 && hasUserTask" style="padding-top: 32px;">
             <UIDynamicFormFooterAction :actions="actions" :actionCallback="actionFn" />
         </div>
     </div>
@@ -61,7 +61,6 @@
 <script>
 import { FormKit, defaultConfig, plugin } from '@formkit/vue'
 import { getCurrentInstance, markRaw } from 'vue'
-import { mapState } from 'vuex'
 
 // eslint-disable-next-line import/no-unresolved
 import '@formkit/themes/genesis'
@@ -96,39 +95,30 @@ export default {
     data () {
         return {
             actions: [],
-            form: {},
             formData: {},
-            taskInput: {},
+            userTask: null,
             theme: '',
-            error: false,
-            errorMsg: ''
+            errorMsg: '',
+            formIsFinished: false,
+            msg: null
         }
     },
     computed: {
-        ...mapState('data', ['messages']),
-        waiting_title () {
-            return this.props.waiting_title || 'Warten auf den Usertask...'
-        },
-        waiting_info () {
-            return (
-                this.props.waiting_info ||
-                'Der Usertask wird automatisch angezeigt, wenn ein entsprechender Task vorhanden ist.'
-            )
-        },
-
         dynamicClass () {
             return `ui-dynamic-form-${this.theme} ui-dynamic-form-common`
         },
-
         dynamicFooterClass () {
             return `ui-dynamic-form-footer-${this.theme} ui-dynamic-form-footer-common`
+        },
+        hasUserTask () {
+            return !!this.userTask
         }
     },
     watch: {
         formData: {
             handler (newData, oldData) {
                 if (this.props.trigger_on_change) {
-                    const res = { payload: { formData: newData, userTask: this.taskInput } }
+                    const res = { payload: { formData: newData, userTask: this.userTask } }
                     this.send(res, this.actions.length)
                 }
             },
@@ -163,43 +153,11 @@ export default {
         })
 
         this.$socket.on('widget-load:' + this.id, (msg) => {
-            this.init()
-            this.$store.commit('data/bind', {
-                widgetId: this.id,
-                msg
-            })
+            this.init(msg)
         })
         this.$socket.on('msg-input:' + this.id, (msg) => {
             // store the latest message in our client-side vuex store when we receive a new message
-            this.init()
-
-            this.messages[this.id] = msg
-
-            const hasTask = msg.payload && msg.payload.userTask
-            const formFields = msg.payload.userTask.userTaskConfig.formFields
-            const formFieldIds = formFields.map(ff => ff.id)
-            const initialValues = msg.payload.userTask.startToken
-
-            if (hasTask) {
-                this.taskInput = msg.payload.userTask
-            }
-
-            if (hasTask && formFields) {
-                formFields.forEach((field) => {
-                    this.formData[field.id] = field.defaultValue
-                })
-            }
-
-            if (hasTask && initialValues) {
-                Object.keys(initialValues).filter(key => formFieldIds.includes(key)).forEach((key) => {
-                    this.formData[key] = initialValues[key]
-                })
-            }
-
-            this.$store.commit('data/bind', {
-                widgetId: this.id,
-                msg
-            })
+            this.init(msg)
         })
         // tell Node-RED that we're loading a new instance of this widget
         this.$socket.emit('widget-load', this.id)
@@ -218,7 +176,7 @@ export default {
             const name = field.id
             const customProperties = customForm.customProperties ?? []
             const isReadOnly = (
-                this.props.readonly || customProperties.find(entry => ['readOnly', 'readonly'].includes(entry.name) && entry.value === 'true'))
+                this.props.readonly || this.formIsFinished || customProperties.find(entry => ['readOnly', 'readonly'].includes(entry.name) && entry.value === 'true'))
                 ? 'true'
                 : undefined
             switch (field.type) {
@@ -231,7 +189,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         number: 'integer',
                         help: hint,
                         wrapperClass: '$remove:formkit-wrapper',
@@ -253,7 +211,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         step,
                         help: hint,
                         wrapperClass: '$remove:formkit-wrapper',
@@ -274,7 +232,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         help: hint,
                         wrapperClass: '$remove:formkit-wrapper',
                         labelClass: 'ui-dynamic-form-input-label',
@@ -297,7 +255,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         options: enums,
                         help: hint,
                         wrapperClass: '$remove:formkit-wrapper',
@@ -322,7 +280,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         options: selections,
                         placeholder,
                         help: hint,
@@ -345,7 +303,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         help: hint,
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
@@ -366,7 +324,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         help: hint,
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
@@ -386,7 +344,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         help: hint,
                         innerClass: 'reset-background',
                         wrapperClass: '$remove:formkit-wrapper',
@@ -411,7 +369,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         options,
                         help: hint,
                         fieldsetClass: 'custom-fieldset',
@@ -433,7 +391,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         help: hint,
                         readonly: isReadOnly,
                         disabled: isReadOnly,
@@ -450,7 +408,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         help: hint,
                         wrapperClass: '$remove:formkit-wrapper',
                         labelClass: 'ui-dynamic-form-input-label',
@@ -470,7 +428,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         help: hint,
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
@@ -492,14 +450,14 @@ export default {
                 }
                 return {
                     type: typeToUse,
-                    innerText: field.defaultValue
+                    innerText: this.formData[field.id]
                 }
             case 'hidden':
                 return {
                     type: 'input',
                     props: {
                         type: 'hidden',
-                        value: field.defaultValue
+                        value: this.formData[field.id]
                     }
                 }
             case 'month':
@@ -511,7 +469,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         help: hint,
                         wrapperClass: '$remove:formkit-wrapper',
                         labelClass: 'ui-dynamic-form-input-label',
@@ -525,7 +483,7 @@ export default {
             case 'paragraph':
                 return {
                     type: 'p',
-                    innerText: field.defaultValue
+                    innerText: this.formData[field.id]
                 }
             case 'password':
                 return {
@@ -536,7 +494,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         help: hint,
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
@@ -560,7 +518,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         options: radioOptions,
                         help: hint,
                         fieldsetClass: 'custom-fieldset',
@@ -582,7 +540,7 @@ export default {
                         name,
                         // label: field.label,
                         required: field.required,
-                        // value: field.defaultValue,
+                        // value: this.formData[field.id],
                         // help: hint,
                         min: customForm.min,
                         max: customForm.max,
@@ -607,7 +565,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         help: hint,
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
@@ -629,7 +587,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         rows,
                         help: hint,
                         placeholder,
@@ -651,7 +609,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         help: hint,
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
@@ -672,7 +630,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         help: hint,
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
@@ -693,7 +651,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         help: hint,
                         placeholder,
                         wrapperClass: '$remove:formkit-wrapper',
@@ -714,7 +672,7 @@ export default {
                         name,
                         label: field.label,
                         required: field.required,
-                        value: field.defaultValue,
+                        value: this.formData[field.id],
                         help: hint,
                         labelClass: 'ui-dynamic-form-input-label',
                         inputClass: `input-${this.theme}`,
@@ -725,23 +683,6 @@ export default {
                     }
                 }
             }
-        },
-        checkFormState (state) {
-            // const field = this.$formkit.get('field_01');
-            // console.info(field.context.state.valid);
-
-            return true
-
-            // loop over fields then this.$formkit.get(this.id) -> check error state if all ok return true else return false
-            // ?? wie unterscheiden wir welche actions dieser validierungsfehler betrifft ??
-            // ?? wie machen wir formkit validierung auch im Studio available ??
-            // \_ vllt macht es sinn das schema von formkit zu übernehmen oder alternativ nur unsere validierung zu nutzen.
-        },
-        hasUserTask () {
-            return this.messages && this.messages[this.id] && this.messages[this.id].payload?.userTask
-        },
-        userTask () {
-            return this.hasUserTask() ? this.messages[this.id].payload.userTask : {}
         },
         getRowWidthStyling (field, index) {
             let style = ''
@@ -756,7 +697,7 @@ export default {
             return style
         },
         fields () {
-            const aFields = this.userTask()?.userTaskConfig?.formFields ?? []
+            const aFields = this.userTask.userTaskConfig?.formFields ?? []
             const fieldMap = aFields.map((field) => ({
                 ...field,
                 items: mapItems(field.type, field)
@@ -773,12 +714,48 @@ export default {
             msgArr[index] = msg
             this.$socket.emit('widget-action', this.id, msgArr)
         },
-        init () {
+        init (msg) {
+            if (!msg) {
+                return
+            }
+
             this.actions = this.props.options
+
+            const hasTask = msg.payload && msg.payload.userTask
+
+            if (hasTask) {
+                this.userTask = msg.payload.userTask
+            } else {
+                this.userTask = null
+                this.formData = {}
+                return
+            }
+
+            const formFields = this.userTask.userTaskConfig.formFields
+            const formFieldIds = formFields.map(ff => ff.id)
+            const initialValues = this.userTask.startToken
+            const finishedFormData = msg.payload.formData
+            this.formIsFinished = !!msg.payload.formData
+
+            if (formFields) {
+                formFields.forEach((field) => {
+                    this.formData[field.id] = field.defaultValue
+                })
+            }
+
+            if (initialValues) {
+                Object.keys(initialValues).filter(key => formFieldIds.includes(key)).forEach((key) => {
+                    this.formData[key] = initialValues[key]
+                })
+            }
+
+            if (this.formIsFinished) {
+                Object.keys(finishedFormData).filter(key => formFieldIds.includes(key)).forEach(key => {
+                    this.formData[key] = finishedFormData[key]
+                })
+            }
         },
         actionFn (action) {
-            // this.checkFormState();
-
             if (action.label === 'Speichern' || action.label === 'Speichern und nächster') {
                 const formkitInputs = this.$refs.form.$el.querySelectorAll('.formkit-outer')
                 let allComplete = true
@@ -796,21 +773,21 @@ export default {
             }
 
             if (this.checkCondition(action.condition)) {
-                this.showError(false, '')
+                this.showError('')
                 // TODO: MM - begin
                 // this.send(
-                //    { payload: { formData: this.formData, userTask: this.userTask() } },
+                //    { payload: { formData: this.formData, userTask: this.userTask } },
                 //    this.actions.findIndex((element) => element.label === action.label)
                 // );
-                const msg = this.messages[this.id] || {}
-                msg.payload = { formData: this.formData, userTask: this.userTask() }
+                const msg = this.msg ?? {}
+                msg.payload = { formData: this.formData, userTask: this.userTask }
                 this.send(
                     msg,
                     this.actions.findIndex((element) => element.label === action.label)
                 )
                 // TODO: mm - end
             } else {
-                this.showError(true, action.errorMessage)
+                this.showError(action.errorMessage)
             }
         },
         checkCondition (condition) {
@@ -818,15 +795,14 @@ export default {
             try {
                 // eslint-disable-next-line no-new-func
                 const func = Function('fields', 'userTask', 'msg', '"use strict"; return (' + condition + ')')
-                const result = func(this.formData, this.taskInput, this.messages[this.id])
+                const result = func(this.formData, this.userTask, this.msg)
                 return Boolean(result)
             } catch (err) {
                 console.error('Error while evaluating condition: ' + err)
                 return false
             }
         },
-        showError (bool, errMsg) {
-            this.error = bool
+        showError (errMsg) {
             this.errorMsg = errMsg
         }
     }
