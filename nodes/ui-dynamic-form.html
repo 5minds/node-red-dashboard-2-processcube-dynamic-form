@@ -27,8 +27,14 @@
             readonly: {
               value: false,
             },
+            collapsible: {
+              value: false,
+            },
+            collapse_when_finished: {
+              value: false,
+            },
             actions_inside_card: {
-                value: true,
+                 value: true,
             },
             card_size_styling: {
               value: "",
@@ -300,36 +306,51 @@
       <label for="node-input-form_columns"><i class="fa fa-hand"></i>Columns in form</label>
       <input type="number" min="1" id="node-input-form_columns" title="Control the amount of columns, that your form fields should be placed in.">
     </div>
-
-    <hr />
-
-    <h4>Other</h4>
     <div class="form-row">
       <label for="node-input-readonly"><i class="fa fa-hand"></i>Readonly</label>
       <input type="checkbox" id="node-input-readonly" title="Makes all form fields read only.">
     </div>
     <div class="form-row">
-      <label for="node-input-trigger_on_change"><i class="fa fa-hand"></i>Trigger on change</label>
-      <input type="checkbox" id="node-input-trigger_on_change" title="A new output will be added. Each time a value inside the form changes, this output will be triggered.">
+      <label for="node-input-collapsible"><i class="fa fa-hand"></i>Collapsible</label>
+      <input type="checkbox" id="node-input-collapsible" title="When checked, the card can be folded at any time.">
+    </div>
+    <div class="form-row">
+      <label for="node-input-collapse_when_finished"><i class="fa fa-hand"></i>Collapsible when finished</label>
+      <input type="checkbox" id="node-input-collapse_when_finished" title="When checked, the card will automatically collapse after finishing the form.">
     </div>
     <div class="form-row">
       <label for="node-input-waiting_title"><i class="fa fa-hand"></i>Title for waiting text</label>
-      <input type="text" id="node-input-waiting_title">
-  </div>
-  <div class="form-row">
-      <label for="node-input-waiting_info"><i class="fa fa-hand"></i>Text for waiting text</label>
-      <input type="text" id="node-input-waiting_info">
-  </div>
+      <input type="text" id="node-input-waiting_title" title="Displayed while no UserTask is present.">
+    </div>
+    <div class="form-row">
+        <label for="node-input-waiting_info"><i class="fa fa-hand"></i>Text for waiting text</label>
+        <input type="text" id="node-input-waiting_info" title="Displayed while no UserTask is present.">
+    </div>
+    <hr />
+    <h4>Other</h4>
+    <div class="form-row">
+      <label for="node-input-trigger_on_change"><i class="fa fa-hand"></i>Trigger on change</label>
+      <input type="checkbox" id="node-input-trigger_on_change" title="A new output will be added. Each time a value inside the form changes, this output will be triggered.">
+    </div>
 </script>
 
 
 <script type="text/markdown" data-help-name="ui-dynamic-form">
 A UI-Node to display Forms for UserTasks from the ProcessCube Engine.
 
+## States
+
+This component can have one of three states. `Waiting`, `active` and `finished`.
+- `Waiting` is the initial state. This node will either display the waiting text and waiting title, or nothing. This dependes on your configuration. This state can be set at any time by passing a message with an empty payload into this node.
+- `Active` will display a dynamic form for a UserTask. This state can be set by passing the result of the `usertask-input` or `wait-for-usertask` node into it.
+- `Finished` will display the last filled form in a disabled mode. This state can be set by passing the result of the `dynamic-form` node into itself.
+
 ## Usage
 
-Connect the UI-Node to the `usertask-input` or `wait-for-usertask` node. It will use the UserTasks FormFields configuration to display a dynamically generated Form inside a Card.
+Connect the input to the `usertask-input` or `wait-for-usertask` node. It will use the UserTasks FormFields configuration to display a dynamically generated Form inside a Card.
 After configuring an action, connect it's output to an `usertask-output` node.
+In case you want to display the `finished` state, place a `link in` and a `link out` node to pipe the `dynamic-form` nodes output into its input.
+In case you want to clear the node and set it back into `waiting` state, place a `function` node that clears the `payload` object. The pipe the `dynamic-form` nodes output into the `function` node and the `function` nodes output into th e`dynamic-form` nodes input.
 
 ## Action Configuration
 
@@ -391,15 +412,17 @@ Enter custom css rules to control the size and placement of the whole card. It c
 This value controls the amount of columns the card will have. It can be used to place multiple FormFields in one row.
 Configure `hidden` FormFields in your UserTask configuration to leave spaces open between FormFields. FormFields with type `heading` will always take up a whole line regardless of the `Columns in Form` value.
 
-## Other
-
 ### Readonly
 
 When checked, all fields in the Form will not be editable. To mark single FormFields as readOnly, add the custom property `readOnly` with the value `true` to the FormField configuration of the UserTask.
 
-### Trigger on change
+### Collapsible
 
-Adds a new output to the node. This output will be triggered each time a FormFields value changes. This can be used for live, server-side validation or for Forms without action buttons.
+When checked, the card will have a collapse icon and can be folded at any.
+
+### Collapsible when finished
+
+When checked, the card will gain a collapse icon and automatically fold, after the node entered `finished` state. This is independed to `Collapsible`.
 
 ### Title for waiting text
 
@@ -408,6 +431,12 @@ While no UserTask is present, this text will be displayed.
 ### Text for waiting text
 
 While no UserTask is present, this text will be displayed.
+
+## Other
+
+### Trigger on change
+
+Adds a new output to the node. This output will be triggered each time a FormFields value changes. This can be used for live, server-side validation or for Forms without action buttons.
 
 ## References
 

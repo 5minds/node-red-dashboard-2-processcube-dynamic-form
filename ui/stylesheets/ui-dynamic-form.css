@@ -145,6 +145,22 @@ code {
     max-height: 90%;
 }
 
+.cardCollapse-leave-active {
+  transition: max-height .5s ease, opacity .2s ease;
+  max-height: 100vh;
+}
+
+.cardCollapse-enter-active {
+  transition: max-height .2s ease, opacity .5s ease;
+  max-height: 100vh;
+}
+
+.cardCollapse-enter-from,
+.cardCollapse-leave-to {
+  max-height: 0px;
+  opacity: 0;
+}
+
 .ui-dynamic-form-formfield-positioner {
     padding: 32px;
     padding-top: 0px;

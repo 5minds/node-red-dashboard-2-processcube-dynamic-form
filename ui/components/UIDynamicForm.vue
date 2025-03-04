@@ -1,50 +1,72 @@
 <template>
     <div className="ui-dynamic-form-external-sizing-wrapper" :style="props.card_size_styling">
         <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
-        <UIDynamicFormTitleText v-if="props.title_style === 'outside' && hasUserTask" :style="props.title_style" :title="props.title_text" :customStyles="props.title_custom_text_styling" :titleIcon="props.title_icon" />
+        <UIDynamicFormTitleText
+            v-if="props.title_style === 'outside' && hasUserTask"
+            :style="props.title_style"
+            :title="props.title_text"
+            :customStyles="props.title_custom_text_styling"
+            :titleIcon="props.title_icon"
+            :collapsible="props.collapsible || (props.collapse_when_finished && formIsFinished)"
+            :collapsed="collapsed"
+            :toggleCollapse="toggleCollapse"
+        />
         <div className="ui-dynamic-form-wrapper">
             <p v-if="hasUserTask" style="margin-bottom: 0px;">
                 <v-form ref="form" v-model="form" :class="dynamicClass">
-                    <UIDynamicFormTitleText v-if="props.title_style != 'outside'" :style="props.title_style" :title="props.title_text" :customStyles="props.title_custom_text_styling" :titleIcon="props.title_icon" />
-                    <div className="ui-dynamic-form-formfield-positioner">
-                        <FormKit id="form" type="group">
-                            <v-row v-for="(field, index) in fields()" :key="field" :style="getRowWidthStyling(field, index)">
-                                <v-col cols="12">
-                                    <component
-                                        :is="createComponent(field).type"
-                                        v-if="createComponent(field).innerText"
-                                        v-bind="createComponent(field).props"
-                                        v-model="formData[field.id]"
-                                    >
-                                        {{ createComponent(field).innerText }}
-                                    </component>
-                                    <div v-else-if="createComponent(field).type == 'v-slider'">
-                                        <p class="formkit-label">{{ field.label }}</p>
-                                        <component
-                                            :is="createComponent(field).type"
-                                            v-bind="createComponent(field).props"
-                                            v-model="field.defaultValue"
-                                        />
-                                        <p class="formkit-help">
-                                            {{ field.customForm ? JSON.parse(field.customForm).hint : undefined }}
-                                        </p>
-                                    </div>
-                                    <component
-                                        :is="createComponent(field).type"
-                                        v-else
-                                        v-bind="createComponent(field).props"
-                                        v-model="formData[field.id]"
-                                    />
-                                </v-col>
+                    <UIDynamicFormTitleText
+                        v-if="props.title_style != 'outside'"
+                        :style="props.title_style"
+                        :title="props.title_text"
+                        :customStyles="props.title_custom_text_styling"
+                        :titleIcon="props.title_icon"
+                        :collapsible="props.collapsible || (props.collapse_when_finished && formIsFinished)"
+                        :collapsed="collapsed"
+                        :toggleCollapse="toggleCollapse"
+                    />
+                    <Transition name="cardCollapse">
+                        <div v-if="!collapsed">
+                            <div className="ui-dynamic-form-formfield-positioner">
+                                <FormKit id="form" type="group">
+                                    <v-row v-for="(field, index) in fields()" :key="field" :style="getRowWidthStyling(field, index)">
+                                        <v-col cols="12">
+                                            <component
+                                                :is="createComponent(field).type"
+                                                v-if="createComponent(field).innerText"
+                                                v-bind="createComponent(field).props"
+                                                v-model="formData[field.id]"
+                                            >
+                                                {{ createComponent(field).innerText }}
+                                            </component>
+                                            <div v-else-if="createComponent(field).type == 'v-slider'">
+                                                <p class="formkit-label">{{ field.label }}</p>
+                                                <component
+                                                    :is="createComponent(field).type"
+                                                    v-bind="createComponent(field).props"
+                                                    v-model="field.defaultValue"
+                                                />
+                                                <p class="formkit-help">
+                                                    {{ field.customForm ? JSON.parse(field.customForm).hint : undefined }}
+                                                </p>
+                                            </div>
+                                            <component
+                                                :is="createComponent(field).type"
+                                                v-else
+                                                v-bind="createComponent(field).props"
+                                                v-model="formData[field.id]"
+                                            />
+                                        </v-col>
+                                    </v-row>
+                                </FormKit>
+                            </div>
+                            <v-row :class="dynamicFooterClass">
+                                <v-row v-if="errorMsg.length > 0" style="padding: 12px">
+                                    <v-alert type="error">Error: {{ errorMsg }}</v-alert>
+                                </v-row>
+                                <UIDynamicFormFooterAction v-if="props.actions_inside_card && actions.length > 0" :actions="actions" :actionCallback="actionFn" :formIsFinished="formIsFinished" style="padding: 16px; padding-top: 0px;" />
                             </v-row>
-                        </FormKit>
-                    </div>
-                    <v-row :class="dynamicFooterClass">
-                        <v-row v-if="errorMsg.length > 0" style="padding: 12px">
-                            <v-alert type="error">Error: {{ errorMsg }}</v-alert>
-                        </v-row>
-                        <UIDynamicFormFooterAction v-if="props.actions_inside_card && actions.length > 0" :actions="actions" :actionCallback="actionFn" :formIsFinished="formIsFinished" style="padding: 16px; padding-top: 0px;" />
-                    </v-row>
+                        </div>
+                    </Transition>
                 </v-form>
             </p>
             <p v-else>
@@ -100,7 +122,8 @@ export default {
             theme: '',
             errorMsg: '',
             formIsFinished: false,
-            msg: null
+            msg: null,
+            collapsed: false
         }
     },
     computed: {
@@ -684,6 +707,9 @@ export default {
                 }
             }
         },
+        toggleCollapse () {
+            this.collapsed = !this.collapsed
+        },
         getRowWidthStyling (field, index) {
             let style = ''
             if (index === 0) {
@@ -715,6 +741,7 @@ export default {
             this.$socket.emit('widget-action', this.id, msgArr)
         },
         init (msg) {
+            this.msg = msg
             if (!msg) {
                 return
             }
@@ -736,6 +763,9 @@ export default {
             const initialValues = this.userTask.startToken
             const finishedFormData = msg.payload.formData
             this.formIsFinished = !!msg.payload.formData
+            if (this.formIsFinished) {
+                this.collapsed = this.props.collapse_when_finished
+            }
 
             if (formFields) {
                 formFields.forEach((field) => {
