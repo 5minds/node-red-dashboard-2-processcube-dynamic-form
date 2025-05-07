@@ -47,16 +47,29 @@
             {
                 "label": "Cancel",
                 "condition": "",
-                "errorMessage": ""
+                "errorMessage": "",
+                "alignment": "left",
+                "primary": "false"
             },
             {
                 "label": "Submit",
                 "condition": "fields.email != ''",
-                "errorMessage": "Please enter an email!"
+                "errorMessage": "Please enter an email!",
+                "alignment": "right",
+                "primary": "true"
             }
         ],
         "waiting_title": "Warten auf den Usertask...",
         "waiting_info": "Der Usertask wird automatisch angezeigt, wenn ein entsprechender Task vorhanden ist.",
+        "form_columns": "",
+        "readonly": false,
+        "actions_inside_card": false,
+        "card_size_styling": "",
+        "title_text": "Example Form",
+        "title_style": "default",
+        "title_custom_text_styling": "",
+        "title_icon": "",
+        "trigger_on_change": false,
         "width": 0,
         "height": 0,
         "outputs": 2,
@@ -153,7 +166,6 @@
             "ui-control"
         ],
         "showPathInSidebar": false,
-        "showPageTitle": true,
         "navigationStyle": "default",
         "titleBarStyle": "default"
     },
