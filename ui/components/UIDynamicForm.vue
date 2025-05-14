@@ -135,6 +135,12 @@ export default {
         },
         hasUserTask () {
             return !!this.userTask
+        },
+        totalOutputs () {
+            return this.props.options.length + (this.props.handle_confirmation_dialogs ? 2 : 0) + (this.props.trigger_on_change ? 1 : 0)
+        },
+        isConfirmDialog () {
+            return this.userTask.userTaskConfig.formFields.some(field => field.type === 'confirm')
         }
     },
     watch: {
@@ -142,7 +148,7 @@ export default {
             handler (newData, oldData) {
                 if (this.props.trigger_on_change) {
                     const res = { payload: { formData: newData, userTask: this.userTask } }
-                    this.send(res, this.actions.length)
+                    this.send(res, this.totalOutputs - 1)
                 }
             },
             deep: true
@@ -337,6 +343,11 @@ export default {
                         validation,
                         validationVisibility: 'live'
                     }
+                }
+            case 'confirm':
+                return {
+                    type: 'h3',
+                    innerText: field.label
                 }
             case 'boolean':
                 return {
@@ -770,6 +781,23 @@ export default {
             if (formFields) {
                 formFields.forEach((field) => {
                     this.formData[field.id] = field.defaultValue
+
+                    if (field.type === 'confirm') {
+                        const customForm = field.customForm ? JSON.parse(field.customForm) : {}
+                        const confirmText = customForm.confirmButtonText ?? 'Confirm'
+                        const declineText = customForm.declineButtonText ?? 'Decline'
+                        this.actions = [{
+                            alignment: 'right',
+                            primary: 'false',
+                            label: declineText,
+                            condition: ''
+                        }, {
+                            alignment: 'right',
+                            primary: 'true',
+                            label: confirmText,
+                            condition: ''
+                        }]
+                    }
                 })
             }
 
@@ -813,7 +841,7 @@ export default {
                 msg.payload = { formData: this.formData, userTask: this.userTask }
                 this.send(
                     msg,
-                    this.actions.findIndex((element) => element.label === action.label)
+                    this.actions.findIndex((element) => element.label === action.label) + (this.isConfirmDialog ? this.props.options.length : 0)
                 )
                 // TODO: mm - end
             } else {
