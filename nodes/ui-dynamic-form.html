@@ -54,6 +54,9 @@
             trigger_on_change: {
                 value: false,
             },
+            handle_confirmation_dialogs: {
+              value: false,
+            },
             width: {
                 value: 0,
                 validate: function (v) {
@@ -71,7 +74,17 @@
         inputs: 1,
         outputs: 0,
         outputLabels: function (index) {
-            return index < this.options.length ? this.options[index].label : 'Triggered on change';
+            const labels = [...this.options.map(i => i.label)];
+
+            if (this.handle_confirmation_dialogs) {
+              labels.push('Decline', 'Confirm');
+            }
+
+            if (this.trigger_on_change) {
+              labels.push('Triggered on change');
+            }
+
+            return labels[index];
         },
         icon: 'ui_dynamic_form.svg',
         label: function () {
@@ -233,6 +246,10 @@
             if ($('#node-input-trigger_on_change').is(':checked')) {
               this.outputs++;
             }
+
+            if ($('#node-input-handle_confirmation_dialogs').is(':checked')) {
+              this.outputs += 2;
+            }
         },
     });
 </script>
@@ -272,8 +289,12 @@
     <div class="form-row">
         <a href="#" class="editor-button editor-button-small" id="node-input-add-option" style="margin-top:4px; margin-left:103px;"><i class="fa fa-plus"></i> <span>action</span></a>
     </div>
+        <div class="form-row">
+        <label for="node-input-handle_confirmation_dialogs"><i class="fa fa-hand"></i>Handles confirmation dialogs</label>
+        <input type="checkbox" id="node-input-handle_confirmation_dialogs" title="Adds more outputs at this node for handling confirm/decline actions">
+    </div>
     <div class="form-row">
-        <label for="node-input-readonly"><i class="fa fa-hand"></i>Inside of card</label>
+        <label for="node-input-actions_inside_card"><i class="fa fa-hand"></i>Inside of card</label>
         <input type="checkbox" id="node-input-actions_inside_card">
     </div>
     <hr />
@@ -378,6 +399,11 @@ Access to the form fields is available through the _fields_ object. A single for
 Example: _fields.field_01_
 
 Access to the usertask object is available through _usertask_
+
+### Handles confirmation dialogs
+
+When checked, this node will gain two additional outputs 'Accept' and 'Decline'. These are required, when handling confirmation dialogs, that may be defined in the Studio by settings a Form Fields type to 'Confirm'.
+The outputs defined by the 'Actions' section of this node won't show up, when a 'Confirm'-FormField is present.
 
 ### Inside of card
 
