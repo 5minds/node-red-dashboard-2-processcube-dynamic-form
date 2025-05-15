@@ -1,6 +1,6 @@
 <template>
     <div style="display: flex; justify-content: space-between; width: 100%">
-        <div style="display: flex; gap: 8px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap">
             <div v-for="(action, index) in actions" :key="index">
                 <v-btn
                     v-if="action.alignment === 'left' || !action.alignment"

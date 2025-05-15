@@ -138,12 +138,14 @@ code {
     --fk-color-border-focus: rgb(var(--v-theme-primary));
 }
 
-.ui-dynamic-form-external-sizing-wrapper {
-    margin-left: 92px;
-    margin-right: 92px;
-    max-width: none;
-    max-height: 90%;
-}
+ @media only screen and (min-width: 600px) {
+   .ui-dynamic-form-external-sizing-wrapper {
+       margin-left: 92px;
+       margin-right: 92px;
+       max-width: none;
+       max-height: 90%;
+   }
+ }
 
 .cardCollapse-leave-active {
   transition: max-height .5s ease, opacity .2s ease;
