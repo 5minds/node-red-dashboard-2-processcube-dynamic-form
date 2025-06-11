@@ -39,6 +39,9 @@
             card_size_styling: {
               value: "",
             },
+            inner_card_styling: {
+              value: "",
+            },
             title_text: {
               value: "",
             },
@@ -320,8 +323,12 @@
 
     <h4>Appearance</h4>
     <div class="form-row">
-      <label for="node-input-form_columns"><i class="fa fa-hand"></i>Card size styling</label>
-      <input type="text" id="node-input-card_size_styling" title="Use CSS properties like margin, padding or max-width to influence sizing and positioning of the component">
+      <label for="node-input-card_size_styling"><i class="fa fa-hand"></i>Card size styling</label>
+      <input type="text" id="node-input-card_size_styling" title="Use CSS properties like margin, padding or max-width to influence sizing and positioning of the component.">
+    </div>
+    <div class="form-row">
+      <label for="node-input-inner_card_styling"><i class="fa fa-hand"></i>Inner card size styling</label>
+      <input type="text" id="node-input-inner_card_styling" title="Use CSS properties like max-height to influence sizing and positioning of the components inner part, that contains only the form fields.">
     </div>
     <div class="form-row">
       <label for="node-input-form_columns"><i class="fa fa-hand"></i>Columns in form</label>
@@ -432,6 +439,10 @@ An URL for an image, that should be displayed before the text. This will be used
 ### Card size styling
 
 Enter custom css rules to control the size and placement of the whole card. It can be used to set a `max-width` for the Card, apply a `margin` etc.
+
+### Inner card size styling
+
+Enter custom css rules to control the size of the inner part, that contains just the form fields. It can be used to override the `max-height` property.
 
 ### Columns in form
 
