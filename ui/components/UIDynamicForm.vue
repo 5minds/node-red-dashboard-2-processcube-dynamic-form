@@ -370,6 +370,7 @@ export default {
                     }
                 }
             case 'file':
+                const multiple = field.customForm ? JSON.parse(field.customForm).multiple === 'true' : false
                 return {
                     type: 'FormKit',
                     props: {
@@ -387,6 +388,7 @@ export default {
                         // innerClass: ui-dynamic-form-input-outlines `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                         readonly: isReadOnly,
                         disabled: isReadOnly,
+                        multiple,
                         validation,
                         validationVisibility: 'live'
                     }
