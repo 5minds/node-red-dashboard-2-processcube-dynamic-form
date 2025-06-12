@@ -2,39 +2,37 @@
     <div className="ui-dynamic-form-external-sizing-wrapper" :style="props.card_size_styling">
         <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
         <UIDynamicFormTitleText
-            v-if="props.title_style === 'outside' && hasUserTask"
-            :style="props.title_style"
-            :title="props.title_text"
-            :customStyles="props.title_custom_text_styling"
-            :titleIcon="props.title_icon"
-            :collapsible="props.collapsible || (props.collapse_when_finished && formIsFinished)"
-            :collapsed="collapsed"
+            v-if="props.title_style === 'outside' && hasUserTask" :style="props.title_style"
+            :title="props.title_text" :customStyles="props.title_custom_text_styling" :titleIcon="props.title_icon"
+            :collapsible="props.collapsible || (props.collapse_when_finished && formIsFinished)" :collapsed="collapsed"
             :toggleCollapse="toggleCollapse"
         />
         <div className="ui-dynamic-form-wrapper">
-            <p v-if="hasUserTask" style="margin-bottom: 0px;">
+            <p v-if="hasUserTask" style="margin-bottom: 0px">
                 <v-form ref="form" v-model="form" :class="dynamicClass">
                     <UIDynamicFormTitleText
-                        v-if="props.title_style != 'outside'"
-                        :style="props.title_style"
-                        :title="props.title_text"
-                        :customStyles="props.title_custom_text_styling"
+                        v-if="props.title_style != 'outside'" :style="props.title_style"
+                        :title="props.title_text" :customStyles="props.title_custom_text_styling"
                         :titleIcon="props.title_icon"
                         :collapsible="props.collapsible || (props.collapse_when_finished && formIsFinished)"
-                        :collapsed="collapsed"
-                        :toggleCollapse="toggleCollapse"
+                        :collapsed="collapsed" :toggleCollapse="toggleCollapse"
                     />
                     <Transition name="cardCollapse">
                         <div v-if="!collapsed">
                             <div className="ui-dynamic-form-formfield-positioner">
                                 <FormKit id="form" type="group">
-                                    <v-row v-for="(field, index) in fields()" :key="field" :style="getRowWidthStyling(field, index)">
+                                    <v-row
+                                        v-for="(field, index) in fields()" :key="field"
+                                        :style="getRowWidthStyling(field, index)"
+                                    >
                                         <v-col cols="12">
                                             <component
                                                 :is="createComponent(field).type"
                                                 v-if="createComponent(field).innerText"
-                                                v-bind="createComponent(field).props"
-                                                v-model="formData[field.id]"
+                                                v-bind="createComponent(field).props" :ref="(el) => {
+                                                    if (index === 0) firstFormFieldRef = el;
+                                                }
+                                                " v-model="formData[field.id]"
                                             >
                                                 {{ createComponent(field).innerText }}
                                             </component>
@@ -42,18 +40,22 @@
                                                 <p class="formkit-label">{{ field.label }}</p>
                                                 <component
                                                     :is="createComponent(field).type"
-                                                    v-bind="createComponent(field).props"
-                                                    v-model="field.defaultValue"
+                                                    v-bind="createComponent(field).props" :ref="(el) => {
+                                                        if (index === 0) firstFormFieldRef = el;
+                                                    }
+                                                    " v-model="field.defaultValue"
                                                 />
                                                 <p class="formkit-help">
-                                                    {{ field.customForm ? JSON.parse(field.customForm).hint : undefined }}
+                                                    {{ field.customForm ? JSON.parse(field.customForm).hint : undefined
+                                                    }}
                                                 </p>
                                             </div>
                                             <component
-                                                :is="createComponent(field).type"
-                                                v-else
-                                                v-bind="createComponent(field).props"
-                                                v-model="formData[field.id]"
+                                                :is="createComponent(field).type" v-else
+                                                v-bind="createComponent(field).props" :ref="(el) => {
+                                                    if (index === 0) firstFormFieldRef = el;
+                                                }
+                                                " v-model="formData[field.id]"
                                             />
                                         </v-col>
                                     </v-row>
@@ -63,17 +65,24 @@
                                 <v-row v-if="errorMsg.length > 0" style="padding: 12px">
                                     <v-alert type="error">Error: {{ errorMsg }}</v-alert>
                                 </v-row>
-                                <UIDynamicFormFooterAction v-if="props.actions_inside_card && actions.length > 0" :actions="actions" :actionCallback="actionFn" :formIsFinished="formIsFinished" style="padding: 16px; padding-top: 0px;" />
+                                <UIDynamicFormFooterAction
+                                    v-if="props.actions_inside_card && actions.length > 0"
+                                    :actions="actions" :actionCallback="actionFn" :formIsFinished="formIsFinished"
+                                    style="padding: 16px; padding-top: 0px"
+                                />
                             </v-row>
                         </div>
                     </Transition>
                 </v-form>
             </p>
             <p v-else>
-                <v-alert v-if="props.waiting_info.length > 0 || props.waiting_title.length > 0" :text="props.waiting_info" :title="props.waiting_title" />
+                <v-alert
+                    v-if="props.waiting_info.length > 0 || props.waiting_title.length > 0"
+                    :text="props.waiting_info" :title="props.waiting_title"
+                />
             </p>
         </div>
-        <div v-if="!props.actions_inside_card && actions.length > 0 && hasUserTask" style="padding-top: 32px;">
+        <div v-if="!props.actions_inside_card && actions.length > 0 && hasUserTask" style="padding-top: 32px">
             <UIDynamicFormFooterAction :actions="actions" :actionCallback="actionFn" />
         </div>
     </div>
@@ -82,7 +91,7 @@
 <!-- eslint-disable no-case-declarations -->
 <script>
 import { FormKit, defaultConfig, plugin } from '@formkit/vue'
-import { getCurrentInstance, markRaw } from 'vue'
+import { getCurrentInstance, markRaw, nextTick } from 'vue'
 
 // eslint-disable-next-line import/no-unresolved
 import '@formkit/themes/genesis'
@@ -92,11 +101,13 @@ import UIDynamicFormTitleText from './TitleText.vue'
 export default {
     name: 'UIDynamicForm',
     components: {
-        FormKit, UIDynamicFormFooterAction, UIDynamicFormTitleText
+        FormKit,
+        UIDynamicFormFooterAction,
+        UIDynamicFormTitleText
     },
     inject: ['$socket'],
     props: {
-    /* do not remove entries from this - Dashboard's Layout Manager's will pass this data to your component */
+        /* do not remove entries from this - Dashboard's Layout Manager's will pass this data to your component */
         id: { type: String, required: true },
         props: { type: Object, default: () => ({}) },
         state: {
@@ -123,7 +134,8 @@ export default {
             errorMsg: '',
             formIsFinished: false,
             msg: null,
-            collapsed: false
+            collapsed: false,
+            firstFormFieldRef: null
         }
     },
     computed: {
@@ -137,10 +149,14 @@ export default {
             return !!this.userTask
         },
         totalOutputs () {
-            return this.props.options.length + (this.props.handle_confirmation_dialogs ? 2 : 0) + (this.props.trigger_on_change ? 1 : 0)
+            return (
+                this.props.options.length +
+                (this.props.handle_confirmation_dialogs ? 2 : 0) +
+                (this.props.trigger_on_change ? 1 : 0)
+            )
         },
         isConfirmDialog () {
-            return this.userTask.userTaskConfig.formFields.some(field => field.type === 'confirm')
+            return this.userTask.userTaskConfig.formFields.some((field) => field.type === 'confirm')
         }
     },
     watch: {
@@ -149,6 +165,20 @@ export default {
                 if (this.props.trigger_on_change) {
                     const res = { payload: { formData: newData, userTask: this.userTask } }
                     this.send(res, this.totalOutputs - 1)
+                }
+            },
+            collapsed (newVal) {
+                if (!newVal && this.hasUserTask) {
+                    nextTick(() => {
+                        this.focusFirstFormField()
+                    })
+                }
+            },
+            userTask (newVal) {
+                if (newVal && !this.collapsed) {
+                    nextTick(() => {
+                        this.focusFirstFormField()
+                    })
                 }
             },
             deep: true
@@ -204,10 +234,12 @@ export default {
             const validation = customForm.validation
             const name = field.id
             const customProperties = customForm.customProperties ?? []
-            const isReadOnly = (
-                this.props.readonly || this.formIsFinished || customProperties.find(entry => ['readOnly', 'readonly'].includes(entry.name) && entry.value === 'true'))
-                ? 'true'
-                : undefined
+            const isReadOnly =
+                this.props.readonly ||
+                    this.formIsFinished ||
+                    customProperties.find((entry) => ['readOnly', 'readonly'].includes(entry.name) && entry.value === 'true')
+                    ? 'true'
+                    : undefined
             switch (field.type) {
             case 'long':
                 return {
@@ -729,7 +761,7 @@ export default {
             if (field.type === 'header') {
                 style += 'flex-basis: 100%;'
             } else {
-                style += `flex-basis: ${1 / this.props.form_columns * 100}%;`
+                style += `flex-basis: ${(1 / this.props.form_columns) * 100}%;`
             }
             return style
         },
@@ -743,9 +775,9 @@ export default {
             return fieldMap
         },
         /*
-            widget-action just sends a msg to Node-RED, it does not store the msg state server-side
-            alternatively, you can use widget-change, which will also store the msg in the Node's datastore
-        */
+                    widget-action just sends a msg to Node-RED, it does not store the msg state server-side
+                    alternatively, you can use widget-change, which will also store the msg in the Node's datastore
+                */
         send (msg, index) {
             const msgArr = []
             msgArr[index] = msg
@@ -770,7 +802,7 @@ export default {
             }
 
             const formFields = this.userTask.userTaskConfig.formFields
-            const formFieldIds = formFields.map(ff => ff.id)
+            const formFieldIds = formFields.map((ff) => ff.id)
             const initialValues = this.userTask.startToken
             const finishedFormData = msg.payload.formData
             this.formIsFinished = !!msg.payload.formData
@@ -786,32 +818,43 @@ export default {
                         const customForm = field.customForm ? JSON.parse(field.customForm) : {}
                         const confirmText = customForm.confirmButtonText ?? 'Confirm'
                         const declineText = customForm.declineButtonText ?? 'Decline'
-                        this.actions = [{
-                            alignment: 'right',
-                            primary: 'false',
-                            label: declineText,
-                            condition: ''
-                        }, {
-                            alignment: 'right',
-                            primary: 'true',
-                            label: confirmText,
-                            condition: ''
-                        }]
+                        this.actions = [
+                            {
+                                alignment: 'right',
+                                primary: 'false',
+                                label: declineText,
+                                condition: ''
+                            },
+                            {
+                                alignment: 'right',
+                                primary: 'true',
+                                label: confirmText,
+                                condition: ''
+                            }
+                        ]
                     }
                 })
             }
 
             if (initialValues) {
-                Object.keys(initialValues).filter(key => formFieldIds.includes(key)).forEach((key) => {
-                    this.formData[key] = initialValues[key]
-                })
+                Object.keys(initialValues)
+                    .filter((key) => formFieldIds.includes(key))
+                    .forEach((key) => {
+                        this.formData[key] = initialValues[key]
+                    })
             }
 
             if (this.formIsFinished) {
-                Object.keys(finishedFormData).filter(key => formFieldIds.includes(key)).forEach(key => {
-                    this.formData[key] = finishedFormData[key]
-                })
+                Object.keys(finishedFormData)
+                    .filter((key) => formFieldIds.includes(key))
+                    .forEach((key) => {
+                        this.formData[key] = finishedFormData[key]
+                    })
             }
+
+            nextTick(() => {
+                this.focusFirstFormField()
+            })
         },
         actionFn (action) {
             if (action.label === 'Speichern' || action.label === 'Speichern und nächster') {
@@ -841,7 +884,8 @@ export default {
                 msg.payload = { formData: this.formData, userTask: this.userTask }
                 this.send(
                     msg,
-                    this.actions.findIndex((element) => element.label === action.label) + (this.isConfirmDialog ? this.props.options.length : 0)
+                    this.actions.findIndex((element) => element.label === action.label) +
+                    (this.isConfirmDialog ? this.props.options.length : 0)
                 )
                 // TODO: mm - end
             } else {
@@ -862,6 +906,31 @@ export default {
         },
         showError (errMsg) {
             this.errorMsg = errMsg
+        },
+        focusFirstFormField () {
+            if (this.collapsed || !this.hasUserTask) {
+                return
+            }
+
+            if (this.firstFormFieldRef) {
+                let inputElement = null
+
+                if (this.firstFormFieldRef.node && this.firstFormFieldRef.node.input instanceof HTMLElement) {
+                    inputElement = this.firstFormFieldRef.node.input
+                } else if (this.firstFormFieldRef.$el instanceof HTMLElement) {
+                    if (['INPUT', 'TEXTAREA', 'SELECT'].includes(this.firstFormFieldRef.$el.tagName)) {
+                        inputElement = this.firstFormFieldRef.$el
+                    } else {
+                        inputElement = this.firstFormFieldRef.$el.querySelector('input:not([type="hidden"]), textarea, select')
+                    }
+                }
+
+                if (inputElement) {
+                    inputElement.focus()
+                } else {
+                    console.warn('Could not find a focusable input element for the first form field.')
+                }
+            }
         }
     }
 }
