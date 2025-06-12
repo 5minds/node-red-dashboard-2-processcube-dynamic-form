@@ -181,8 +181,9 @@ code {
   margin: 0px;
 }
 
-.reset-background {
-    --fk-bg-input: none; /*maybe none or (revert)*/
+.reset-background, .reset-background .formkit-input:focus {
+    --fk-bg-input: none !important; /*maybe none or (revert)*/
+    background-color: var(--fk-bg-input) !important;
 }
 
 .custom-fieldset {
