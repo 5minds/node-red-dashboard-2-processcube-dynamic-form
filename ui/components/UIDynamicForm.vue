@@ -26,7 +26,7 @@
                     />
                     <Transition name="cardCollapse">
                         <div v-if="!collapsed">
-                            <div className="ui-dynamic-form-formfield-positioner">
+                            <div className="ui-dynamic-form-formfield-positioner" :style="props.inner_card_styling">
                                 <FormKit id="form" type="group">
                                     <v-row v-for="(field, index) in fields()" :key="field" :style="getRowWidthStyling(field, index)">
                                         <v-col cols="12">
