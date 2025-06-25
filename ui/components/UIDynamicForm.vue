@@ -81,7 +81,6 @@
 
 <!-- eslint-disable no-case-declarations -->
 <script>
-import { createValidationPlugin } from '@formkit/core'
 import { FormKit, defaultConfig, plugin } from '@formkit/vue'
 import { getCurrentInstance, markRaw } from 'vue'
 
@@ -112,18 +111,22 @@ export default {
         const instance = getCurrentInstance()
         const app = instance.appContext.app
 
-        const requiredIfPlugin = createValidationPlugin((node) => {
-            node.addValidation('requiredIf', ({ value }, args) => {
-                const [field, expected] = args
-                const actual = node?.root?.value?.[field]
-                const required = actual === expected
-                return required ? !!value : true
-            }, 'Dieses Feld ist erforderlich.')
-        })
-
         const formkitConfig = defaultConfig({
-            plugins: [requiredIfPlugin],
-            theme: 'genesis'
+            theme: 'genesis',
+            rules: {
+                requiredIf: ({ value, name }, [targetField, expectedValue], node) => {
+                    const actual = node?.root?.value?.[targetField]
+                    if (actual === expectedValue && (!value || value === '')) {
+                        return `Feld ${name} ist erforderlich, wenn ${targetField} = ${expectedValue}`
+                    }
+                    return true
+                }
+            },
+            messages: {
+                de: {
+                    requiredIf: 'Dieses Feld ist erforderlich.'
+                }
+            }
         })
         app.use(plugin, formkitConfig)
     },
