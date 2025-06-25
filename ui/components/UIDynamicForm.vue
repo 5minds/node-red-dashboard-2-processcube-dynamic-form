@@ -81,7 +81,7 @@
 
 <!-- eslint-disable no-case-declarations -->
 <script>
-import { FormKit, defaultConfig, plugin } from '@formkit/vue'
+import { FormKit, defaultConfig, plugin, createValidationPlugin } from '@formkit/vue'
 import { getCurrentInstance, markRaw } from 'vue'
 
 // eslint-disable-next-line import/no-unresolved
@@ -107,9 +107,21 @@ export default {
     setup (props) {
         console.info('UIDynamicForm setup with:', props)
         console.debug('Vue function loaded correctly', markRaw)
+
         const instance = getCurrentInstance()
         const app = instance.appContext.app
+
+        const requiredIfPlugin = createValidationPlugin((node) => {
+            node.addValidation('requiredIf', ({ value }, args) => {
+                const [field, expected] = args
+                const actual = node?.root?.value?.[field]
+                const required = actual === expected
+                return required ? !!value : true
+            }, 'Dieses Feld ist erforderlich.')
+        })
+
         const formkitConfig = defaultConfig({
+            plugins: [requiredIfPlugin],
             theme: 'genesis'
         })
         app.use(plugin, formkitConfig)
