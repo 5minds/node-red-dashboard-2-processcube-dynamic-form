@@ -125,6 +125,7 @@ export default {
 
         const formkitConfig = defaultConfig({
             theme: 'genesis',
+            locales: { de },
             locale: 'de',
             rules: {
                 requiredIf: ({ value, name }, [targetField, expectedValue], node) => {
