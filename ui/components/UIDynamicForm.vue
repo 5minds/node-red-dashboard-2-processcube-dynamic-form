@@ -118,10 +118,26 @@ export default {
     setup (props) {
         console.info('UIDynamicForm setup with:', props)
         console.debug('Vue function loaded correctly', markRaw)
+
         const instance = getCurrentInstance()
         const app = instance.appContext.app
+
         const formkitConfig = defaultConfig({
-            theme: 'genesis'
+            theme: 'genesis',
+            rules: {
+                requiredIf: ({ value, name }, [targetField, expectedValue], node) => {
+                    const actual = node?.root?.value?.[targetField]
+                    if (actual === expectedValue && (!value || value === '')) {
+                        return `Feld ${name} ist erforderlich, wenn ${targetField} = ${expectedValue}`
+                    }
+                    return true
+                }
+            },
+            messages: {
+                de: {
+                    requiredIf: 'Dieses Feld ist erforderlich.'
+                }
+            }
         })
         app.use(plugin, formkitConfig)
     },
