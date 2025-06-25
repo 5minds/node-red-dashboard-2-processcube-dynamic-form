@@ -128,17 +128,15 @@ export default {
             locales: { de },
             locale: 'de',
             rules: {
-                requiredIf: (node, [targetField, expectedValue]) => {
+                requiredIf: ({ value }, [targetField, expectedValue], node) => {
                     const actual = node?.root?.value?.[targetField]
-                    if (actual === expectedValue && (!node.value || node.value === '')) {
-                        return `Feld ${node.name} ist erforderlich, wenn ${targetField} = ${expectedValue}`
+                    const isEmpty = value === '' || value === null || value === undefined
+
+                    if (actual === expectedValue && isEmpty) {
+                        return false // oder: `return "Dieses Feld ist erforderlich."`
                     }
+
                     return true
-                }
-            },
-            messages: {
-                de: {
-                    requiredIf: 'Dieses Feld ist erforderlich.'
                 }
             }
         })
