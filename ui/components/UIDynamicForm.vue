@@ -90,6 +90,7 @@
 
 <!-- eslint-disable no-case-declarations -->
 <script>
+import { de } from '@formkit/i18n'
 import { FormKit, defaultConfig, plugin } from '@formkit/vue'
 import { getCurrentInstance, markRaw, nextTick } from 'vue'
 
@@ -124,6 +125,7 @@ export default {
 
         const formkitConfig = defaultConfig({
             theme: 'genesis',
+            locale: 'de',
             rules: {
                 requiredIf: ({ value, name }, [targetField, expectedValue], node) => {
                     const actual = node?.root?.value?.[targetField]
