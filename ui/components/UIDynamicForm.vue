@@ -128,10 +128,10 @@ export default {
             locales: { de },
             locale: 'de',
             rules: {
-                requiredIf: ({ value, name }, [targetField, expectedValue], node) => {
+                requiredIf: (node, [targetField, expectedValue]) => {
                     const actual = node?.root?.value?.[targetField]
-                    if (actual === expectedValue && (!value || value === '')) {
-                        return `Feld ${name} ist erforderlich, wenn ${targetField} = ${expectedValue}`
+                    if (actual === expectedValue && (!node.value || node.value === '')) {
+                        return `Feld ${node.name} ist erforderlich, wenn ${targetField} = ${expectedValue}`
                     }
                     return true
                 }
