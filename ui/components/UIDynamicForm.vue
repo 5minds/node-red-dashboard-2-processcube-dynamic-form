@@ -1,3 +1,16 @@
+<script setup>
+// eslint-disable-next-line no-unused-vars
+function requiredIf ({ value }, [targetField, expectedValue], node) {
+    const actual = node?.root?.value?.[targetField]
+    const isEmpty = value === '' || value === null || value === undefined
+
+    if (actual === expectedValue && isEmpty) {
+        return false // oder: `return "Dieses Feld ist erforderlich."`
+    }
+
+    return true
+}
+</script>
 <template>
     <div className="ui-dynamic-form-external-sizing-wrapper" :style="props.card_size_styling">
         <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
@@ -126,19 +139,7 @@ export default {
         const formkitConfig = defaultConfig({
             theme: 'genesis',
             locales: { de },
-            locale: 'de',
-            rules: {
-                requiredIf: ({ value }, [targetField, expectedValue], node) => {
-                    const actual = node?.root?.value?.[targetField]
-                    const isEmpty = value === '' || value === null || value === undefined
-
-                    if (actual === expectedValue && isEmpty) {
-                        return false // oder: `return "Dieses Feld ist erforderlich."`
-                    }
-
-                    return true
-                }
-            }
+            locale: 'de'
         })
         app.use(plugin, formkitConfig)
     },
