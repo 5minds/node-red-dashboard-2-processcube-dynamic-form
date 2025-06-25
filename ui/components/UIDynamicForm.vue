@@ -81,7 +81,8 @@
 
 <!-- eslint-disable no-case-declarations -->
 <script>
-import { FormKit, defaultConfig, plugin, createValidationPlugin } from '@formkit/vue'
+import { createValidationPlugin } from '@formkit/core'
+import { FormKit, defaultConfig, plugin } from '@formkit/vue'
 import { getCurrentInstance, markRaw } from 'vue'
 
 // eslint-disable-next-line import/no-unresolved
