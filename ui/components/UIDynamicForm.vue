@@ -98,7 +98,6 @@ import { getCurrentInstance, markRaw, nextTick } from 'vue'
 import '@formkit/themes/genesis'
 import UIDynamicFormFooterAction from './FooterActions.vue'
 import UIDynamicFormTitleText from './TitleText.vue'
-import { rules } from 'eslint-plugin-vue'
 
 // eslint-disable-next-line no-unused-vars
 function requiredIf ({ value }, [targetField, expectedValue], node) {
@@ -139,7 +138,8 @@ export default {
         const formkitConfig = defaultConfig({
             theme: 'genesis',
             locales: { de },
-            locale: 'de'
+            locale: 'de',
+            rules: { requiredIf }
         })
         app.use(plugin, formkitConfig)
     },
