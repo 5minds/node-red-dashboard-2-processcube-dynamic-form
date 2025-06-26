@@ -139,8 +139,7 @@ export default {
         const formkitConfig = defaultConfig({
             theme: 'genesis',
             locales: { de },
-            locale: 'de',
-            rules: { requiredIf }
+            locale: 'de'
         })
         app.use(plugin, formkitConfig)
     },
