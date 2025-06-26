@@ -101,6 +101,8 @@ import UIDynamicFormTitleText from './TitleText.vue'
 
 // eslint-disable-next-line no-unused-vars
 function requiredIf ({ value }, [targetField, expectedValue], node) {
+    console.debug(arguments)
+
     const actual = node?.root?.value?.[targetField]
     const isEmpty = value === '' || value === null || value === undefined
 
