@@ -139,7 +139,8 @@ export default {
             theme: 'genesis',
             locales: { de },
             locale: 'de',
-            rules: { requiredIf }
+            // eslint-disable-next-line object-shorthand
+            rules: { requiredIf: requiredIf }
         })
         app.use(plugin, formkitConfig)
     },
