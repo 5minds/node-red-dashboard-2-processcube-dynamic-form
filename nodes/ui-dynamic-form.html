@@ -1,260 +1,260 @@
 <script type="text/javascript">
-    RED.nodes.registerType('ui-dynamic-form', {
-        category: 'ProcessCube UI',
-        color: '#00aed7',
-        defaults: {
-            name: { value: '' },
-            group: { type: 'ui-group', required: true },
-            order: { value: 0 },
-            options: {
-                value: [{ label: '' }],
-                validate: function (v) {
-                    const unique = new Set(
-                        v.map(function (o) {
-                            return o.label;
-                        })
-                    );
-                    return v.length === unique.size;
-                },
-            },
-            waiting_title: { value: 'Warten auf den Usertask...' },
-            waiting_info: {
-                value: 'Der Usertask wird automatisch angezeigt, wenn ein entsprechender Task vorhanden ist.',
-            },
-            form_columns: {
-              value: 1,
-            },
-            readonly: {
-              value: false,
-            },
-            collapsible: {
-              value: false,
-            },
-            collapse_when_finished: {
-              value: false,
-            },
-            actions_inside_card: {
-                 value: true,
-            },
-            card_size_styling: {
-              value: "",
-            },
-            inner_card_styling: {
-              value: "",
-            },
-            title_text: {
-              value: "",
-            },
-            title_style: {
-              value: "default",
-            },
-            title_custom_text_styling: {
-                value: "",
-            },
-            title_icon: {
-                value: "",
-            },
-            trigger_on_change: {
-                value: false,
-            },
-            handle_confirmation_dialogs: {
-              value: false,
-            },
-            width: {
-                value: 0,
-                validate: function (v) {
-                    const width = v || 0;
-                    const currentGroup = $('#node-input-group').val() || this.group;
-                    const groupNode = RED.nodes.node(currentGroup);
-                    const valid = !groupNode || +width <= +groupNode.width;
-                    $('#node-input-size').toggleClass('input-error', !valid);
-                    return valid;
-                },
-            },
-            height: { value: 0 },
-            outputs: { value: 1 },
-        },
-        inputs: 1,
-        outputs: 0,
-        outputLabels: function (index) {
-            const labels = [...this.options.map(i => i.label)];
-
-            if (this.handle_confirmation_dialogs) {
-              labels.push('Decline', 'Confirm');
-            }
-
-            if (this.trigger_on_change) {
-              labels.push('Triggered on change');
-            }
-
-            return labels[index];
-        },
-        icon: 'ui_dynamic_form.svg',
-        label: function () {
-            return this.name || 'dynamic-form';
-        },
-        oneditprepare: function () {
-            $('#node-input-size').elementSizer({
-                width: '#node-input-width',
-                height: '#node-input-height',
-                group: '#node-input-group',
-            });
-            $('#node-input-title_style').typedInput({
-              types: [
-                  {
-                    value: 'title_style',
-                    options: [
-                        { value: 'default', label: 'Default' },
-                        { value: 'minimal', label: 'Minimal' },
-                        { value: 'outside', label: 'Outside of card' },
-                    ]
-                  }
-              ]
+  RED.nodes.registerType('ui-dynamic-form', {
+    category: 'ProcessCube UI',
+    color: '#00aed7',
+    defaults: {
+      name: { value: '' },
+      group: { type: 'ui-group', required: true },
+      order: { value: 0 },
+      options: {
+        value: [{ label: '' }],
+        validate: function (v) {
+          const unique = new Set(
+            v.map(function (o) {
+              return o.label;
             })
-
-            function generateOption(i, option) {
-                const container = $('<li/>', {
-                    style: 'background: var(--red-ui-secondary-background, #fff); margin:0; padding:8px 0px 0px;',
-                });
-
-                // Create input fields for value and label
-                const row = $('<div/>').appendTo(container);
-                $('<input/>', {
-                    class: 'node-input-option-label',
-                    type: 'text',
-                    style: 'margin-left:7px; width:calc(29%);',
-                    placeholder: 'Label',
-                    value: option.label,
-                })
-                    .appendTo(row);
-
-                $('<input/>', {
-                    class: 'node-input-option-condition',
-                    type: 'text',
-                    style: 'margin-left:7px; width:calc(29%);',
-                    placeholder: 'Condition',
-                    value: option.condition,
-                })
-                    .appendTo(row);
-
-                $('<input/>', {
-                    class: 'node-input-option-error',
-                    type: 'text',
-                    style: 'margin-left:7px; width:calc(29%);',
-                    placeholder: 'Error message',
-                    value: option.errorMessage,
-                })
-                    .appendTo(row);
-
-                $('<input/>', {
-                    class: 'node-input-option-alignment',
-                    type: 'text',
-                    style: 'margin-left:7px; width:calc(29%);',
-                    placeholder: 'Alignment',
-                    value: option.alignment
-                })
-                    .appendTo(row)
-                    .typedInput({
-                        types: [
-                            {
-                                value: 'alignment',
-                                options: [
-                                    { value: 'left', label: 'Align left' },
-                                    { value: 'right', label: 'Align right' },
-                                ]
-                            }
-                        ]
-                    });
-
-                $('<input/>', {
-                    class: 'node-input-option-primary',
-                    type: 'text',
-                    style: 'margin-left:7px; width:calc(29%);',
-                    placeholder: 'Action type',
-                    value: option.primary,
-                })
-                    .appendTo(row)
-                    .typedInput({
-                        types: [
-                            {
-                                value: 'primary',
-                                options: [
-                                    { value: 'false', label: 'Secondary action'},
-                                    { value: 'true', label: 'Primary action'},
-                                ]
-                            }
-                        ]
-                    });
-
-                // Create delete button for the option
-                const finalSpan = $('<span/>', {
-                    style: 'float:right; margin-right:8px;',
-                }).appendTo(row);
-                const deleteButton = $('<a/>', {
-                    href: '#',
-                    class: 'editor-button editor-button-small',
-                    style: 'margin-top:7px; margin-left:5px;',
-                }).appendTo(finalSpan);
-                $('<i/>', { class: 'fa fa-remove' }).appendTo(deleteButton);
-
-                deleteButton.click(function () {
-                    container.css({
-                        background: 'var(--red-ui-secondary-background-inactive, #fee)',
-                    });
-                    container.fadeOut(300, function () {
-                        $(this).remove();
-                    });
-                });
-
-                $('#node-input-option-container').append(container);
-            }
-
-            $('#node-input-add-option').click(function () {
-                generateOption($('#node-input-option-container').children().length + 1, {});
-                $('#node-input-option-container-div').scrollTop(
-                    $('#node-input-option-container-div').get(0).scrollHeight
-                );
-            });
-
-            for (let i = 0; i < this.options.length; i++) {
-                const option = this.options[i];
-                generateOption(i + 1, option);
-            }
-
-            $('#node-input-option-container').sortable({
-                axis: 'y',
-                handle: '.node-input-option-handle',
-                cursor: 'move',
-            });
+          );
+          return v.length === unique.size;
         },
-        oneditsave: function () {
-            const options = $('#node-input-option-container').children();
-            const node = this;
-            node.options = [];
-            options.each(function (i) {
-                const option = $(this);
-                const o = {
-                    label: option.find('.node-input-option-label').val(),
-                    condition: option.find('.node-input-option-condition').val(),
-                    errorMessage: option.find('.node-input-option-error').val(),
-                    alignment: option.find('.node-input-option-alignment').val(),
-                    primary: option.find('.node-input-option-primary').val(),
-                };
-
-                node.options.push(o);
-            });
-
-            this.outputs = node.options.length || 0;
-
-            if ($('#node-input-trigger_on_change').is(':checked')) {
-              this.outputs++;
-            }
-
-            if ($('#node-input-handle_confirmation_dialogs').is(':checked')) {
-              this.outputs += 2;
-            }
+      },
+      waiting_title: { value: 'Warten auf den Usertask...' },
+      waiting_info: {
+        value: 'Der Usertask wird automatisch angezeigt, wenn ein entsprechender Task vorhanden ist.',
+      },
+      form_columns: {
+        value: 1,
+      },
+      readonly: {
+        value: false,
+      },
+      collapsible: {
+        value: false,
+      },
+      collapse_when_finished: {
+        value: false,
+      },
+      actions_inside_card: {
+        value: true,
+      },
+      card_size_styling: {
+        value: '',
+      },
+      inner_card_styling: {
+        value: '',
+      },
+      title_text: { value: '' },
+      title_text_type: { value: 'str' },
+      title_style: {
+        value: 'default',
+      },
+      title_custom_text_styling: {
+        value: '',
+      },
+      title_icon: {
+        value: '',
+      },
+      trigger_on_change: {
+        value: false,
+      },
+      handle_confirmation_dialogs: {
+        value: false,
+      },
+      width: {
+        value: 0,
+        validate: function (v) {
+          const width = v || 0;
+          const currentGroup = $('#node-input-group').val() || this.group;
+          const groupNode = RED.nodes.node(currentGroup);
+          const valid = !groupNode || +width <= +groupNode.width;
+          $('#node-input-size').toggleClass('input-error', !valid);
+          return valid;
         },
-    });
+      },
+      height: { value: 0 },
+      outputs: { value: 1 },
+    },
+    inputs: 1,
+    outputs: 0,
+    outputLabels: function (index) {
+      const labels = [...this.options.map((i) => i.label)];
+
+      if (this.handle_confirmation_dialogs) {
+        labels.push('Decline', 'Confirm');
+      }
+
+      if (this.trigger_on_change) {
+        labels.push('Triggered on change');
+      }
+
+      return labels[index];
+    },
+    icon: 'ui_dynamic_form.svg',
+    label: function () {
+      return this.name || 'dynamic-form';
+    },
+    oneditprepare: function () {
+      $('#node-input-size').elementSizer({
+        width: '#node-input-width',
+        height: '#node-input-height',
+        group: '#node-input-group',
+      });
+      $('#node-input-title_style').typedInput({
+        types: [
+          {
+            value: 'title_style',
+            options: [
+              { value: 'default', label: 'Default' },
+              { value: 'minimal', label: 'Minimal' },
+              { value: 'outside', label: 'Outside of card' },
+            ],
+          },
+        ],
+      });
+
+      $('#node-input-title_text').typedInput({
+        default: 'str',
+        types: ['str', 'msg'],
+        typeField: '#node-input-title_text_type',
+      });
+
+      function generateOption(i, option) {
+        const container = $('<li/>', {
+          style: 'background: var(--red-ui-secondary-background, #fff); margin:0; padding:8px 0px 0px;',
+        });
+
+        // Create input fields for value and label
+        const row = $('<div/>').appendTo(container);
+        $('<input/>', {
+          class: 'node-input-option-label',
+          type: 'text',
+          style: 'margin-left:7px; width:calc(29%);',
+          placeholder: 'Label',
+          value: option.label,
+        }).appendTo(row);
+
+        $('<input/>', {
+          class: 'node-input-option-condition',
+          type: 'text',
+          style: 'margin-left:7px; width:calc(29%);',
+          placeholder: 'Condition',
+          value: option.condition,
+        }).appendTo(row);
+
+        $('<input/>', {
+          class: 'node-input-option-error',
+          type: 'text',
+          style: 'margin-left:7px; width:calc(29%);',
+          placeholder: 'Error message',
+          value: option.errorMessage,
+        }).appendTo(row);
+
+        $('<input/>', {
+          class: 'node-input-option-alignment',
+          type: 'text',
+          style: 'margin-left:7px; width:calc(29%);',
+          placeholder: 'Alignment',
+          value: option.alignment,
+        })
+          .appendTo(row)
+          .typedInput({
+            types: [
+              {
+                value: 'alignment',
+                options: [
+                  { value: 'left', label: 'Align left' },
+                  { value: 'right', label: 'Align right' },
+                ],
+              },
+            ],
+          });
+
+        $('<input/>', {
+          class: 'node-input-option-primary',
+          type: 'text',
+          style: 'margin-left:7px; width:calc(29%);',
+          placeholder: 'Action type',
+          value: option.primary,
+        })
+          .appendTo(row)
+          .typedInput({
+            types: [
+              {
+                value: 'primary',
+                options: [
+                  { value: 'false', label: 'Secondary action' },
+                  { value: 'true', label: 'Primary action' },
+                ],
+              },
+            ],
+          });
+
+        // Create delete button for the option
+        const finalSpan = $('<span/>', {
+          style: 'float:right; margin-right:8px;',
+        }).appendTo(row);
+        const deleteButton = $('<a/>', {
+          href: '#',
+          class: 'editor-button editor-button-small',
+          style: 'margin-top:7px; margin-left:5px;',
+        }).appendTo(finalSpan);
+        $('<i/>', { class: 'fa fa-remove' }).appendTo(deleteButton);
+
+        deleteButton.click(function () {
+          container.css({
+            background: 'var(--red-ui-secondary-background-inactive, #fee)',
+          });
+          container.fadeOut(300, function () {
+            $(this).remove();
+          });
+        });
+
+        $('#node-input-option-container').append(container);
+      }
+
+      $('#node-input-add-option').click(function () {
+        generateOption($('#node-input-option-container').children().length + 1, {});
+        $('#node-input-option-container-div').scrollTop($('#node-input-option-container-div').get(0).scrollHeight);
+      });
+
+      for (let i = 0; i < this.options.length; i++) {
+        const option = this.options[i];
+        generateOption(i + 1, option);
+      }
+
+      $('#node-input-option-container').sortable({
+        axis: 'y',
+        handle: '.node-input-option-handle',
+        cursor: 'move',
+      });
+    },
+    oneditsave: function () {
+      const options = $('#node-input-option-container').children();
+      const node = this;
+      node.options = [];
+      options.each(function (i) {
+        const option = $(this);
+        const o = {
+          label: option.find('.node-input-option-label').val(),
+          condition: option.find('.node-input-option-condition').val(),
+          errorMessage: option.find('.node-input-option-error').val(),
+          alignment: option.find('.node-input-option-alignment').val(),
+          primary: option.find('.node-input-option-primary').val(),
+        };
+
+        node.options.push(o);
+      });
+
+      this.outputs = node.options.length || 0;
+
+      if ($('#node-input-trigger_on_change').is(':checked')) {
+        this.outputs++;
+      }
+
+      if ($('#node-input-handle_confirmation_dialogs').is(':checked')) {
+        this.outputs += 2;
+      }
+    },
+  });
 </script>
 
 <script type="text/html" data-template-name="ui-dynamic-form">
@@ -302,11 +302,12 @@
     </div>
     <hr />
 
-    <h4>Title Configuration</h4>
-    <div class="form-row">
-        <label for="node-input-title_text"><i class="fa fa-hand"></i>Title text</label>
-        <input type="text" id="node-input-title_text" title="Enter the text to show as a title.">
-    </div>
+  <h4>Title Configuration</h4>
+  <div class="form-row">
+      <label for="node-input-title_text"><i class="fa fa-hand"></i>Title text</label>
+      <input type="text" id="node-input-title_text" title="Enter the text to show as a title.">
+      <input type="hidden" id="node-input-title_text_type">
+  </div>
     <div class="form-row">
         <label for="node-input-title_style"><i class="fa fa-hand"></i>Style</label>
         <input type="text" id="node-input-title_style" title="Select the base styling layout for your title.">
@@ -362,121 +363,123 @@
     </div>
 </script>
 
-
 <script type="text/markdown" data-help-name="ui-dynamic-form">
-A UI-Node to display Forms for UserTasks from the ProcessCube Engine.
+  A UI-Node to display Forms for UserTasks from the ProcessCube Engine.
 
-## States
+  ## States
 
-This component can have one of three states. `Waiting`, `active` and `finished`.
-- `Waiting` is the initial state. This node will either display the waiting text and waiting title, or nothing. This dependes on your configuration. This state can be set at any time by passing a message with an empty payload into this node.
-- `Active` will display a dynamic form for a UserTask. This state can be set by passing the result of the `usertask-input` or `wait-for-usertask` node into it.
-- `Finished` will display the last filled form in a disabled mode. This state can be set by passing the result of the `dynamic-form` node into itself.
+  This component can have one of three states. `Waiting`, `active` and `finished`.
 
-## Usage
+  - `Waiting` is the initial state. This node will either display the waiting text and waiting title, or nothing. This dependes on your configuration. This state can be set at any time by passing a message with an empty payload into this node.
+  - `Active` will display a dynamic form for a UserTask. This state can be set by passing the result of the `usertask-input` or `wait-for-usertask` node into it.
+  - `Finished` will display the last filled form in a disabled mode. This state can be set by passing the result of the `dynamic-form` node into itself.
 
-Connect the input to the `usertask-input` or `wait-for-usertask` node. It will use the UserTasks FormFields configuration to display a dynamically generated Form inside a Card.
-After configuring an action, connect it's output to an `usertask-output` node.
-In case you want to display the `finished` state, place a `link in` and a `link out` node to pipe the `dynamic-form` nodes output into its input.
-In case you want to clear the node and set it back into `waiting` state, place a `function` node that clears the `payload` object. The pipe the `dynamic-form` nodes output into the `function` node and the `function` nodes output into th e`dynamic-form` nodes input.
+  ## Usage
 
-## Action Configuration
+  Connect the input to the `usertask-input` or `wait-for-usertask` node. It will use the UserTasks FormFields configuration to display a dynamically generated Form inside a Card.
+  After configuring an action, connect it's output to an `usertask-output` node.
+  In case you want to display the `finished` state, place a `link in` and a `link out` node to pipe the `dynamic-form` nodes output into its input.
+  In case you want to clear the node and set it back into `waiting` state, place a `function` node that clears the `payload` object. The pipe the `dynamic-form` nodes output into the `function` node and the `function` nodes output into th e`dynamic-form` nodes input.
 
-Actions are buttons displayed at the bottom of the Form.
+  ## Action Configuration
 
-### Actions
+  Actions are buttons displayed at the bottom of the Form.
 
-A Form can have any amount of actions. Each action is specified with a:
+  ### Actions
 
-- **Label**: The buttons text.
-- **Condition (optional)**: An expression that evaluates to true or false. It controls whether the action is enabled or not.
-- **Error message (optional)**: Will be displayed, when Condition evaluates to false.
-- **Alignment**: Controls the buttons position. It can be placed on the left or right side of the form.
-- **Action type**: Controls the styling of the button. There should always be one primary action.
+  A Form can have any amount of actions. Each action is specified with a:
 
-For each action configured, the node will gain a new output, that is named as the linked action.
+  - **Label**: The buttons text.
+  - **Condition (optional)**: An expression that evaluates to true or false. It controls whether the action is enabled or not.
+  - **Error message (optional)**: Will be displayed, when Condition evaluates to false.
+  - **Alignment**: Controls the buttons position. It can be placed on the left or right side of the form.
+  - **Action type**: Controls the styling of the button. There should always be one primary action.
 
-#### Condition
+  For each action configured, the node will gain a new output, that is named as the linked action.
 
-Various values can be accessed inside the condition through following constants:
+  #### Condition
 
-Access to the message object is available through _msg_
+  Various values can be accessed inside the condition through following constants:
 
-Access to the form fields is available through the _fields_ object. A single form field can be accessed by selecting the field id as a key.
-Example: _fields.field_01_
+  Access to the message object is available through _msg_
 
-Access to the usertask object is available through _usertask_
+  Access to the form fields is available through the _fields_ object. A single form field can be accessed by selecting the field id as a key.
+  Example: _fields.field_01_
 
-### Handles confirmation dialogs
+  Access to the usertask object is available through _usertask_
 
-When checked, this node will gain two additional outputs 'Accept' and 'Decline'. These are required, when handling confirmation dialogs, that may be defined in the Studio by settings a Form Fields type to 'Confirm'.
-The outputs defined by the 'Actions' section of this node won't show up, when a 'Confirm'-FormField is present.
+  ### Handles confirmation dialogs
 
-### Inside of card
+  When checked, this node will gain two additional outputs 'Accept' and 'Decline'. These are required, when handling confirmation dialogs, that may be defined in the Studio by settings a Form Fields type to 'Confirm'.
+  The outputs defined by the 'Actions' section of this node won't show up, when a 'Confirm'-FormField is present.
 
-This property controls the positioning of the action buttons. They can be palced inside of the card, right below the FormFields, or below the whole Card containing the Form.
+  ### Inside of card
 
-## Title Configuration
+  This property controls the positioning of the action buttons. They can be palced inside of the card, right below the FormFields, or below the whole Card containing the Form.
 
-### Title
+  ## Title Configuration
 
-The text displayed above the FormFields in the Cards header. When left empty, there will be no header in the Card.
+  ### Title
 
-### Style
+  The text displayed above the FormFields in the Cards header. When left empty, there will be no header in the Card.
 
-Controls the headers styling. `Default` is the recommended 5Minds theming. `Minimal` might be used to apply custom stylings and `Outside of card` places the title right above the card.
+  ### Style
 
-### Custom text styling
+  Controls the headers styling. `Default` is the recommended 5Minds theming. `Minimal` might be used to apply custom stylings and `Outside of card` places the title right above the card.
 
-Enter custom css rules to modifiy how the title text is displayed. This can be used particulary well together with the style `Minimal`.
+  ### Custom text styling
 
-### Title icon
+  Enter custom css rules to modifiy how the title text is displayed. This can be used particulary well together with the style `Minimal`.
 
-An URL for an image, that should be displayed before the text. This will be used as the `src`-Property of a HTML `img`-Element. Therefore DataURLs can be used to add images/svgs etc., that are not available online.
+  ### Title icon
 
-## Appearance
+  An URL for an image, that should be displayed before the text. This will be used as the `src`-Property of a HTML `img`-Element. Therefore DataURLs can be used to add images/svgs etc., that are not available online.
 
-### Card size styling
+  ## Appearance
 
-Enter custom css rules to control the size and placement of the whole card. It can be used to set a `max-width` for the Card, apply a `margin` etc.
+  ### Card size styling
 
-### Inner card size styling
+  Enter custom css rules to control the size and placement of the whole card. It can be used to set a `max-width` for the Card, apply a `margin` etc.
 
-Enter custom css rules to control the size of the inner part, that contains just the form fields. It can be used to override the `max-height` property.
+  ### Inner card size styling
 
-### Columns in form
+  Enter custom css rules to control the size of the inner part, that contains just the form fields.
+  It can be used to override the `max-height` property.
+  E.g. `max-height: none;` will remove the default `max-height` of 550px, so that the card can grow indefinitely.
 
-This value controls the amount of columns the card will have. It can be used to place multiple FormFields in one row.
-Configure `hidden` FormFields in your UserTask configuration to leave spaces open between FormFields. FormFields with type `heading` will always take up a whole line regardless of the `Columns in Form` value.
+  ### Columns in form
 
-### Readonly
+  This value controls the amount of columns the card will have. It can be used to place multiple FormFields in one row.
+  Configure `hidden` FormFields in your UserTask configuration to leave spaces open between FormFields. FormFields with type `heading` will always take up a whole line regardless of the `Columns in Form` value.
 
-When checked, all fields in the Form will not be editable. To mark single FormFields as readOnly, add the custom property `readOnly` with the value `true` to the FormField configuration of the UserTask.
+  ### Readonly
 
-### Collapsible
+  When checked, all fields in the Form will not be editable. To mark single FormFields as readOnly, add the custom property `readOnly` with the value `true` to the FormField configuration of the UserTask.
 
-When checked, the card will have a collapse icon and can be folded at any.
+  ### Collapsible
 
-### Collapsible when finished
+  When checked, the card will have a collapse icon and can be folded at any.
 
-When checked, the card will gain a collapse icon and automatically fold, after the node entered `finished` state. This is independed to `Collapsible`.
+  ### Collapsible when finished
 
-### Title for waiting text
+  When checked, the card will gain a collapse icon and automatically fold, after the node entered `finished` state. This is independed to `Collapsible`.
 
-While no UserTask is present, this text will be displayed.
+  ### Title for waiting text
 
-### Text for waiting text
+  While no UserTask is present, this text will be displayed.
 
-While no UserTask is present, this text will be displayed.
+  ### Text for waiting text
 
-## Other
+  While no UserTask is present, this text will be displayed.
 
-### Trigger on change
+  ## Other
 
-Adds a new output to the node. This output will be triggered each time a FormFields value changes. This can be used for live, server-side validation or for Forms without action buttons.
+  ### Trigger on change
 
-## References
+  Adds a new output to the node. This output will be triggered each time a FormFields value changes. This can be used for live, server-side validation or for Forms without action buttons.
 
--   [The ProcessCube Developer Network](https://processcube.io) - All documentation for the ProcessCube&copy; Plattform
--   [Node-RED Integration in ProcessCube&copy;](https://processcube.io/docs/node-red) - Node-RED Integration in ProcessCube&copy;
+  ## References
+
+  - [The ProcessCube Developer Network](https://processcube.io) - All documentation for the ProcessCube&copy; Plattform
+  - [Node-RED Integration in ProcessCube&copy;](https://processcube.io/docs/node-red) - Node-RED Integration in ProcessCube&copy;
 </script>
