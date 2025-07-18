@@ -781,8 +781,7 @@ export default {
             if (field.type === 'header') {
                 style += 'flex-basis: 100%;'
             } else {
-                // On desktop, use form_columns; on mobile, always 100%
-                style += `flex-basis: 100%;` // Mobile default
+                style += `flex-basis: 100%;`
             }
             return style
         },
