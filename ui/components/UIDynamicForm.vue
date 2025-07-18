@@ -266,13 +266,14 @@ export default {
                             required: field.required,
                             value: this.formData[field.id],
                             number: 'integer',
+                            min: 0,
+                            validation: validation ? `${validation}|number` : 'number',
                             help: hint,
                             wrapperClass: '$remove:formkit-wrapper',
                             labelClass: 'ui-dynamic-form-input-label',
                             inputClass: `input-${this.theme}`,
                             innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                             readonly: isReadOnly,
-                            validation,
                             validationVisibility: 'live'
                         }
                     }
@@ -288,13 +289,14 @@ export default {
                             required: field.required,
                             value: this.formData[field.id],
                             step,
+                            number: 'float',
+                            validation: validation ? `${validation}|number` : 'number',
                             help: hint,
                             wrapperClass: '$remove:formkit-wrapper',
                             labelClass: 'ui-dynamic-form-input-label',
                             inputClass: `input-${this.theme}`,
                             innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
                             readonly: isReadOnly,
-                            validation,
                             validationVisibility: 'live'
                         }
                     }
@@ -891,13 +893,32 @@ export default {
 
             if (this.checkCondition(action.condition)) {
                 this.showError('')
-                // TODO: MM - begin
-                // this.send(
-                //    { payload: { formData: this.formData, userTask: this.userTask } },
-                //    this.actions.findIndex((element) => element.label === action.label)
-                // );
+
+                const processedFormData = { ...this.formData }
+                const formFields = this.userTask.userTaskConfig.formFields
+
+                formFields.forEach(field => {
+                    const fieldValue = processedFormData[field.id]
+
+                    if (field.type === 'number' || field.type === 'long') {
+                        if (fieldValue !== null && fieldValue !== undefined && fieldValue !== '') {
+                            if (field.type === 'long') {
+                                const intValue = parseInt(fieldValue, 10)
+                                if (!isNaN(intValue)) {
+                                    processedFormData[field.id] = intValue
+                                }
+                            } else {
+                                const numValue = parseFloat(fieldValue)
+                                if (!isNaN(numValue)) {
+                                    processedFormData[field.id] = numValue
+                                }
+                            }
+                        }
+                    }
+                })
+
                 const msg = this.msg ?? {}
-                msg.payload = { formData: this.formData, userTask: this.userTask }
+                msg.payload = { formData: processedFormData, userTask: this.userTask }
                 this.send(
                     msg,
                     this.actions.findIndex((element) => element.label === action.label) +
