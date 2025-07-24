@@ -130,6 +130,42 @@ code {
   padding: 8px;
 }
 
+.ui-dynamic-form-footer-actions-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ui-dynamic-form-footer-actions-left,
+.ui-dynamic-form-footer-actions-right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.ui-dynamic-form-footer-action-button {
+  min-height: 36px;
+  padding: 8px 12px;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+@media screen and (min-width: 600px) {
+  .ui-dynamic-form-footer-actions-container {
+    flex-wrap: wrap;
+  }
+
+  .ui-dynamic-form-footer-action-button {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
 .ui-dynamic-form-wrapper {
   --fk-color-primary: rgb(var(--v-theme-primary)) !important;
   --fk-color-border: rgb(var(--v-theme-group-outline)); /* Does not work somehow */
@@ -143,6 +179,202 @@ code {
   .ui-dynamic-form-external-sizing-wrapper {
     max-width: none;
     max-height: 90%;
+  }
+}
+
+@media only screen and (max-width: 599px) {
+  .ui-dynamic-form-external-sizing-wrapper {
+    max-width: 100vw;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  .ui-dynamic-form-wrapper {
+    padding: 8px;
+    margin: 0;
+    overflow-x: hidden;
+  }
+
+  .ui-dynamic-form-formfield-positioner {
+    padding: 16px;
+    padding-top: 8px;
+    max-height: calc(100vh - 200px);
+    column-gap: 0px;
+    flex-direction: column;
+    border-left: none;
+    border-right: none;
+    overflow-x: hidden;
+  }
+
+  .ui-dynamic-form-title-default {
+    padding: 16px;
+    font-size: 24px;
+    border-left: none;
+    border-right: none;
+  }
+
+  .ui-dynamic-form-title-minimal {
+    padding: 12px;
+    border-left: none;
+    border-right: none;
+  }
+
+  .ui-dynamic-form-title-outside {
+    padding: 12px 16px;
+    font-size: 20px;
+  }
+
+  .ui-dynamic-form-footer-common {
+    padding: 12px 16px;
+    gap: 12px;
+    margin: 0;
+  }
+
+  .input-light,
+  .input-default,
+  .input-dark {
+    font-size: 16px;
+    padding: 12px 8px;
+    min-height: 44px;
+  }
+
+  .ui-dynamic-form-input-label {
+    font-size: 16px;
+    padding-bottom: 8px;
+  }
+
+  .ui-dynamic-form-footer-actions-container {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .ui-dynamic-form-footer-actions-left,
+  .ui-dynamic-form-footer-actions-right {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .ui-dynamic-form-footer-actions-left > div,
+  .ui-dynamic-form-footer-actions-right > div {
+    width: 100%;
+  }
+
+  .ui-dynamic-form-footer-action-button {
+    min-height: 44px;
+    padding: 12px 16px;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ui-dynamic-form-footer-action-button .v-btn__content {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    display: block !important;
+  }
+
+  .ui-dynamic-form-footer-action-primary,
+  .ui-dynamic-form-footer-action-secondary {
+    min-height: 44px;
+    font-size: 16px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .ui-dynamic-form-footer-action-primary .v-btn__content,
+  .ui-dynamic-form-footer-action-secondary .v-btn__content {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 100% !important;
+    display: block !important;
+  }
+
+  .ui-dynamic-form-formfield-positioner .v-row {
+    margin-bottom: 16px;
+    flex-basis: 100% !important;
+  }
+
+  .ui-dynamic-form-formfield-positioner select,
+  .ui-dynamic-form-formfield-positioner textarea {
+    font-size: 16px;
+    min-height: 44px;
+    padding: 12px 8px;
+  }
+
+  .ui-dynamic-form-formfield-positioner input[type="checkbox"],
+  .ui-dynamic-form-formfield-positioner input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+  }
+
+  .ui-dynamic-form-formfield-positioner input[type="file"] {
+    font-size: 16px;
+    padding: 12px 8px;
+  }
+
+  .ui-dynamic-form-title-default h3 svg,
+  .ui-dynamic-form-title-minimal h3 svg,
+  .ui-dynamic-form-title-outside h3 svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .ui-dynamic-form-title-responsive {
+    gap: 15px !important;
+    flex-wrap: wrap;
+  }
+
+  .ui-dynamic-form-title-responsive img {
+    max-width: 32px;
+    height: auto;
+  }
+
+  .ui-dynamic-form-formfield-positioner {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media only screen and (max-width: 480px) {
+  .ui-dynamic-form-formfield-positioner {
+    padding: 12px;
+    padding-top: 4px;
+  }
+
+  .ui-dynamic-form-title-default {
+    padding: 12px;
+    font-size: 20px;
+  }
+
+  .ui-dynamic-form-title-outside {
+    font-size: 18px;
+  }
+
+  .input-light,
+  .input-default,
+  .input-dark {
+    font-size: 16px;
+    padding: 10px 6px;
+  }
+
+  .ui-dynamic-form-input-label {
+    font-size: 14px;
+  }
+
+  .ui-dynamic-form-footer-action-button {
+    min-height: 48px;
+    font-size: 16px;
+    padding: 12px 16px;
   }
 }
 
@@ -174,6 +406,28 @@ code {
   border-left: 2px solid #f6f5fa;
   border-right: 2px solid #f6f5fa;
   border-radius: 0px 0px 6px 6px;
+}
+
+@media (min-width: 600px) {
+  .ui-dynamic-form-formfield-positioner .v-row:not(.ui-dynamic-form-header-row) {
+    flex-basis: calc(50% - 10px); /* Default 2 columns, adjust based on form_columns */
+  }
+
+  .ui-dynamic-form-formfield-positioner[data-columns="1"] .v-row:not(.ui-dynamic-form-header-row) {
+    flex-basis: 100%;
+  }
+
+  .ui-dynamic-form-formfield-positioner[data-columns="2"] .v-row:not(.ui-dynamic-form-header-row) {
+    flex-basis: calc(50% - 10px);
+  }
+
+  .ui-dynamic-form-formfield-positioner[data-columns="3"] .v-row:not(.ui-dynamic-form-header-row) {
+    flex-basis: calc(33.333% - 14px);
+  }
+
+  .ui-dynamic-form-formfield-positioner[data-columns="4"] .v-row:not(.ui-dynamic-form-header-row) {
+    flex-basis: calc(25% - 15px);
+  }
 }
 
 .ui-dynamic-form-formfield-positioner h1,

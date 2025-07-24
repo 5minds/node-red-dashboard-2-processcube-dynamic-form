@@ -15,9 +15,11 @@
                         :collapsed="collapsed" :toggleCollapse="toggleCollapse" />
                     <Transition name="cardCollapse">
                         <div v-if="!collapsed">
-                            <div className="ui-dynamic-form-formfield-positioner" :style="props.inner_card_styling">
+                            <div className="ui-dynamic-form-formfield-positioner" :style="props.inner_card_styling"
+                                :data-columns="props.form_columns || 1">
                                 <FormKit id="form" type="group">
                                     <v-row v-for="(field, index) in fields()" :key="field"
+                                        :class="field.type === 'header' ? 'ui-dynamic-form-header-row' : ''"
                                         :style="getRowWidthStyling(field, index)">
                                         <v-col cols="12">
                                             <component :is="createComponent(field).type"
@@ -779,7 +781,7 @@ export default {
             if (field.type === 'header') {
                 style += 'flex-basis: 100%;'
             } else {
-                style += `flex-basis: ${(1 / this.props.form_columns) * 100}%;`
+                style += `flex-basis: 100%;`
             }
             return style
         },
