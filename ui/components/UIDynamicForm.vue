@@ -905,12 +905,12 @@ export default {
                     if (field.type === 'number' || field.type === 'long') {
                         if (fieldValue !== null && fieldValue !== undefined && fieldValue !== '') {
                             if (field.type === 'long') {
-                                const intValue = parseInt(fieldValue, 10)
+                                const intValue = Number.parseInt(fieldValue, 10)
                                 if (!isNaN(intValue)) {
                                     processedFormData[field.id] = intValue
                                 }
                             } else {
-                                const numValue = parseFloat(fieldValue)
+                                const numValue = Number.parseFloat(fieldValue)
                                 if (!isNaN(numValue)) {
                                     processedFormData[field.id] = numValue
                                 }
