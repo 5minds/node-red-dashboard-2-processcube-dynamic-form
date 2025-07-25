@@ -1042,7 +1042,7 @@ export default {
 
             const formFields = this.userTask.userTaskConfig.formFields;
             const formFieldIds = formFields.map((ff) => ff.id);
-            const initialValues = this.userTask.startToken.formData; //luis777
+            const initialValues = this.userTask.startToken;
             const finishedFormData = msg.payload.formData;
             this.formIsFinished = !!msg.payload.formData;
             if (this.formIsFinished) {
@@ -1092,7 +1092,6 @@ export default {
                     Object.keys(initialValues)
                         .filter((key) => formFieldIds.includes(key))
                         .forEach((key) => {
-                            console.log('luis888.2', key, initialValues[key]);
                             this.formData[key] = initialValues[key];
                         });
                 }
