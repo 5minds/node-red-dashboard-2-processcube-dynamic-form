@@ -41,7 +41,19 @@
                                         <v-col cols="12">
                                             <component
                                                 :is="getFieldComponent(field).type"
-                                                v-if="getFieldComponent(field).innerText"
+                                                v-if="getFieldComponent(field).innerHTML"
+                                                v-bind="getFieldComponent(field).props"
+                                                :class="getFieldComponent(field).class"
+                                                v-html="getFieldComponent(field).innerHTML"
+                                                :ref="
+                                                    (el) => {
+                                                        if (index === 0) firstFormFieldRef = el;
+                                                    }
+                                                "
+                                            />
+                                            <component
+                                                :is="getFieldComponent(field).type"
+                                                v-else-if="getFieldComponent(field).innerText"
                                                 v-bind="getFieldComponent(field).props"
                                                 :ref="
                                                     (el) => {
@@ -81,6 +93,48 @@
                                                 "
                                                 v-model="formData[field.id]"
                                             />
+                                            <!-- <component
+                                                :is="getFieldComponent(field).type"
+                                                v-if="getFieldComponent(field).innerText"
+                                                v-bind="getFieldComponent(field).props"
+                                                :ref="
+                                                    (el) => {
+                                                        if (index === 0) firstFormFieldRef = el;
+                                                    }
+                                                "
+                                                v-model="formData[field.id]"
+                                            >
+                                                {{ getFieldComponent(field).innerText }}
+                                            </component>
+                                            <div v-else-if="getFieldComponent(field).type == 'v-slider'">
+                                                <p class="formkit-label">{{ field.label }}</p>
+                                                <component
+                                                    :is="getFieldComponent(field).type"
+                                                    v-bind="getFieldComponent(field).props"
+                                                    :ref="
+                                                        (el) => {
+                                                            if (index === 0) firstFormFieldRef = el;
+                                                        }
+                                                    "
+                                                    v-model="field.defaultValue"
+                                                />
+                                                <p class="formkit-help">
+                                                    {{
+                                                        field.customForm ? JSON.parse(field.customForm).hint : undefined
+                                                    }}
+                                                </p>
+                                            </div>
+                                            <component
+                                                :is="getFieldComponent(field).type"
+                                                v-else
+                                                v-bind="getFieldComponent(field).props"
+                                                :ref="
+                                                    (el) => {
+                                                        if (index === 0) firstFormFieldRef = el;
+                                                    }
+                                                "
+                                                v-model="formData[field.id]"
+                                            /> -->
                                         </v-col>
                                     </v-row>
                                 </FormKit>
@@ -115,18 +169,17 @@
     </div>
 </template>
 
-<!-- eslint-disable no-case-declarations -->
 <script>
 import { de } from '@formkit/i18n';
 import { FormKit, defaultConfig, plugin } from '@formkit/vue';
 import { getCurrentInstance, markRaw, nextTick } from 'vue';
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';
 
-// eslint-disable-next-line import/no-unresolved
 import '@formkit/themes/genesis';
 import UIDynamicFormFooterAction from './FooterActions.vue';
 import UIDynamicFormTitleText from './TitleText.vue';
 
-// eslint-disable-next-line no-unused-vars
 function requiredIf({ value }, [targetField, expectedValue], node) {
     console.debug(arguments);
 
@@ -134,10 +187,42 @@ function requiredIf({ value }, [targetField, expectedValue], node) {
     const isEmpty = value === '' || value === null || value === undefined;
 
     if (actual === expectedValue && isEmpty) {
-        return false; // oder: `return "Dieses Feld ist erforderlich."`
+        return false;
     }
 
     return true;
+}
+
+class MarkdownRenderer extends marked.Renderer {
+    link(params) {
+        const link = super.link(params);
+        return link.replace('<a', "<a target='_blank'");
+    }
+
+    html(params) {
+        const result = super.html(params);
+        if (result.startsWith('<a ') && !result.includes('target=')) {
+            return result.replace('<a ', `<a target="_blank" `);
+        }
+        return result;
+    }
+}
+
+class MarkedHooks extends marked.Hooks {
+    postprocess(html) {
+        return DOMPurify.sanitize(html, { ADD_ATTR: ['target'] });
+    }
+}
+
+function processMarkdown(content) {
+    if (!content) return '';
+
+    const html = marked.parse(content.toString(), {
+        renderer: new MarkdownRenderer(),
+        hooks: new MarkedHooks(),
+    });
+
+    return html;
 }
 
 export default {
@@ -306,6 +391,7 @@ export default {
         },
 
         createComponent(field) {
+            console.debug('Creating component for field:', field);
             const customForm = field.customForm ? JSON.parse(field.customForm) : {};
             const hint = customForm.hint;
             const placeholder = customForm.placeholder;
@@ -767,9 +853,12 @@ export default {
                         },
                     };
                 case 'paragraph':
+                    const paragraphContent = this.formData[field.id] || field.defaultValue || field.label || '';
+                    const processedHtml = processMarkdown(paragraphContent);
                     return {
-                        type: 'p',
-                        innerText: this.formData[field.id],
+                        type: 'div',
+                        innerHTML: processedHtml,
+                        class: 'ui-dynamic-form-paragraph',
                     };
                 case 'password':
                     return {
@@ -1011,9 +1100,9 @@ export default {
             return fieldMap;
         },
         /*
-                    widget-action just sends a msg to Node-RED, it does not store the msg state server-side
-                    alternatively, you can use widget-change, which will also store the msg in the Node's datastore
-                */
+                            widget-action just sends a msg to Node-RED, it does not store the msg state server-side
+                            alternatively, you can use widget-change, which will also store the msg in the Node's datastore
+                        */
         send(msg, index) {
             const msgArr = [];
             msgArr[index] = msg;
