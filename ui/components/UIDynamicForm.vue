@@ -93,48 +93,6 @@
                                                 "
                                                 v-model="formData[field.id]"
                                             />
-                                            <!-- <component
-                                                :is="getFieldComponent(field).type"
-                                                v-if="getFieldComponent(field).innerText"
-                                                v-bind="getFieldComponent(field).props"
-                                                :ref="
-                                                    (el) => {
-                                                        if (index === 0) firstFormFieldRef = el;
-                                                    }
-                                                "
-                                                v-model="formData[field.id]"
-                                            >
-                                                {{ getFieldComponent(field).innerText }}
-                                            </component>
-                                            <div v-else-if="getFieldComponent(field).type == 'v-slider'">
-                                                <p class="formkit-label">{{ field.label }}</p>
-                                                <component
-                                                    :is="getFieldComponent(field).type"
-                                                    v-bind="getFieldComponent(field).props"
-                                                    :ref="
-                                                        (el) => {
-                                                            if (index === 0) firstFormFieldRef = el;
-                                                        }
-                                                    "
-                                                    v-model="field.defaultValue"
-                                                />
-                                                <p class="formkit-help">
-                                                    {{
-                                                        field.customForm ? JSON.parse(field.customForm).hint : undefined
-                                                    }}
-                                                </p>
-                                            </div>
-                                            <component
-                                                :is="getFieldComponent(field).type"
-                                                v-else
-                                                v-bind="getFieldComponent(field).props"
-                                                :ref="
-                                                    (el) => {
-                                                        if (index === 0) firstFormFieldRef = el;
-                                                    }
-                                                "
-                                                v-model="formData[field.id]"
-                                            /> -->
                                         </v-col>
                                     </v-row>
                                 </FormKit>
@@ -181,8 +139,6 @@ import UIDynamicFormFooterAction from './FooterActions.vue';
 import UIDynamicFormTitleText from './TitleText.vue';
 
 function requiredIf({ value }, [targetField, expectedValue], node) {
-    console.debug(arguments);
-
     const actual = node?.root?.value?.[targetField];
     const isEmpty = value === '' || value === null || value === undefined;
 
@@ -243,9 +199,6 @@ export default {
         },
     },
     setup(props) {
-        console.info('UIDynamicForm setup with:', props);
-        console.debug('Vue function loaded correctly', markRaw);
-
         const instance = getCurrentInstance();
         const app = instance.appContext.app;
 
@@ -253,7 +206,6 @@ export default {
             theme: 'genesis',
             locales: { de },
             locale: 'de',
-            // eslint-disable-next-line object-shorthand
             rules: { requiredIf: requiredIf },
         });
         app.use(plugin, formkitConfig);
@@ -269,7 +221,8 @@ export default {
             msg: null,
             collapsed: false,
             firstFormFieldRef: null,
-            componentCache: new Map(), // Add caching for components
+            intersectionObserver: null,
+            visibleFileFields: new Set(),
         };
     },
     computed: {
@@ -290,7 +243,7 @@ export default {
             );
         },
         isConfirmDialog() {
-            return this.userTask.userTaskConfig.formFields.some((field) => field.type === 'confirm');
+            return this.userTask?.userTaskConfig?.formFields?.some((field) => field.type === 'confirm') || false;
         },
         effectiveTitle() {
             if (this.props.title_text_type === 'str') {
@@ -300,6 +253,29 @@ export default {
             } else {
                 return '';
             }
+        },
+        // Optimized computed property for field components
+        fieldComponents() {
+            if (!this.userTask?.userTaskConfig?.formFields) {
+                return {};
+            }
+
+            const components = {};
+            const aFields = this.userTask.userTaskConfig.formFields;
+
+            aFields.forEach((field) => {
+                components[field.id] = this.createComponent(field);
+            });
+
+            return components;
+        },
+        // Optimized computed property for fields
+        computedFields() {
+            const aFields = this.userTask?.userTaskConfig?.formFields ?? [];
+            return aFields.map((field) => ({
+                ...field,
+                items: mapItems(field.type, field),
+            }));
         },
     },
     watch: {
@@ -354,6 +330,9 @@ export default {
             element.classList.add('test');
         });
 
+        // Initialize Intersection Observer for lazy loading
+        this.initLazyLoading();
+
         this.$socket.on('widget-load:' + this.id, (msg) => {
             this.init(msg);
         });
@@ -368,114 +347,161 @@ export default {
         /* Make sure, any events you subscribe to on SocketIO are unsubscribed to here */
         this.$socket?.off('widget-load' + this.id);
         this.$socket?.off('msg-input:' + this.id);
+
+        // Clean up Intersection Observer
+        if (this.intersectionObserver) {
+            this.intersectionObserver.disconnect();
+        }
     },
     methods: {
-        // Performance optimized component caching
+        // Simplified component getter - now just returns from computed cache
         getFieldComponent(field) {
-            const cacheKey = `${field.id}_${JSON.stringify(this.formData[field.id])}_${this.formIsFinished}_${
-                this.theme
-            }`;
-
-            if (this.componentCache.has(cacheKey)) {
-                return this.componentCache.get(cacheKey);
-            }
-
-            const component = this.createComponent(field);
-            this.componentCache.set(cacheKey, component);
-            return component;
+            return this.fieldComponents[field.id] || this.createComponent(field);
         },
 
         // Clear cache when form data changes
         clearComponentCache() {
-            this.componentCache.clear();
+            // This is now handled by computed properties automatically
         },
 
         createComponent(field) {
-            console.debug('Creating component for field:', field);
             const customForm = field.customForm ? JSON.parse(field.customForm) : {};
-            const hint = customForm.hint;
-            const placeholder = customForm.placeholder;
-            const validation = customForm.validation;
+            const { hint, placeholder, validation, customProperties = [] } = customForm;
             const name = field.id;
-            const customProperties = customForm.customProperties ?? [];
             const isReadOnly =
                 this.props.readonly ||
                 this.formIsFinished ||
-                customProperties.find(
+                customProperties.some(
                     (entry) => ['readOnly', 'readonly'].includes(entry.name) && entry.value === 'true'
                 )
                     ? 'true'
                     : undefined;
+
+            const commonFormKitProps = {
+                id: field.id,
+                name,
+                label: field.label,
+                required: field.required,
+                value: this.formData[field.id],
+                help: hint,
+                wrapperClass: '$remove:formkit-wrapper',
+                labelClass: 'ui-dynamic-form-input-label',
+                inputClass: `input-${this.theme}`,
+                innerClass: `ui-dynamic-form-input-outlines ${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
+                readonly: isReadOnly,
+                validation,
+                validationVisibility: 'live',
+            };
+
             switch (field.type) {
                 case 'long':
                     return {
                         type: 'FormKit',
                         props: {
+                            ...commonFormKitProps,
                             type: 'number',
-                            id: field.id,
-                            name,
-                            label: field.label,
-                            required: field.required,
-                            value: this.formData[field.id],
                             number: 'integer',
                             min: 0,
                             validation: validation ? `${validation}|number` : 'number',
-                            help: hint,
-                            wrapperClass: '$remove:formkit-wrapper',
-                            labelClass: 'ui-dynamic-form-input-label',
-                            inputClass: `input-${this.theme}`,
-                            innerClass: `ui-dynamic-form-input-outlines ${
-                                this.theme === 'dark' ? '$remove:formkit-inner' : ''
-                            }`,
-                            readonly: isReadOnly,
-                            validationVisibility: 'live',
                         },
                     };
                 case 'number':
-                    const step = field.customForm ? JSON.parse(field.customForm).step : undefined;
+                    const step = customForm.step;
                     return {
                         type: 'FormKit',
                         props: {
+                            ...commonFormKitProps,
                             type: 'number',
-                            id: field.id,
-                            name,
-                            label: field.label,
-                            required: field.required,
-                            value: this.formData[field.id],
                             step,
                             number: 'float',
                             validation: validation ? `${validation}|number` : 'number',
-                            help: hint,
-                            wrapperClass: '$remove:formkit-wrapper',
-                            labelClass: 'ui-dynamic-form-input-label',
-                            inputClass: `input-${this.theme}`,
-                            innerClass: `ui-dynamic-form-input-outlines ${
-                                this.theme === 'dark' ? '$remove:formkit-inner' : ''
-                            }`,
-                            readonly: isReadOnly,
-                            validationVisibility: 'live',
                         },
                     };
                 case 'date':
                     return {
                         type: 'FormKit',
                         props: {
+                            ...commonFormKitProps,
                             type: 'date',
-                            id: field.id,
-                            name,
-                            label: field.label,
-                            required: field.required,
-                            value: this.formData[field.id],
-                            help: hint,
-                            wrapperClass: '$remove:formkit-wrapper',
-                            labelClass: 'ui-dynamic-form-input-label',
-                            inputClass: `input-${this.theme}`,
-                            innerClass: `ui-dynamic-form-input-outlines ${
-                                this.theme === 'dark' ? '$remove:formkit-inner' : ''
-                            }`,
-                            readonly: isReadOnly,
-                            validation,
-                            validationVisibility: 'live',
+                        },
+                    };
+                case 'string':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            ...commonFormKitProps,
+                            type: 'text',
+                            placeholder,
+                        },
+                    };
+                case 'email':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            ...commonFormKitProps,
+                            type: 'email',
+                            placeholder,
+                        },
+                    };
+                case 'password':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            ...commonFormKitProps,
+                            type: 'password',
+                            placeholder,
+                        },
+                    };
+                case 'tel':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            ...commonFormKitProps,
+                            type: 'tel',
+                            placeholder,
+                        },
+                    };
+                case 'url':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            ...commonFormKitProps,
+                            type: 'url',
+                            placeholder,
+                        },
+                    };
+                case 'time':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            ...commonFormKitProps,
+                            type: 'time',
+                            placeholder,
+                        },
+                    };
+                case 'week':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            ...commonFormKitProps,
+                            type: 'week',
+                            placeholder,
+                        },
+                    };
+                case 'month':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            ...commonFormKitProps,
+                            type: 'month',
+                        },
+                    };
+                case 'datetime-local':
+                    return {
+                        type: 'FormKit',
+                        props: {
+                            ...commonFormKitProps,
+                            type: 'datetime-local',
                         },
                     };
                 case 'enum':
@@ -591,106 +617,59 @@ export default {
                             ? this.formData[originalFieldId]
                             : [this.formData[originalFieldId]];
 
-                        // Separate images from other files
-                        const images = [];
-                        const otherFiles = [];
+                        // Create unique container ID for this field
+                        const containerId = `file-preview-${field.id}`;
 
-                        fileDataArray.forEach((fileData) => {
-                            const fileName = fileData.name || '';
-                            const isImage = fileName.toLowerCase().match(/\.(png|jpg|jpeg|gif|webp)$/);
-
-                            if (isImage && fileData.file && fileData.file.data) {
-                                // Convert buffer to base64 data URL for image display - safe for large files
-                                const uint8Array = new Uint8Array(fileData.file.data);
-                                let binaryString = '';
-
-                                // Process in chunks to avoid call stack overflow
-                                const chunkSize = 1024;
-                                for (let i = 0; i < uint8Array.length; i += chunkSize) {
-                                    const chunk = uint8Array.slice(i, i + chunkSize);
-                                    binaryString += String.fromCharCode.apply(null, chunk);
-                                }
-
-                                const base64String = btoa(binaryString);
-                                const mimeType = fileName.toLowerCase().endsWith('.png')
-                                    ? 'image/png'
-                                    : fileName.toLowerCase().endsWith('.gif')
-                                    ? 'image/gif'
-                                    : 'image/jpeg';
-                                const dataURL = `data:${mimeType};base64,${base64String}`;
-
-                                images.push({ fileName, dataURL, fileData });
-                            } else {
-                                otherFiles.push({ fileName, fileData });
-                            }
-                        });
-
-                        let content = `<label class="ui-dynamic-form-input-label">${field.label} (Vorschau)${
-                            field.required ? ' *' : ''
-                        }</label>`;
-
-                        // Display images
-                        if (images.length > 0) {
-                            content += '<div style="margin-top: 8px;">';
-                            content += '<div style="font-weight: bold; margin-bottom: 8px;">Bilder:</div>';
-                            images.forEach((img, index) => {
-                                const downloadId = `download-img-${field.id}-${index}`;
-                                content += `
-                                    <div style="display: inline-block; margin: 8px; text-align: center; vertical-align: top;">
-                                        <img src="${img.dataURL}" alt="${img.fileName}"
-                                             style="max-width: 300px; max-height: 200px; border: 1px solid #ccc; display: block; cursor: pointer;"
-                                             onclick="document.getElementById('${downloadId}').click();" />
-                                        <div style="margin-top: 4px; font-size: 0.9em; color: #666; max-width: 300px; word-break: break-word;">
-                                            ${img.fileName}
-                                        </div>
-                                        <a id="${downloadId}" href="${img.dataURL}" download="${img.fileName}" style="display: none;"></a>
+                        // Check if this field is already visible (for immediate processing)
+                        if (this.visibleFileFields.has(field.id)) {
+                            // Return loading state initially
+                            const loadingContent = `
+                                <div id="${containerId}" data-lazy-field="${field.id}">
+                                    <label class="ui-dynamic-form-input-label">${field.label} (Vorschau)${
+                                field.required ? ' *' : ''
+                            }</label>
+                                    <div style="margin-top: 8px; padding: 20px; text-align: center; color: #666;">
+                                        <div style="font-size: 1.2em; margin-bottom: 8px;">⏳</div>
+                                        <div>Dateien werden geladen...</div>
                                     </div>
-                                `;
-                            });
-                            content += '</div>';
-                        }
+                                </div>
+                            `;
 
-                        // Display other files as list
-                        if (otherFiles.length > 0) {
-                            content +=
-                                '<div style="margin-top: 12px; padding: 12px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;">';
-                            content += '<div style="font-weight: bold; margin-bottom: 8px;">Weitere Dateien:</div>';
-                            otherFiles.forEach((file, index) => {
-                                const downloadId = `download-file-${field.id}-${index}`;
-                                const uint8Array = new Uint8Array(file.fileData.file.data);
-                                let binaryString = '';
+                            // Process files asynchronously
+                            setTimeout(() => {
+                                this.processFilePreview(containerId, fileDataArray, field);
+                            }, 0);
 
-                                // Process in chunks for download
-                                const chunkSize = 1024;
-                                for (let i = 0; i < uint8Array.length; i += chunkSize) {
-                                    const chunk = uint8Array.slice(i, i + chunkSize);
-                                    binaryString += String.fromCharCode.apply(null, chunk);
-                                }
-
-                                const base64String = btoa(binaryString);
-                                const dataURL = `data:application/octet-stream;base64,${base64String}`;
-
-                                content += `
-                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; padding: 4px; border-radius: 3px; cursor: pointer;"
-                                         onclick="document.getElementById('${downloadId}').click();"
-                                         onmouseover="this.style.backgroundColor='#e6e6e6';"
-                                         onmouseout="this.style.backgroundColor='transparent';">
-                                        <span style="font-size: 1.2em;">📎</span>
-                                        <span style="flex: 1; word-break: break-word;">${file.fileName}</span>
-                                        <span style="font-size: 0.8em; color: #007bff;">Download</span>
-                                        <a id="${downloadId}" href="${dataURL}" download="${file.fileName}" style="display: none;"></a>
+                            return {
+                                type: 'div',
+                                props: {
+                                    innerHTML: loadingContent,
+                                },
+                            };
+                        } else {
+                            // Return lazy loading placeholder
+                            const lazyContent = `
+                                <div id="${containerId}" data-lazy-field="${field.id}" class="lazy-file-preview">
+                                    <label class="ui-dynamic-form-input-label">${field.label} (Vorschau)${
+                                field.required ? ' *' : ''
+                            }</label>
+                                    <div style="margin-top: 8px; padding: 40px; text-align: center; color: #999; border: 1px dashed #ddd; border-radius: 4px;">
+                                        <div style="font-size: 1.5em; margin-bottom: 12px;">📁</div>
+                                        <div>Dateien werden geladen, wenn sie sichtbar werden...</div>
+                                        <div style="margin-top: 8px; font-size: 0.9em;">${
+                                            fileDataArray.length
+                                        } Datei(en)</div>
                                     </div>
-                                `;
-                            });
-                            content += '</div>';
-                        }
+                                </div>
+                            `;
 
-                        return {
-                            type: 'div',
-                            props: {
-                                innerHTML: content,
-                            },
-                        };
+                            return {
+                                type: 'div',
+                                props: {
+                                    innerHTML: lazyContent,
+                                },
+                            };
+                        }
                     }
                     // If no files to preview, return empty div
                     return {
@@ -1075,6 +1054,220 @@ export default {
                     };
             }
         },
+        initLazyLoading() {
+            // Initialize Intersection Observer for lazy loading of file previews
+            if (typeof IntersectionObserver !== 'undefined') {
+                this.intersectionObserver = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach((entry) => {
+                            if (entry.isIntersecting) {
+                                const element = entry.target;
+                                const fieldId = element.getAttribute('data-lazy-field');
+
+                                if (fieldId && !this.visibleFileFields.has(fieldId)) {
+                                    this.visibleFileFields.add(fieldId);
+                                    this.loadFilePreview(fieldId);
+                                    this.intersectionObserver.unobserve(element);
+                                }
+                            }
+                        });
+                    },
+                    {
+                        root: null,
+                        rootMargin: '50px', // Start loading 50px before element becomes visible
+                        threshold: 0.1,
+                    }
+                );
+
+                // Observe all lazy file preview elements
+                this.$nextTick(() => {
+                    this.observeLazyElements();
+                });
+            } else {
+                // Fallback for browsers without Intersection Observer
+                // Load all file previews immediately
+                this.loadAllFilePreviews();
+            }
+        },
+        observeLazyElements() {
+            const lazyElements = document.querySelectorAll('.lazy-file-preview[data-lazy-field]');
+            lazyElements.forEach((element) => {
+                if (this.intersectionObserver) {
+                    this.intersectionObserver.observe(element);
+                }
+            });
+        },
+        loadFilePreview(fieldId) {
+            // Find the field configuration
+            const field = this.userTask?.userTaskConfig?.formFields?.find((f) => f.id === fieldId);
+            if (!field) return;
+
+            const originalFieldId = fieldId.replace('_preview', '');
+            const fileDataArray = this.formData[originalFieldId];
+
+            if (!fileDataArray || fileDataArray.length === 0) return;
+
+            const containerId = `file-preview-${fieldId}`;
+            const container = document.getElementById(containerId);
+
+            if (container) {
+                // Show loading state
+                container.innerHTML = `
+                    <label class="ui-dynamic-form-input-label">${field.label} (Vorschau)${
+                    field.required ? ' *' : ''
+                }</label>
+                    <div style="margin-top: 8px; padding: 20px; text-align: center; color: #666;">
+                        <div style="font-size: 1.2em; margin-bottom: 8px;">⏳</div>
+                        <div>Dateien werden geladen...</div>
+                    </div>
+                `;
+
+                // Process files
+                setTimeout(() => {
+                    this.processFilePreview(containerId, fileDataArray, field);
+                }, 0);
+            }
+        },
+        loadAllFilePreviews() {
+            // Fallback method - load all file previews immediately
+            const fileFields =
+                this.userTask?.userTaskConfig?.formFields?.filter((f) => f.type === 'file-preview') || [];
+            fileFields.forEach((field) => {
+                if (!this.visibleFileFields.has(field.id)) {
+                    this.visibleFileFields.add(field.id);
+                    this.loadFilePreview(field.id);
+                }
+            });
+        },
+        processFilePreview(containerId, fileDataArray, field) {
+            // Process files in chunks to avoid blocking the UI
+            const processInChunks = async () => {
+                const images = [];
+                const otherFiles = [];
+
+                // Process files in batches to avoid UI blocking
+                const batchSize = 3;
+
+                for (let i = 0; i < fileDataArray.length; i += batchSize) {
+                    const batch = fileDataArray.slice(i, i + batchSize);
+
+                    for (const fileData of batch) {
+                        const fileName = fileData.name || '';
+                        const isImage = fileName.toLowerCase().match(/\.(png|jpg|jpeg|gif|webp)$/);
+
+                        if (isImage && fileData.file && fileData.file.data) {
+                            // Convert buffer to base64 data URL for image display
+                            const uint8Array = new Uint8Array(fileData.file.data);
+                            let binaryString = '';
+
+                            // Process in chunks to avoid call stack overflow
+                            const chunkSize = 1024;
+                            for (let j = 0; j < uint8Array.length; j += chunkSize) {
+                                const chunk = uint8Array.slice(j, j + chunkSize);
+                                binaryString += String.fromCharCode.apply(null, chunk);
+                            }
+
+                            const base64String = btoa(binaryString);
+                            const mimeType = fileName.toLowerCase().endsWith('.png')
+                                ? 'image/png'
+                                : fileName.toLowerCase().endsWith('.gif')
+                                ? 'image/gif'
+                                : 'image/jpeg';
+                            const dataURL = `data:${mimeType};base64,${base64String}`;
+
+                            images.push({ fileName, dataURL, fileData });
+                        } else {
+                            otherFiles.push({ fileName, fileData });
+                        }
+                    }
+
+                    // Allow UI to update between batches
+                    await new Promise((resolve) => setTimeout(resolve, 10));
+                }
+
+                // Build the final content
+                let content = `<label class="ui-dynamic-form-input-label">${field.label} (Vorschau)${
+                    field.required ? ' *' : ''
+                }</label>`;
+
+                // Display images
+                if (images.length > 0) {
+                    content += '<div style="margin-top: 8px;">';
+                    content += '<div style="font-weight: bold; margin-bottom: 8px;">Bilder:</div>';
+                    images.forEach((img, index) => {
+                        const downloadId = `download-img-${field.id}-${index}`;
+                        content += `
+                            <div style="display: inline-block; margin: 8px; text-align: center; vertical-align: top;">
+                                <img src="${img.dataURL}" alt="${img.fileName}"
+                                     style="max-width: 300px; max-height: 200px; border: 1px solid #ccc; display: block; cursor: pointer;"
+                                     onclick="document.getElementById('${downloadId}').click();" />
+                                <div style="margin-top: 4px; font-size: 0.9em; color: #666; max-width: 300px; word-break: break-word;">
+                                    ${img.fileName}
+                                </div>
+                                <a id="${downloadId}" href="${img.dataURL}" download="${img.fileName}" style="display: none;"></a>
+                            </div>
+                        `;
+                    });
+                    content += '</div>';
+                }
+
+                // Display other files as list
+                if (otherFiles.length > 0) {
+                    content +=
+                        '<div style="margin-top: 12px; padding: 12px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;">';
+                    content += '<div style="font-weight: bold; margin-bottom: 8px;">Weitere Dateien:</div>';
+                    otherFiles.forEach((file, index) => {
+                        const downloadId = `download-file-${field.id}-${index}`;
+                        const uint8Array = new Uint8Array(file.fileData.file.data);
+                        let binaryString = '';
+
+                        // Process in chunks for download
+                        const chunkSize = 1024;
+                        for (let j = 0; j < uint8Array.length; j += chunkSize) {
+                            const chunk = uint8Array.slice(j, j + chunkSize);
+                            binaryString += String.fromCharCode.apply(null, chunk);
+                        }
+
+                        const base64String = btoa(binaryString);
+                        const dataURL = `data:application/octet-stream;base64,${base64String}`;
+
+                        content += `
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px; padding: 4px; border-radius: 3px; cursor: pointer;"
+                                 onclick="document.getElementById('${downloadId}').click();"
+                                 onmouseover="this.style.backgroundColor='#e6e6e6';"
+                                 onmouseout="this.style.backgroundColor='transparent';">
+                                <span style="font-size: 1.2em;">📎</span>
+                                <span style="flex: 1; word-break: break-word;">${file.fileName}</span>
+                                <span style="font-size: 0.8em; color: #007bff;">Download</span>
+                                <a id="${downloadId}" href="${dataURL}" download="${file.fileName}" style="display: none;"></a>
+                            </div>
+                        `;
+                    });
+                    content += '</div>';
+                }
+
+                // Update the container with the final content
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.innerHTML = content;
+                }
+            };
+
+            processInChunks().catch((error) => {
+                const container = document.getElementById(containerId);
+                if (container) {
+                    container.innerHTML = `
+                        <label class="ui-dynamic-form-input-label">${field.label} (Vorschau)${
+                        field.required ? ' *' : ''
+                    }</label>
+                        <div style="margin-top: 8px; padding: 20px; text-align: center; color: #d32f2f;">
+                            <div style="font-size: 1.2em; margin-bottom: 8px;">⚠️</div>
+                            <div>Fehler beim Laden der Dateien</div>
+                        </div>
+                    `;
+                }
+            });
+        },
         toggleCollapse() {
             this.collapsed = !this.collapsed;
         },
@@ -1091,13 +1284,7 @@ export default {
             return style;
         },
         fields() {
-            const aFields = this.userTask.userTaskConfig?.formFields ?? [];
-            const fieldMap = aFields.map((field) => ({
-                ...field,
-                items: mapItems(field.type, field),
-            }));
-
-            return fieldMap;
+            return this.computedFields;
         },
         /*
                             widget-action just sends a msg to Node-RED, it does not store the msg state server-side
@@ -1110,7 +1297,6 @@ export default {
         },
         init(msg) {
             this.msg = msg;
-            // Clear component cache when form data changes for performance
             this.clearComponentCache();
 
             if (!msg) {
@@ -1126,17 +1312,22 @@ export default {
             } else {
                 this.userTask = null;
                 this.formData = {};
+                // Reset lazy loading state
+                this.visibleFileFields.clear();
                 return;
             }
 
             const formFields = this.userTask.userTaskConfig.formFields;
             const formFieldIds = formFields.map((ff) => ff.id);
-            const initialValues = this.userTask.startToken;
+            const initialValues = this.userTask.startToken.formData;
             const finishedFormData = msg.payload.formData;
             this.formIsFinished = !!msg.payload.formData;
             if (this.formIsFinished) {
                 this.collapsed = this.props.collapse_when_finished;
             }
+
+            // Reset lazy loading state for new task
+            this.visibleFileFields.clear();
 
             if (formFields) {
                 formFields.forEach((field) => {
@@ -1177,13 +1368,11 @@ export default {
             }
 
             if (initialValues) {
-                if (initialValues) {
-                    Object.keys(initialValues)
-                        .filter((key) => formFieldIds.includes(key))
-                        .forEach((key) => {
-                            this.formData[key] = initialValues[key];
-                        });
-                }
+                Object.keys(initialValues)
+                    .filter((key) => formFieldIds.includes(key))
+                    .forEach((key) => {
+                        this.formData[key] = initialValues[key];
+                    });
             }
 
             if (this.formIsFinished) {
@@ -1194,8 +1383,11 @@ export default {
                     });
             }
 
-            nextTick(() => {
+            // Force update of computed properties by triggering reactivity
+            this.$nextTick(() => {
                 this.focusFirstFormField();
+                // Re-observe lazy elements after DOM update
+                this.observeLazyElements();
             });
         },
         actionFn(action) {
@@ -1261,7 +1453,6 @@ export default {
                 const result = func(this.formData, this.userTask, this.msg);
                 return Boolean(result);
             } catch (err) {
-                console.error('Error while evaluating condition: ' + err);
                 return false;
             }
         },
@@ -1290,8 +1481,6 @@ export default {
 
                 if (inputElement) {
                     inputElement.focus();
-                } else {
-                    console.warn('Could not find a focusable input element for the first form field.');
                 }
             }
         },
@@ -1313,4 +1502,29 @@ function mapItems(type, field) {
 <style>
 /* CSS is auto scoped, but using named classes is still recommended */
 @import '../stylesheets/ui-dynamic-form.css';
+
+/* Lazy loading styles */
+.lazy-file-preview {
+    transition: opacity 0.3s ease-in-out;
+}
+
+.lazy-file-preview .lazy-placeholder {
+    background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+    background-size: 200% 200%;
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% -200%;
+    }
+    100% {
+        background-position: 200% 200%;
+    }
+}
+
+.lazy-file-preview:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 </style>
