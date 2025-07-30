@@ -1319,7 +1319,7 @@ export default {
 
             const formFields = this.userTask.userTaskConfig.formFields;
             const formFieldIds = formFields.map((ff) => ff.id);
-            const initialValues = this.userTask.startToken;
+            const initialValues = this.userTask.startToken.formData;
             const finishedFormData = msg.payload.formData;
             this.formIsFinished = !!msg.payload.formData;
             if (this.formIsFinished) {
