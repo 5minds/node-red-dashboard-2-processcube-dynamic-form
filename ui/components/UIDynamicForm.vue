@@ -77,9 +77,7 @@
                                                     v-model="field.defaultValue"
                                                 />
                                                 <p class="formkit-help">
-                                                    {{
-                                                        field.customForm ? JSON.parse(field.customForm).hint : undefined
-                                                    }}
+                                                    {{ getFieldHint(field) }}
                                                 </p>
                                             </div>
                                             <component
@@ -364,8 +362,39 @@ export default {
             // This is now handled by computed properties automatically
         },
 
+        // Safe method to get field hint for template use
+        getFieldHint(field) {
+            try {
+                if (field.customForm) {
+                    let customForm;
+                    if (typeof field.customForm === 'string') {
+                        customForm = JSON.parse(field.customForm);
+                    } else if (typeof field.customForm === 'object') {
+                        customForm = field.customForm;
+                    }
+                    return customForm?.hint;
+                }
+            } catch (error) {
+                console.warn('Failed to parse customForm hint for field', field.id, error);
+            }
+            return undefined;
+        },
+
         createComponent(field) {
-            const customForm = field.customForm ? JSON.parse(field.customForm) : {};
+            // Safe parsing of customForm - handle both string and object cases
+            let customForm = {};
+            try {
+                if (field.customForm) {
+                    if (typeof field.customForm === 'string') {
+                        customForm = JSON.parse(field.customForm);
+                    } else if (typeof field.customForm === 'object') {
+                        customForm = field.customForm;
+                    }
+                }
+            } catch (error) {
+                console.warn('Failed to parse customForm for field', field.id, error);
+                customForm = {};
+            }
             const { hint, placeholder, validation, customProperties = [] } = customForm;
             const name = field.id;
             const isReadOnly =
@@ -532,9 +561,11 @@ export default {
                         },
                     };
                 case 'select':
-                    const selections = JSON.parse(field.customForm).entries.map((obj) => {
-                        return { value: obj.key, label: obj.value };
-                    });
+                    const selections = customForm.entries
+                        ? customForm.entries.map((obj) => {
+                              return { value: obj.key, label: obj.value };
+                          })
+                        : [];
                     return {
                         type: 'FormKit',
                         props: {
@@ -679,7 +710,7 @@ export default {
                         },
                     };
                 case 'file':
-                    const multiple = field.customForm ? JSON.parse(field.customForm).multiple === 'true' : false;
+                    const multiple = customForm.multiple === 'true';
                     return {
                         type: 'FormKit',
                         props: {
@@ -701,9 +732,11 @@ export default {
                         },
                     };
                 case 'checkbox':
-                    const options = JSON.parse(field.customForm).entries.map((obj) => {
-                        return { value: obj.key, label: obj.value };
-                    });
+                    const options = customForm.entries
+                        ? customForm.entries.map((obj) => {
+                              return { value: obj.key, label: obj.value };
+                          })
+                        : [];
                     return {
                         type: 'FormKit',
                         props: {
@@ -791,10 +824,10 @@ export default {
                     };
                 case 'header':
                     let typeToUse = 'h1';
-                    if (field.customForm && JSON.parse(field.customForm).style === 'heading_2') {
+                    if (customForm.style === 'heading_2') {
                         typeToUse = 'h2';
                     }
-                    if (field.customForm && JSON.parse(field.customForm).style === 'heading_3') {
+                    if (customForm.style === 'heading_3') {
                         typeToUse = 'h3';
                     }
                     return {
@@ -863,9 +896,11 @@ export default {
                         },
                     };
                 case 'radio':
-                    const radioOptions = JSON.parse(field.customForm).entries.map((obj) => {
-                        return { value: obj.key, label: obj.value };
-                    });
+                    const radioOptions = customForm.entries
+                        ? customForm.entries.map((obj) => {
+                              return { value: obj.key, label: obj.value };
+                          })
+                        : [];
                     return {
                         type: 'FormKit',
                         props: {
@@ -890,7 +925,6 @@ export default {
                         },
                     };
                 case 'range':
-                    const customForm = JSON.parse(field.customForm);
                     return {
                         type: 'v-slider',
                         props: {
@@ -938,7 +972,7 @@ export default {
                         },
                     };
                 case 'textarea':
-                    const rows = field.customForm ? JSON.parse(field.customForm).rows : undefined;
+                    const rows = customForm.rows;
                     return {
                         type: 'FormKit',
                         props: {
@@ -1319,7 +1353,7 @@ export default {
 
             const formFields = this.userTask.userTaskConfig.formFields;
             const formFieldIds = formFields.map((ff) => ff.id);
-            const initialValues = this.userTask.startToken.formData;
+            const initialValues = this.userTask.startToken;
             const finishedFormData = msg.payload.formData;
             this.formIsFinished = !!msg.payload.formData;
             if (this.formIsFinished) {
@@ -1334,7 +1368,19 @@ export default {
                     this.formData[field.id] = field.defaultValue;
 
                     if (field.type === 'confirm') {
-                        const customForm = field.customForm ? JSON.parse(field.customForm) : {};
+                        let customForm = {};
+                        try {
+                            if (field.customForm) {
+                                if (typeof field.customForm === 'string') {
+                                    customForm = JSON.parse(field.customForm);
+                                } else if (typeof field.customForm === 'object') {
+                                    customForm = field.customForm;
+                                }
+                            }
+                        } catch (error) {
+                            console.warn('Failed to parse customForm for confirm field', field.id, error);
+                            customForm = {};
+                        }
                         const confirmText = customForm.confirmButtonText ?? 'Confirm';
                         const declineText = customForm.declineButtonText ?? 'Decline';
                         this.actions = [
