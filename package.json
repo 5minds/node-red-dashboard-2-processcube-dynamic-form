@@ -1,6 +1,6 @@
 {
   "name": "@5minds/node-red-dashboard-2-processcube-dynamic-form",
-  "version": "2.0.8",
+  "version": "2.1.0",
   "description": "The ui component for the ProcessCube dynamic-form",
   "keywords": [
     "processcube",
@@ -57,6 +57,8 @@
     "@formkit/i18n": "^1.6.9",
     "@formkit/themes": "^1.6.9",
     "@formkit/vue": "^1.6.9",
+    "dompurify": "^3.2.6",
+    "marked": "^16.1.1",
     "to-title-case": "^1.0.0",
     "vue": "^3.3.8",
     "vuex": "^4.1.0"
