@@ -79,12 +79,15 @@
       const labels = [...this.options.map((i) => i.label)];
 
       if (this.handle_confirmation_dialogs) {
-        labels.push('Decline', 'Confirm');
+        labels.push('Ablehnen', 'Bestätigen');
       }
 
       if (this.trigger_on_change) {
         labels.push('Triggered on change');
       }
+
+      labels.push('Suspend');
+      labels.push('Terminate');
 
       return labels[index];
     },
@@ -122,7 +125,6 @@
           style: 'background: var(--red-ui-secondary-background, #fff); margin:0; padding:8px 0px 0px;',
         });
 
-        // Create input fields for value and label
         const row = $('<div/>').appendTo(container);
         $('<input/>', {
           class: 'node-input-option-label',
@@ -188,7 +190,6 @@
             ],
           });
 
-        // Create delete button for the option
         const finalSpan = $('<span/>', {
           style: 'float:right; margin-right:8px;',
         }).appendTo(row);
@@ -251,8 +252,13 @@
       }
 
       if ($('#node-input-handle_confirmation_dialogs').is(':checked')) {
-        this.outputs += 2;
+        const confirmationOutputs = 2;
+        this.outputs += confirmationOutputs;
       }
+
+      const suspendOutput = 1;
+      const terminateOutput = 1;
+      this.outputs += suspendOutput + terminateOutput;
     },
   });
 </script>
@@ -280,15 +286,7 @@
             <span id="valWarning" style="color: var(--red-ui-text-color-error, #910000)"><b>All Values must be unique.</b></span>
             <ol id="node-input-option-container" style="list-style-type:none; margin:0;"></ol>
         </div>
-        <!-- <a
-            data-html="true"
-            title="Dynamic Property: Send 'msg.options' in order to override this property."
-            class="red-ui-button ui-node-popover-title"
-            style="margin-left: 4px; cursor: help; font-size: 0.625rem; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; justify-content: center; align-items: center;">
-            <i style="font-family: ui-serif;">fx</i>
-        </a> -->
     </div>
-    <!-- Add Option Button -->
     <div class="form-row">
         <a href="#" class="editor-button editor-button-small" id="node-input-add-option" style="margin-top:4px; margin-left:103px;"><i class="fa fa-plus"></i> <span>action</span></a>
     </div>
@@ -411,11 +409,23 @@
   ### Handles confirmation dialogs
 
   When checked, this node will gain two additional outputs 'Accept' and 'Decline'. These are required, when handling confirmation dialogs, that may be defined in the Studio by settings a Form Fields type to 'Confirm'.
-  The outputs defined by the 'Actions' section of this node won't show up, when a 'Confirm'-FormField is present.
+  When a 'Confirm'-FormField is present and this option is enabled, only the confirmation buttons (Accept/Decline) will be displayed. The actions configured in the 'Actions' section will be hidden.
 
   ### Inside of card
 
   This property controls the positioning of the action buttons. They can be palced inside of the card, right below the FormFields, or below the whole Card containing the Form.
+
+  ## Built-in Actions
+
+  The dynamic form includes two built-in actions that are always available:
+
+  ### Suspend Action
+
+  A secondary-styled button that allows users to suspend the current UserTask. This action has its own dedicated output and will send a message with `isSuspend: true` in the payload.
+
+  ### Terminate Action
+
+  A red link-styled button that allows users to terminate the current UserTask. This action has its own dedicated output and will send a message with `isTerminate: true` in the payload.
 
   ## Title Configuration
 
