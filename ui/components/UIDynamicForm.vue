@@ -99,7 +99,7 @@
                   <v-alert type="error">Error: {{ errorMsg }}</v-alert>
                 </v-row>
                 <UIDynamicFormFooterAction
-                  v-if="props.actions_inside_card && hasUserTask"
+                  v-if="props.actions_inside_card && hasUserTask && actions.length > 0"
                   :actions="actions"
                   :actionCallback="actionFn"
                   :formIsFinished="formIsFinished"
