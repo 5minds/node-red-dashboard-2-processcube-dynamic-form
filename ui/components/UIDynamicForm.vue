@@ -901,7 +901,6 @@ export default {
       }
 
       if (formFields) {
-        console.log('Form fields:', formFields);
         formFields.forEach((field) => {
           this.formData[field.id] = field.defaultValue;
 
