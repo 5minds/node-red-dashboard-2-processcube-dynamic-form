@@ -302,7 +302,6 @@ export default {
     }
   },
   mounted() {
-    console.log('UIDynamicForm mounted with ID:', this.id);
     const elements = document.querySelectorAll('.formkit-input');
 
     elements.forEach((element) => {
