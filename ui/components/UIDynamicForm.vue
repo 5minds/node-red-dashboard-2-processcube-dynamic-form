@@ -76,7 +76,7 @@
                           v-model="field.defaultValue"
                         />
                         <p class="formkit-help">
-                          {{ field.customForm ? JSON.parse(JSON.stringify(field.customForm)).hint : undefined }}
+                          {{ field.customForm ? field.customForm.hint : undefined }}
                         </p>
                       </div>
                       <component
