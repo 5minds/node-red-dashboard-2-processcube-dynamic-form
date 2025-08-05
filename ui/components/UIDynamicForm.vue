@@ -118,7 +118,7 @@
         />
       </p>
     </div>
-    <div v-if="!props.actions_inside_card && hasUserTask" style="padding-top: 32px">
+    <div v-if="!props.actions_inside_card && hasUserTask && actions.length > 0" style="padding-top: 32px">
       <UIDynamicFormFooterAction :actions="actions" :actionCallback="actionFn" />
     </div>
   </div>
