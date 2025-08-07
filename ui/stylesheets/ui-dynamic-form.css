@@ -130,6 +130,24 @@ code {
   padding: 8px;
 }
 
+.ui-dynamic-form-footer-action-terminate {
+  background-color: transparent !important;
+  border: none !important;
+  color: #dc3545 !important;
+  text-decoration: none;
+  padding: 4px 8px !important;
+  min-height: auto !important;
+  font-size: 0.875rem;
+  cursor: pointer;
+  box-shadow: none !important;
+}
+
+.ui-dynamic-form-footer-action-terminate:hover {
+  background-color: transparent !important;
+  color: #b02a37 !important;
+  text-decoration: underline;
+}
+
 .ui-dynamic-form-footer-actions-container {
   display: flex;
   justify-content: space-between;

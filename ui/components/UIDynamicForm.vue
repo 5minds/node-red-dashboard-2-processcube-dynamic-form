@@ -1,6 +1,5 @@
 <template>
   <div className="ui-dynamic-form-external-sizing-wrapper" :style="props.card_size_styling">
-    <!-- Component must be wrapped in a block so props such as className and style can be passed in from parent -->
     <UIDynamicFormTitleText
       v-if="props.title_style === 'outside' && hasUserTask"
       :style="props.title_style"
@@ -77,7 +76,7 @@
                           v-model="field.defaultValue"
                         />
                         <p class="formkit-help">
-                          {{ field.customForm ? JSON.parse(field.customForm).hint : undefined }}
+                          {{ field.customForm ? field.customForm.hint : undefined }}
                         </p>
                       </div>
                       <component
@@ -100,7 +99,7 @@
                   <v-alert type="error">Error: {{ errorMsg }}</v-alert>
                 </v-row>
                 <UIDynamicFormFooterAction
-                  v-if="props.actions_inside_card && actions.length > 0"
+                  v-if="props.actions_inside_card && hasUserTask && actions.length > 0"
                   :actions="actions"
                   :actionCallback="actionFn"
                   :formIsFinished="formIsFinished"
@@ -119,7 +118,7 @@
         />
       </p>
     </div>
-    <div v-if="!props.actions_inside_card && actions.length > 0 && hasUserTask" style="padding-top: 32px">
+    <div v-if="!props.actions_inside_card && hasUserTask && actions.length > 0" style="padding-top: 32px">
       <UIDynamicFormFooterAction :actions="actions" :actionCallback="actionFn" />
     </div>
   </div>
@@ -190,7 +189,6 @@ export default {
   },
   inject: ['$socket'],
   props: {
-    /* do not remove entries from this - Dashboard's Layout Manager's will pass this data to your component */
     id: { type: String, required: true },
     props: { type: Object, default: () => ({}) },
     state: {
@@ -209,7 +207,6 @@ export default {
       theme: 'genesis',
       locales: { de },
       locale: 'de',
-      // eslint-disable-next-line object-shorthand
       rules: { requiredIf: requiredIf },
     });
     app.use(plugin, formkitConfig);
@@ -238,10 +235,12 @@ export default {
       return !!this.userTask;
     },
     totalOutputs() {
+      const outputsConfirmTerminate = 2;
       return (
         this.props.options.length +
         (this.props.handle_confirmation_dialogs ? 2 : 0) +
-        (this.props.trigger_on_change ? 1 : 0)
+        (this.props.trigger_on_change ? 1 : 0) +
+        outputsConfirmTerminate
       );
     },
     isConfirmDialog() {
@@ -313,21 +312,17 @@ export default {
       this.init(msg);
     });
     this.$socket.on('msg-input:' + this.id, (msg) => {
-      // store the latest message in our client-side vuex store when we receive a new message
       this.init(msg);
     });
-    // tell Node-RED that we're loading a new instance of this widget
     this.$socket.emit('widget-load', this.id);
   },
   unmounted() {
-    /* Make sure, any events you subscribe to on SocketIO are unsubscribed to here */
     this.$socket?.off('widget-load' + this.id);
     this.$socket?.off('msg-input:' + this.id);
   },
   methods: {
     createComponent(field) {
-      console.debug('Creating component for field:', field);
-      const customForm = field.customForm ? JSON.parse(field.customForm) : {};
+      const customForm = field.customForm ? JSON.parse(JSON.stringify(field.customForm)) : {};
       const hint = customForm.hint;
       const placeholder = customForm.placeholder;
       const validation = customForm.validation;
@@ -363,7 +358,7 @@ export default {
             },
           };
         case 'number':
-          const step = field.customForm ? JSON.parse(field.customForm).step : undefined;
+          const step = field.customForm ? JSON.parse(JSON.stringify(field.customForm)).step : undefined;
           return {
             type: 'FormKit',
             props: {
@@ -412,7 +407,7 @@ export default {
           return {
             type: 'FormKit',
             props: {
-              type: 'select', // JSON.parse(field.customForm).displayAs
+              type: 'select',
               id: field.id,
               name,
               label: field.label,
@@ -431,13 +426,13 @@ export default {
             },
           };
         case 'select':
-          const selections = JSON.parse(field.customForm).entries.map((obj) => {
+          const selections = JSON.parse(JSON.stringify(field.customForm)).entries.map((obj) => {
             return { value: obj.key, label: obj.value };
           });
           return {
             type: 'FormKit',
             props: {
-              type: 'select', // JSON.parse(field.customForm).displayAs
+              type: 'select',
               id: field.id,
               name,
               label: field.label,
@@ -503,7 +498,7 @@ export default {
             },
           };
         case 'file':
-          const multiple = field.customForm ? JSON.parse(field.customForm).multiple === 'true' : false;
+          const multiple = field.customForm ? JSON.parse(JSON.stringify(field.customForm)).multiple === 'true' : false;
           return {
             type: 'FormKit',
             props: {
@@ -518,7 +513,6 @@ export default {
               wrapperClass: '$remove:formkit-wrapper',
               labelClass: 'ui-dynamic-form-input-label',
               inputClass: `input-${this.theme}`,
-              // innerClass: ui-dynamic-form-input-outlines `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
               readonly: isReadOnly,
               disabled: isReadOnly,
               multiple,
@@ -527,7 +521,7 @@ export default {
             },
           };
         case 'checkbox':
-          const options = JSON.parse(field.customForm).entries.map((obj) => {
+          const options = JSON.parse(JSON.stringify(field.customForm)).entries.map((obj) => {
             return { value: obj.key, label: obj.value };
           });
           return {
@@ -611,10 +605,10 @@ export default {
           };
         case 'header':
           let typeToUse = 'h1';
-          if (field.customForm && JSON.parse(field.customForm).style === 'heading_2') {
+          if (field.customForm && JSON.parse(JSON.stringify(field.customForm)).style === 'heading_2') {
             typeToUse = 'h2';
           }
-          if (field.customForm && JSON.parse(field.customForm).style === 'heading_3') {
+          if (field.customForm && JSON.parse(JSON.stringify(field.customForm)).style === 'heading_3') {
             typeToUse = 'h3';
           }
           return {
@@ -679,7 +673,7 @@ export default {
             },
           };
         case 'radio':
-          const radioOptions = JSON.parse(field.customForm).entries.map((obj) => {
+          const radioOptions = JSON.parse(JSON.stringify(field.customForm)).entries.map((obj) => {
             return { value: obj.key, label: obj.value };
           });
           return {
@@ -704,24 +698,18 @@ export default {
             },
           };
         case 'range':
-          const customForm = JSON.parse(field.customForm);
+          const customForm = JSON.parse(JSON.stringify(field.customForm));
           return {
             type: 'v-slider',
             props: {
               id: field.id,
               name,
-              // label: field.label,
               required: field.required,
-              // value: this.formData[field.id],
-              // help: hint,
               min: customForm.min,
               max: customForm.max,
               step: customForm.step,
               thumbLabel: true,
-              // wrapperClass: '$remove:formkit-wrapper',
               labelClass: 'ui-dynamic-form-input-label',
-              // inputClass: `input-${this.theme}`,
-              // innerClass: ui-dynamic-form-input-outlines `${this.theme === 'dark' ? '$remove:formkit-inner' : ''}`,
               readonly: isReadOnly,
               disabled: isReadOnly,
               validation,
@@ -732,7 +720,7 @@ export default {
           return {
             type: 'FormKit',
             props: {
-              type: 'tel' /* with pro component mask more good */,
+              type: 'tel',
               id: field.id,
               name,
               label: field.label,
@@ -750,11 +738,11 @@ export default {
             },
           };
         case 'textarea':
-          const rows = field.customForm ? JSON.parse(field.customForm).rows : undefined;
+          const rows = field.customForm ? JSON.parse(JSON.stringify(field.customForm)).rows : undefined;
           return {
             type: 'FormKit',
             props: {
-              type: 'textarea' /* with pro component mask more good */,
+              type: 'textarea',
               id: field.id,
               name,
               label: field.label,
@@ -776,7 +764,7 @@ export default {
           return {
             type: 'FormKit',
             props: {
-              type: 'time' /* with pro component mask more good */,
+              type: 'time',
               id: field.id,
               name,
               label: field.label,
@@ -880,10 +868,6 @@ export default {
 
       return fieldMap;
     },
-    /*
-                            widget-action just sends a msg to Node-RED, it does not store the msg state server-side
-                            alternatively, you can use widget-change, which will also store the msg in the Node's datastore
-                        */
     send(msg, index) {
       const msgArr = [];
       msgArr[index] = msg;
@@ -921,23 +905,34 @@ export default {
           this.formData[field.id] = field.defaultValue;
 
           if (field.type === 'confirm') {
-            const customForm = field.customForm;
+            const customForm = field.customForm ? JSON.parse(JSON.stringify(field.customForm)) : {};
             const confirmText = customForm.confirmButtonText ?? 'Confirm';
             const declineText = customForm.declineButtonText ?? 'Decline';
-            this.actions = [
+            const confirmActions = [
               {
-                alignment: 'right',
-                primary: 'false',
-                label: declineText,
-                condition: '',
-              },
-              {
-                alignment: 'right',
+                alignment: 'left',
                 primary: 'true',
                 label: confirmText,
                 condition: '',
+                isConfirmAction: true,
+                confirmFieldId: field.id,
+                confirmValue: true,
+              },
+              {
+                alignment: 'left',
+                primary: 'true',
+                label: declineText,
+                condition: '',
+                isConfirmAction: true,
+                confirmFieldId: field.id,
+                confirmValue: false,
               },
             ];
+            if (this.props.handle_confirmation_dialogs) {
+              this.actions = confirmActions;
+            } else {
+              this.actions = [...this.actions, ...confirmActions];
+            }
           }
         });
       }
@@ -963,6 +958,42 @@ export default {
       });
     },
     actionFn(action) {
+      if (action.isTerminate) {
+        this.showError('');
+
+        const msg = this.msg ?? {};
+        msg.payload = {
+          formData: this.formData,
+          userTask: this.userTask,
+          isTerminate: true,
+        };
+
+        const terminateOutputIndex = this.totalOutputs - 1;
+
+        this.send(msg, terminateOutputIndex);
+        return;
+      }
+
+      if (action.isSuspend) {
+        this.showError('');
+
+        const msg = this.msg ?? {};
+        msg.payload = {
+          formData: this.formData,
+          userTask: this.userTask,
+          isSuspend: true,
+        };
+
+        const suspendOutputIndex = this.totalOutputs - 2;
+
+        this.send(msg, suspendOutputIndex);
+        return;
+      }
+
+      if (action.isConfirmAction && action.confirmFieldId) {
+        this.formData[action.confirmFieldId] = action.confirmValue;
+      }
+
       if (action.label === 'Speichern' || action.label === 'Speichern und nächster') {
         const formkitInputs = this.$refs.form.$el.querySelectorAll('.formkit-outer');
         let allComplete = true;
@@ -1012,7 +1043,6 @@ export default {
           this.actions.findIndex((element) => element.label === action.label) +
             (this.isConfirmDialog ? this.props.options.length : 0)
         );
-        // TODO: mm - end
       } else {
         this.showError(action.errorMessage);
       }
@@ -1020,7 +1050,6 @@ export default {
     checkCondition(condition) {
       if (condition === '') return true;
       try {
-        // eslint-disable-next-line no-new-func
         const func = Function('fields', 'userTask', 'msg', '"use strict"; return (' + condition + ')');
         const result = func(this.formData, this.userTask, this.msg);
         return Boolean(result);
