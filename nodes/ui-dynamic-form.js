@@ -8,14 +8,11 @@ module.exports = function (RED) {
 
     const evts = {
       onAction: true,
-      beforeSend: function (msg) {
+      onInput: function (msg, send, done) {
         if (config.title_text_type && config.title_text_type !== 'str') {
           msg.dynamicTitle = RED.util.evaluateNodeProperty(config.title_text, config.title_text_type, node, msg);
         }
 
-        return msg;
-      },
-      onInput: function (msg, send, done) {
         base.stores.data.save(base, node, msg);
 
         if (done) done();
