@@ -308,16 +308,13 @@ export default {
       element.classList.add('test');
     });
 
-    this.$socket.on('widget-load:' + this.id, (msg) => {
-      this.init(msg);
-    });
     this.$socket.on('msg-input:' + this.id, (msg) => {
       this.init(msg);
     });
     this.$socket.emit('widget-load', this.id);
   },
   unmounted() {
-    this.$socket?.off('widget-load' + this.id);
+    this.$socket?.off('widget-load', this.id);
     this.$socket?.off('msg-input:' + this.id);
   },
   methods: {
