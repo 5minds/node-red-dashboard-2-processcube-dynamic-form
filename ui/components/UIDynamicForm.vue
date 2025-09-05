@@ -897,7 +897,6 @@ export default {
         this.collapsed = this.props.collapse_when_finished;
       }
 
-      // Check if we have a confirmation dialog field
       const hasConfirmField = formFields.some((field) => field.type === 'confirm');
 
       if (formFields) {

@@ -85,7 +85,6 @@
       const labels = [...this.options.map((i) => i.label)];
 
       if (this.handle_confirmation_dialogs && this.confirm_actions) {
-        // Labels come from user task field configuration (confirmButtonText/declineButtonText)
         labels.push('Decline (from UserTask)', 'Confirm (from UserTask)');
       }
 
