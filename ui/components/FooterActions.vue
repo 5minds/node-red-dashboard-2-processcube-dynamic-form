@@ -11,26 +11,6 @@
           {{ action.label }}
         </v-btn>
       </div>
-      <div>
-        <v-btn
-          class="ui-dynamic-form-footer-action-button ui-dynamic-form-footer-action-secondary"
-          :disabled="formIsFinished"
-          @click="handleSuspend"
-        >
-          Suspend
-        </v-btn>
-      </div>
-      <div>
-        <v-btn
-          class="ui-dynamic-form-footer-action-terminate"
-          :disabled="formIsFinished"
-          @click="handleTerminate"
-          variant="text"
-          size="small"
-        >
-          Terminate
-        </v-btn>
-      </div>
     </div>
     <div class="ui-dynamic-form-footer-actions-right">
       <div v-for="(action, index) in rightSideActions" :key="`right-${index}`">
@@ -69,8 +49,8 @@ export default {
     leftSideActions() {
       const leftActions = this.actions.filter((action) => action.alignment === 'left' || !action.alignment);
       const sortPrimaryToLeft = (a, b) => {
-        const aPrimary = a.primary === 'true';
-        const bPrimary = b.primary === 'true';
+        const aPrimary = a.primary === 'primary';
+        const bPrimary = b.primary === 'primary';
         if (aPrimary && !bPrimary) return -1;
         if (!aPrimary && bPrimary) return 1;
         return 0;
@@ -81,8 +61,8 @@ export default {
     rightSideActions() {
       const rightActions = this.actions.filter((action) => action.alignment === 'right');
       const sortPrimaryToRight = (a, b) => {
-        const aPrimary = a.primary === 'true';
-        const bPrimary = b.primary === 'true';
+        const aPrimary = a.primary === 'primary';
+        const bPrimary = b.primary === 'primary';
         if (!aPrimary && bPrimary) return -1;
         if (aPrimary && !bPrimary) return 1;
         return 0;
@@ -93,29 +73,15 @@ export default {
   },
   methods: {
     getActionButtonClass(action) {
-      return action.primary === 'true'
-        ? 'ui-dynamic-form-footer-action-primary'
-        : 'ui-dynamic-form-footer-action-secondary';
-    },
-    handleTerminate() {
-      const terminateAction = {
-        label: 'Terminate',
-        alignment: 'left',
-        primary: 'false',
-        isTerminate: true,
-      };
-
-      this.actionCallback(terminateAction);
-    },
-    handleSuspend() {
-      const suspendAction = {
-        label: 'Suspend',
-        alignment: 'left',
-        primary: 'false',
-        isSuspend: true,
-      };
-
-      this.actionCallback(suspendAction);
+      switch (action.primary) {
+        case 'primary':
+          return 'ui-dynamic-form-footer-action-primary';
+        case 'destructive':
+          return 'ui-dynamic-form-footer-action-terminate';
+        case 'secondary':
+        default:
+          return 'ui-dynamic-form-footer-action-secondary';
+      }
     },
   },
 };

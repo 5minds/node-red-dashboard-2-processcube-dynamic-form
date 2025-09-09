@@ -59,6 +59,12 @@
       handle_confirmation_dialogs: {
         value: false,
       },
+      confirm_actions: {
+        value: [
+          { label: 'Confirm', primary: 'primary', alignment: 'right' },
+          { label: 'Decline', primary: 'primary', alignment: 'right' },
+        ],
+      },
       width: {
         value: 0,
         validate: function (v) {
@@ -78,16 +84,13 @@
     outputLabels: function (index) {
       const labels = [...this.options.map((i) => i.label)];
 
-      if (this.handle_confirmation_dialogs) {
-        labels.push('Ablehnen', 'Bestätigen');
+      if (this.handle_confirmation_dialogs && this.confirm_actions) {
+        labels.push('Decline (from UserTask)', 'Confirm (from UserTask)');
       }
 
       if (this.trigger_on_change) {
         labels.push('Triggered on change');
       }
-
-      labels.push('Suspend');
-      labels.push('Terminate');
 
       return labels[index];
     },
@@ -121,43 +124,66 @@
       });
 
       function generateOption(i, option) {
-        const container = $('<li/>', {
-          style: 'background: var(--red-ui-secondary-background, #fff); margin:0; padding:8px 0px 0px;',
+        const row = $('<tr/>', {
+          style: 'background: var(--red-ui-secondary-background, #fff);',
         });
 
-        const row = $('<div/>').appendTo(container);
+        const labelCell = $('<td/>', {
+          style: 'padding: 4px; border-bottom: 1px solid var(--red-ui-form-input-border-color, #eee);',
+        }).appendTo(row);
         $('<input/>', {
           class: 'node-input-option-label',
           type: 'text',
-          style: 'margin-left:7px; width:calc(29%);',
+          style:
+            'width: 100%; box-sizing: border-box; border: 1px solid var(--red-ui-form-input-border-color, #ccc); padding: 3px;',
           placeholder: 'Label',
           value: option.label,
-        }).appendTo(row);
+        }).appendTo(labelCell);
 
-        $('<input/>', {
+        const conditionCell = $('<td/>', {
+          style: 'padding: 4px; border-bottom: 1px solid var(--red-ui-form-input-border-color, #eee);',
+        }).appendTo(row);
+        const conditionInput = $('<input/>', {
           class: 'node-input-option-condition',
           type: 'text',
-          style: 'margin-left:7px; width:calc(29%);',
+          style:
+            'width: 100%; box-sizing: border-box; border: 1px solid var(--red-ui-form-input-border-color, #ccc); padding: 3px;',
           placeholder: 'Condition',
           value: option.condition,
-        }).appendTo(row);
+        }).appendTo(conditionCell);
 
+        conditionInput.data('explicitly-cleared', false);
+        conditionInput.on('input', function () {
+          if ($(this).val().trim() === '') {
+            $(this).data('explicitly-cleared', true);
+          } else {
+            $(this).data('explicitly-cleared', false);
+          }
+        });
+
+        const errorCell = $('<td/>', {
+          style: 'padding: 4px; border-bottom: 1px solid var(--red-ui-form-input-border-color, #eee);',
+        }).appendTo(row);
         $('<input/>', {
           class: 'node-input-option-error',
           type: 'text',
-          style: 'margin-left:7px; width:calc(29%);',
+          style:
+            'width: 100%; box-sizing: border-box; border: 1px solid var(--red-ui-form-input-border-color, #ccc); padding: 3px;',
           placeholder: 'Error message',
           value: option.errorMessage,
-        }).appendTo(row);
+        }).appendTo(errorCell);
 
+        const alignmentCell = $('<td/>', {
+          style: 'padding: 4px; border-bottom: 1px solid var(--red-ui-form-input-border-color, #eee);',
+        }).appendTo(row);
         $('<input/>', {
           class: 'node-input-option-alignment',
           type: 'text',
-          style: 'margin-left:7px; width:calc(29%);',
+          style: 'width: 100%; box-sizing: border-box;',
           placeholder: 'Alignment',
           value: option.alignment,
         })
-          .appendTo(row)
+          .appendTo(alignmentCell)
           .typedInput({
             types: [
               {
@@ -170,51 +196,85 @@
             ],
           });
 
+        const typeCell = $('<td/>', {
+          style: 'padding: 4px; border-bottom: 1px solid var(--red-ui-form-input-border-color, #eee);',
+        }).appendTo(row);
         $('<input/>', {
           class: 'node-input-option-primary',
           type: 'text',
-          style: 'margin-left:7px; width:calc(29%);',
+          style: 'width: 100%; box-sizing: border-box;',
           placeholder: 'Action type',
           value: option.primary,
         })
-          .appendTo(row)
+          .appendTo(typeCell)
           .typedInput({
             types: [
               {
-                value: 'primary',
+                value: 'type',
                 options: [
-                  { value: 'false', label: 'Secondary action' },
-                  { value: 'true', label: 'Primary action' },
+                  { value: 'primary', label: 'Primary action' },
+                  { value: 'secondary', label: 'Secondary action' },
+                  { value: 'destructive', label: 'Destructive action' },
                 ],
               },
             ],
           });
 
-        const finalSpan = $('<span/>', {
-          style: 'float:right; margin-right:8px;',
+        const deleteCell = $('<td/>', {
+          style:
+            'padding: 4px; text-align: center; width: 30px; border-bottom: 1px solid var(--red-ui-form-input-border-color, #eee);',
         }).appendTo(row);
         const deleteButton = $('<a/>', {
           href: '#',
           class: 'editor-button editor-button-small',
-          style: 'margin-top:7px; margin-left:5px;',
-        }).appendTo(finalSpan);
+          style: 'height: 28px; display: inline-flex; align-items: center; justify-content: center;',
+        }).appendTo(deleteCell);
         $('<i/>', { class: 'fa fa-remove' }).appendTo(deleteButton);
 
         deleteButton.click(function () {
-          container.css({
+          row.css({
             background: 'var(--red-ui-secondary-background-inactive, #fee)',
           });
-          container.fadeOut(300, function () {
+          row.fadeOut(300, function () {
             $(this).remove();
+            checkForDuplicateLabels();
           });
         });
 
-        $('#node-input-option-container').append(container);
+        $('#node-input-option-container tbody').append(row);
+
+        row.find('.node-input-option-label').on('input', checkForDuplicateLabels);
+      }
+
+      function checkForDuplicateLabels() {
+        const labels = [];
+        let hasDuplicates = false;
+
+        $('#node-input-option-container tbody .node-input-option-label').each(function () {
+          const label = $(this).val().trim();
+          if (label && labels.includes(label)) {
+            hasDuplicates = true;
+          }
+          if (label) {
+            labels.push(label);
+          }
+        });
+
+        if (hasDuplicates) {
+          $('#valWarning').show();
+        } else {
+          $('#valWarning').hide();
+        }
       }
 
       $('#node-input-add-option').click(function () {
-        generateOption($('#node-input-option-container').children().length + 1, {});
+        const newOption = {};
+        if ($('#node-input-handle_confirmation_dialogs').is(':checked')) {
+          newOption.condition = '!usertask.isConfirmDialog';
+        }
+        generateOption($('#node-input-option-container tbody tr').length + 1, newOption);
         $('#node-input-option-container-div').scrollTop($('#node-input-option-container-div').get(0).scrollHeight);
+        checkForDuplicateLabels();
       });
 
       for (let i = 0; i < this.options.length; i++) {
@@ -222,28 +282,175 @@
         generateOption(i + 1, option);
       }
 
-      $('#node-input-option-container').sortable({
+      $('#node-input-option-container tbody .node-input-option-condition').each(function () {
+        const conditionInput = $(this);
+        if (!conditionInput.val().trim()) {
+          conditionInput.data('explicitly-cleared', true);
+        }
+      });
+
+      checkForDuplicateLabels();
+
+      $('#node-input-option-container tbody').sortable({
         axis: 'y',
-        handle: '.node-input-option-handle',
         cursor: 'move',
+        helper: function (e, tr) {
+          var $originals = tr.children();
+          var $helper = tr.clone();
+          $helper.children().each(function (index) {
+            $(this).width($originals.eq(index).width());
+          });
+          return $helper;
+        },
+      });
+
+      function generateConfirmOption(option, index) {
+        const row = $('<tr/>', {
+          style: 'background: var(--red-ui-secondary-background, #fff);',
+        });
+
+        const labelCell = $('<td/>', {
+          style: 'padding: 4px; border-bottom: 1px solid var(--red-ui-form-input-border-color, #eee);',
+        }).appendTo(row);
+        $('<input/>', {
+          class: 'node-input-confirm-option-label',
+          type: 'text',
+          style:
+            'width: 100%; box-sizing: border-box; background-color: var(--red-ui-form-input-background-disabled, #f9f9f9); border: 1px solid var(--red-ui-form-input-border-color, #ccc); padding: 3px;',
+          placeholder: 'Label',
+          value: option.label,
+          readonly: true,
+        }).appendTo(labelCell);
+
+        const alignmentCell = $('<td/>', {
+          style: 'padding: 4px; border-bottom: 1px solid var(--red-ui-form-input-border-color, #eee);',
+        }).appendTo(row);
+        $('<input/>', {
+          class: 'node-input-confirm-option-alignment',
+          type: 'text',
+          style: 'width: 100%; box-sizing: border-box;',
+          placeholder: 'Alignment',
+          value: option.alignment,
+        })
+          .appendTo(alignmentCell)
+          .typedInput({
+            types: [
+              {
+                value: 'alignment',
+                options: [
+                  { value: 'left', label: 'Align left' },
+                  { value: 'right', label: 'Align right' },
+                ],
+              },
+            ],
+          });
+
+        const primaryCell = $('<td/>', {
+          style: 'padding: 4px; border-bottom: 1px solid var(--red-ui-form-input-border-color, #eee);',
+        }).appendTo(row);
+        $('<input/>', {
+          class: 'node-input-confirm-option-primary',
+          type: 'text',
+          style: 'width: 100%; box-sizing: border-box;',
+          placeholder: 'Action type',
+          value: option.primary,
+        })
+          .appendTo(primaryCell)
+          .typedInput({
+            types: [
+              {
+                value: 'type',
+                options: [
+                  { value: 'primary', label: 'Primary action' },
+                  { value: 'secondary', label: 'Secondary action' },
+                  { value: 'destructive', label: 'Destructive action' },
+                ],
+              },
+            ],
+          });
+
+        $('#node-input-confirm-option-container tbody').append(row);
+      }
+
+      const confirmActions = this.confirm_actions || [
+        { label: 'Confirm', primary: 'primary', alignment: 'right' },
+        { label: 'Decline', primary: 'primary', alignment: 'right' },
+      ];
+
+      for (let i = 0; i < confirmActions.length; i++) {
+        const option = confirmActions[i];
+        generateConfirmOption(option, i);
+      }
+
+      function toggleConfirmActionsSection() {
+        const isChecked = $('#node-input-handle_confirmation_dialogs').is(':checked');
+        $('#confirm-actions-section').toggle(isChecked);
+      }
+
+      function handleConfirmationDialogToggle() {
+        const isChecked = $('#node-input-handle_confirmation_dialogs').is(':checked');
+
+        if (isChecked) {
+          $('#node-input-option-container tbody .node-input-option-condition').each(function () {
+            const conditionInput = $(this);
+            if (!conditionInput.val().trim() && !conditionInput.data('explicitly-cleared')) {
+              conditionInput.val('!usertask.isConfirmDialog');
+            }
+          });
+        } else {
+          $('#node-input-option-container tbody .node-input-option-condition').each(function () {
+            const conditionInput = $(this);
+            if (conditionInput.val().trim() === '!usertask.isConfirmDialog') {
+              conditionInput.val('');
+              conditionInput.data('explicitly-cleared', false);
+            }
+          });
+        }
+      }
+
+      toggleConfirmActionsSection();
+
+      $('#node-input-handle_confirmation_dialogs').on('change', function () {
+        toggleConfirmActionsSection();
+        handleConfirmationDialogToggle();
       });
     },
     oneditsave: function () {
-      const options = $('#node-input-option-container').children();
+      const options = $('#node-input-option-container tbody tr');
       const node = this;
       node.options = [];
       options.each(function (i) {
-        const option = $(this);
+        const row = $(this);
         const o = {
-          label: option.find('.node-input-option-label').val(),
-          condition: option.find('.node-input-option-condition').val(),
-          errorMessage: option.find('.node-input-option-error').val(),
-          alignment: option.find('.node-input-option-alignment').val(),
-          primary: option.find('.node-input-option-primary').val(),
+          label: row.find('.node-input-option-label').val(),
+          condition: row.find('.node-input-option-condition').val().trim(),
+          errorMessage: row.find('.node-input-option-error').val(),
+          alignment: row.find('.node-input-option-alignment').val(),
+          primary: row.find('.node-input-option-primary').val(),
         };
 
         node.options.push(o);
       });
+
+      const confirmOptions = $('#node-input-confirm-option-container tbody tr');
+      node.confirm_actions = [];
+      if (confirmOptions.length > 0) {
+        confirmOptions.each(function (i) {
+          const row = $(this);
+          const o = {
+            label: row.find('.node-input-confirm-option-label').val(),
+            alignment: row.find('.node-input-confirm-option-alignment').val(),
+            primary: row.find('.node-input-confirm-option-primary').val(),
+          };
+
+          node.confirm_actions.push(o);
+        });
+      } else {
+        node.confirm_actions = [
+          { label: 'Confirm', primary: 'primary', alignment: 'right' },
+          { label: 'Decline', primary: 'primary', alignment: 'right' },
+        ];
+      }
 
       this.outputs = node.options.length || 0;
 
@@ -252,13 +459,8 @@
       }
 
       if ($('#node-input-handle_confirmation_dialogs').is(':checked')) {
-        const confirmationOutputs = 2;
-        this.outputs += confirmationOutputs;
+        this.outputs += node.confirm_actions.length;
       }
-
-      const suspendOutput = 1;
-      const terminateOutput = 1;
-      this.outputs += suspendOutput + terminateOutput;
     },
   });
 </script>
@@ -282,18 +484,48 @@
     <h4>Action Configuration</h4>
     <div class="form-row form-row-flex node-input-option-container-row" style="margin-bottom: 0px;width: 100%">
         <label for="node-input-width" style="vertical-align:top"><i class="fa fa-list-alt"></i> Actions</label>
-        <div id="node-input-option-container-div" style="box-sizing:border-box; border-radius:5px; height:257px; padding:5px; border:1px solid var(--red-ui-form-input-border-color, #ccc); overflow-y:scroll; display:inline-block; width: 70%;">
-            <span id="valWarning" style="color: var(--red-ui-text-color-error, #910000)"><b>All Values must be unique.</b></span>
-            <ol id="node-input-option-container" style="list-style-type:none; margin:0;"></ol>
+        <div id="node-input-option-container-div" style="box-sizing:border-box; border-radius:5px; height:287px; padding:5px; border:1px solid var(--red-ui-form-input-border-color, #ccc); overflow-y:scroll; display:inline-block; width: 70%;">
+            <span id="valWarning" style="color: var(--red-ui-text-color-error, #910000); display: none;"><b>Duplicate labels found! All action labels must be unique.</b></span>
+            <table id="node-input-option-container" style="width: 100%; border-collapse: collapse; margin: 0;">
+                <thead>
+                    <tr style="background: var(--red-ui-primary-background, #f3f3f3);">
+                        <th style="padding: 5px; text-align: left; font-size: 11px; font-weight: bold; border-bottom: 1px solid var(--red-ui-form-input-border-color, #ccc);">Label</th>
+                        <th style="padding: 5px; text-align: left; font-size: 11px; font-weight: bold; border-bottom: 1px solid var(--red-ui-form-input-border-color, #ccc);">Condition</th>
+                        <th style="padding: 5px; text-align: left; font-size: 11px; font-weight: bold; border-bottom: 1px solid var(--red-ui-form-input-border-color, #ccc);">Error Message</th>
+                        <th style="padding: 5px; text-align: left; font-size: 11px; font-weight: bold; border-bottom: 1px solid var(--red-ui-form-input-border-color, #ccc); width: 100px;">Align</th>
+                        <th style="padding: 5px; text-align: left; font-size: 11px; font-weight: bold; border-bottom: 1px solid var(--red-ui-form-input-border-color, #ccc); width: 120px;">Type</th>
+                        <th style="padding: 5px; text-align: center; font-size: 11px; font-weight: bold; border-bottom: 1px solid var(--red-ui-form-input-border-color, #ccc); width: 30px;"></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
     <div class="form-row">
-        <a href="#" class="editor-button editor-button-small" id="node-input-add-option" style="margin-top:4px; margin-left:103px;"><i class="fa fa-plus"></i> <span>action</span></a>
+        <a href="#" class="editor-button editor-button-small" id="node-input-add-option" style="margin-top:4px; margin-left:120px;"><i class="fa fa-plus"></i> <span>Add action</span></a>
     </div>
-        <div class="form-row">
-        <label for="node-input-handle_confirmation_dialogs"><i class="fa fa-hand"></i>Handles confirmation dialogs</label>
+
+    <div class="form-row">
+        <label for="node-input-handle_confirmation_dialogs"><i class="fa fa-hand"></i>Handle confirmation dialogs</label>
         <input type="checkbox" id="node-input-handle_confirmation_dialogs" title="Adds more outputs at this node for handling confirm/decline actions">
     </div>
+
+    <div class="form-row form-row-flex node-input-confirm-option-container-row" id="confirm-actions-section" style="margin-bottom: 0px;width: 100%; display: none;">
+        <label for="node-input-confirm-width" style="vertical-align:top"><i class="fa fa-list-alt"></i> Confirm Actions</label>
+        <div id="node-input-confirm-option-container-div" style="box-sizing:border-box; border-radius:5px; height:150px; padding:5px; border:1px solid var(--red-ui-form-input-border-color, #ccc); overflow-y:auto; display:inline-block; width: 70%;">
+            <table id="node-input-confirm-option-container" style="width: 100%; border-collapse: collapse; margin: 0;">
+                <thead>
+                    <tr style="background: var(--red-ui-primary-background, #f3f3f3);">
+                        <th style="padding: 5px; text-align: left; font-size: 11px; font-weight: bold; border-bottom: 1px solid var(--red-ui-form-input-border-color, #ccc); width: 150px;">Label</th>
+                        <th style="padding: 5px; text-align: left; font-size: 11px; font-weight: bold; border-bottom: 1px solid var(--red-ui-form-input-border-color, #ccc); width: 120px;">Align</th>
+                        <th style="padding: 5px; text-align: left; font-size: 11px; font-weight: bold; border-bottom: 1px solid var(--red-ui-form-input-border-color, #ccc); width: 140px;">Type</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="form-row">
         <label for="node-input-actions_inside_card"><i class="fa fa-hand"></i>Inside of card</label>
         <input type="checkbox" id="node-input-actions_inside_card">
@@ -388,7 +620,7 @@
   A Form can have any amount of actions. Each action is specified with a:
 
   - **Label**: The buttons text.
-  - **Condition (optional)**: An expression that evaluates to true or false. It controls whether the action is enabled or not.
+  - **Condition (optional)**: An expression that evaluates to true or false. It controls whether the action is displayed and enabled.
   - **Error message (optional)**: Will be displayed, when Condition evaluates to false.
   - **Alignment**: Controls the buttons position. It can be placed on the left or right side of the form.
   - **Action type**: Controls the styling of the button. There should always be one primary action.
@@ -404,28 +636,64 @@
   Access to the form fields is available through the _fields_ object. A single form field can be accessed by selecting the field id as a key.
   Example: _fields.field_01_
 
-  Access to the usertask object is available through _usertask_
+  Access to the usertask object is available through _usertask_. The usertask object includes a special property _usertask.isConfirmDialog_ that indicates whether the current form is displaying a confirmation dialog.
+
+  **Examples:**
+
+  - `!usertask.isConfirmDialog` - Show action only in normal forms, not in confirmation dialogs
+  - `usertask.isConfirmDialog` - Show action only in confirmation dialogs
+  - `fields.myField === 'someValue'` - Show action only when a specific field has a certain value
 
   ### Handles confirmation dialogs
 
-  When checked, this node will gain two additional outputs 'Accept' and 'Decline'. These are required, when handling confirmation dialogs, that may be defined in the Studio by settings a Form Fields type to 'Confirm'.
-  When a 'Confirm'-FormField is present and this option is enabled, only the confirmation buttons (Accept/Decline) will be displayed. The actions configured in the 'Actions' section will be hidden.
+  When checked, this node will gain two additional outputs 'Decline' and 'Confirm'. These are required when handling confirmation dialogs that may be defined in the Studio by setting a Form Field's type to 'Confirm'.
+
+  When a 'Confirm' FormField is present and this option is enabled, only the confirmation buttons (Decline/Confirm) will be displayed by default. Regular actions will only be shown if their condition evaluates to true in the confirmation dialog context.
+
+  The default condition `!usertask.isConfirmDialog` ensures that regular actions are hidden in confirmation dialogs but shown in normal forms. You can customize this behavior by modifying the condition for each action.
+
+  ### Confirm Actions Configuration
+
+  When "Handle confirmation dialogs" is enabled, a dedicated configuration section appears for customizing the confirmation buttons. Unlike regular actions, confirm actions are automatically generated based on the UserTask's field configuration but can be styled and positioned according to your needs.
+
+  #### Confirm Actions Table
+
+  The confirm actions table provides configuration options for:
+
+  - **Label**: Display text for the button (read-only). This value comes directly from the UserTask's field configuration
+  - **Alignment**: Controls button positioning within the form
+  - **Type**: Controls the visual styling of the button
+  - Note: The label cannot be changed here, as it is sourced from the UserTask configuration
+
+  #### Default Confirm Action Configuration
+
+  When first enabled, the system creates two default confirm actions:
+
+  - **Confirm**: Primary button, right-aligned
+  - **Decline**: Primary button, right-aligned
+
+  #### Behavior with Confirmation Dialogs
+
+  When a UserTask contains a FormField with type 'Confirm':
+
+  1. The form automatically switches to confirmation dialog mode
+  2. Regular actions are filtered based on their conditions (using `usertask.isConfirmDialog`)
+  3. Only the configured confirm actions are displayed
+  4. Button labels are overridden by the UserTask's field configuration
+  5. The outputs route to "Decline (from UserTask)" and "Confirm (from UserTask)" respectively
+
+  #### Condition Interaction
+
+  Confirm actions work in conjunction with regular action conditions:
+
+  - Regular actions with empty conditions are shown in both normal and confirmation dialogs
+  - Actions with `!usertask.isConfirmDialog` are hidden in confirmation dialogs
+  - Actions with `usertask.isConfirmDialog` are only shown in confirmation dialogs
+  - This allows for flexible control over which actions appear in different contexts
 
   ### Inside of card
 
   This property controls the positioning of the action buttons. They can be palced inside of the card, right below the FormFields, or below the whole Card containing the Form.
-
-  ## Built-in Actions
-
-  The dynamic form includes two built-in actions that are always available:
-
-  ### Suspend Action
-
-  A secondary-styled button that allows users to suspend the current UserTask. This action has its own dedicated output and will send a message with `isSuspend: true` in the payload.
-
-  ### Terminate Action
-
-  A red link-styled button that allows users to terminate the current UserTask. This action has its own dedicated output and will send a message with `isTerminate: true` in the payload.
 
   ## Title Configuration
 
