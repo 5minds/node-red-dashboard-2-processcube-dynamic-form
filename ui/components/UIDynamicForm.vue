@@ -235,14 +235,12 @@ export default {
       return !!this.userTask;
     },
     totalOutputs() {
-      const confirmOutputs = this.props.handle_confirmation_dialogs 
-        ? (this.props.confirm_actions ? this.props.confirm_actions.length : 2)
+      const confirmOutputs = this.props.handle_confirmation_dialogs
+        ? this.props.confirm_actions
+          ? this.props.confirm_actions.length
+          : 2
         : 0;
-      return (
-        this.props.options.length +
-        confirmOutputs +
-        (this.props.trigger_on_change ? 1 : 0)
-      );
+      return this.props.options.length + confirmOutputs + (this.props.trigger_on_change ? 1 : 0);
     },
     isConfirmDialog() {
       return this.userTask.userTaskConfig.formFields.some((field) => field.type === 'confirm');
@@ -908,55 +906,55 @@ export default {
             const confirmText = customForm.confirmButtonText ?? 'Confirm';
             const declineText = customForm.declineButtonText ?? 'Decline';
 
-              const confirmActions = [
-                {
-                  alignment: this.props.confirm_actions[1]?.alignment || 'left',
-                  primary: this.props.confirm_actions[1]?.primary || 'destructive',
-                  label: declineText,
-                  condition: '',
-                  isConfirmAction: true,
-                  confirmFieldId: field.id,
-                  confirmValue: false,
-                },
-                {
-                  alignment: this.props.confirm_actions[0]?.alignment || 'right',
-                  primary: this.props.confirm_actions[0]?.primary || 'primary', 
-                  label: confirmText,
-                  condition: '',
-                  isConfirmAction: true,
-                  confirmFieldId: field.id,
-                  confirmValue: true,
-                },
-              ];
+            const confirmActions = [
+              {
+                alignment: this.props.confirm_actions[1]?.alignment || 'left',
+                primary: this.props.confirm_actions[1]?.primary || 'destructive',
+                label: declineText,
+                condition: '',
+                isConfirmAction: true,
+                confirmFieldId: field.id,
+                confirmValue: false,
+              },
+              {
+                alignment: this.props.confirm_actions[0]?.alignment || 'right',
+                primary: this.props.confirm_actions[0]?.primary || 'primary',
+                label: confirmText,
+                condition: '',
+                isConfirmAction: true,
+                confirmFieldId: field.id,
+                confirmValue: true,
+              },
+            ];
 
-              const filteredActions = this.props.options.filter(action => {
-                if (!action.condition) return true;
-                try {
-                  const usertaskWithContext = {
-                    ...this.userTask,
-                    isConfirmDialog: true
-                  };
-                  const func = Function('fields', 'usertask', 'msg', '"use strict"; return (' + action.condition + ')');
-                  const result = func(this.formData, usertaskWithContext, this.msg);
-                  return Boolean(result);
-                } catch (err) {
-                  console.error('Error while evaluating condition: ' + err);
-                  return false;
-                }
-              });
+            const filteredActions = this.props.options.filter((action) => {
+              if (!action.condition) return true;
+              try {
+                const usertaskWithContext = {
+                  ...this.userTask,
+                  isConfirmDialog: true,
+                };
+                const func = Function('fields', 'usertask', 'msg', '"use strict"; return (' + action.condition + ')');
+                const result = func(this.formData, usertaskWithContext, this.msg);
+                return Boolean(result);
+              } catch (err) {
+                console.error('Error while evaluating condition: ' + err);
+                return false;
+              }
+            });
 
-              this.actions = [...filteredActions, ...confirmActions];
-            }
+            this.actions = [...filteredActions, ...confirmActions];
+          }
         });
       }
 
       if (!hasConfirmField && this.props.handle_confirmation_dialogs) {
-        this.actions = this.props.options.filter(action => {
+        this.actions = this.props.options.filter((action) => {
           if (!action.condition) return true;
           try {
             const usertaskWithContext = {
               ...this.userTask,
-              isConfirmDialog: false
+              isConfirmDialog: false,
             };
             const func = Function('fields', 'usertask', 'msg', '"use strict"; return (' + action.condition + ')');
             const result = func(this.formData, usertaskWithContext, this.msg);
@@ -1040,8 +1038,8 @@ export default {
 
         let outputIndex;
         if (action.isConfirmAction) {
-            const confirmActionIndex = action.confirmValue ? 1 : 0;
-            outputIndex = this.props.options.length + confirmActionIndex;
+          const confirmActionIndex = action.confirmValue ? 1 : 0;
+          outputIndex = this.props.options.length + confirmActionIndex;
         } else {
           outputIndex = this.props.options.findIndex((element) => element.label === action.label);
         }
@@ -1055,7 +1053,7 @@ export default {
       try {
         const usertaskWithContext = {
           ...this.userTask,
-          isConfirmDialog: context.isConfirmDialog || false
+          isConfirmDialog: context.isConfirmDialog || false,
         };
 
         const func = Function('fields', 'usertask', 'msg', '"use strict"; return (' + condition + ')');
