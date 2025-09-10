@@ -889,6 +889,8 @@ export default {
       const formFields = this.userTask.userTaskConfig.formFields;
       const formFieldIds = formFields.map((ff) => ff.id);
       const initialValues = this.userTask.startToken;
+      console.log('Initial Values:', initialValues);
+      console.log('Form Fields:', formFields);
       const finishedFormData = msg.payload.formData;
       this.formIsFinished = !!msg.payload.formData;
       if (this.formIsFinished) {
@@ -986,32 +988,29 @@ export default {
         this.focusFirstFormField();
       });
     },
-    actionFn(action) {
+    async actionFn(action) {
       if (action.isConfirmAction && action.confirmFieldId) {
         this.formData[action.confirmFieldId] = action.confirmValue;
-      }
-
-      if (action.label === 'Speichern' || action.label === 'Speichern und nächster') {
-        const formkitInputs = this.$refs.form.$el.querySelectorAll('.formkit-outer');
-        let allComplete = true;
-
-        formkitInputs.forEach((input) => {
-          const dataComplete = input.getAttribute('data-complete');
-          const dataInvalid = input.getAttribute('data-invalid');
-
-          if (dataComplete == null && dataInvalid === 'true') {
-            allComplete = false;
-          }
-        });
-
-        if (!allComplete) return;
       }
 
       if (this.checkCondition(action.condition, { isConfirmDialog: this.isConfirmDialog })) {
         this.showError('');
 
-        const processedFormData = { ...this.formData };
+        let processedFormData = { ...this.formData };
         const formFields = this.userTask.userTaskConfig.formFields;
+
+        try {
+          console.log(
+            'Processing file fields:',
+            formFields.filter((f) => f.type === 'file')
+          );
+          processedFormData = await this.processFileFields(processedFormData, formFields);
+          console.log('File processing completed successfully');
+        } catch (error) {
+          console.error('Error processing file fields:', error);
+          this.showError('Fehler beim Verarbeiten der Dateien');
+          return;
+        }
 
         formFields.forEach((field) => {
           const fieldValue = processedFormData[field.id];
@@ -1092,6 +1091,99 @@ export default {
         }
       }
     },
+    async convertFileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result.split(',')[1];
+          resolve({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            lastModified: file.lastModified,
+            data: base64,
+          });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    },
+    async processFileFields(formData, formFields) {
+      const processedData = { ...formData };
+
+      for (const field of formFields) {
+        if (field.type === 'file') {
+          const fieldValue = processedData[field.id];
+
+          if (fieldValue) {
+            const multiple = field.customForm
+              ? JSON.parse(JSON.stringify(field.customForm)).multiple === 'true'
+              : false;
+
+            if (multiple && Array.isArray(fieldValue)) {
+              // Handle multiple files
+              const base64Files = [];
+              for (const file of fieldValue) {
+                const processedFile = await this.processIndividualFile(file);
+                if (processedFile) {
+                  base64Files.push(processedFile);
+                }
+              }
+              processedData[field.id] = base64Files;
+            } else if (Array.isArray(fieldValue)) {
+              const base64Files = [];
+              for (const file of fieldValue) {
+                const processedFile = await this.processIndividualFile(file);
+                if (processedFile) {
+                  base64Files.push(processedFile);
+                }
+              }
+              processedData[field.id] = multiple ? base64Files : base64Files[0] || null;
+            } else if (fieldValue) {
+              const processedFile = await this.processIndividualFile(fieldValue);
+              if (processedFile) {
+                processedData[field.id] = processedFile;
+              }
+            }
+          }
+        }
+      }
+
+      return processedData;
+    },
+    async processIndividualFile(fileData) {
+      let actualFile = null;
+
+      if (fileData instanceof File) {
+        actualFile = fileData;
+      } else if (fileData instanceof FileList && fileData.length > 0) {
+        actualFile = fileData[0];
+      } else if (fileData && fileData.file instanceof File) {
+        actualFile = fileData.file;
+      } else if (fileData && fileData.file instanceof FileList && fileData.file.length > 0) {
+        actualFile = fileData.file[0];
+      } else if (Array.isArray(fileData) && fileData.length > 0) {
+        if (fileData[0] instanceof File) {
+          actualFile = fileData[0];
+        } else if (fileData[0] && fileData[0].file instanceof File) {
+          actualFile = fileData[0].file;
+        } else if (fileData[0] && fileData[0].file instanceof FileList && fileData[0].file.length > 0) {
+          actualFile = fileData[0].file[0];
+        }
+      } else if (typeof fileData === 'object' && fileData.data && fileData.name) {
+        return fileData;
+      }
+
+      if (actualFile instanceof File) {
+        return await this.convertFileToBase64(actualFile);
+      }
+
+      if (fileData && typeof fileData === 'object' && !fileData.data) {
+        console.warn('Could not process file data:', fileData);
+      }
+
+      return fileData;
+    },
   },
 };
 
@@ -1108,6 +1200,5 @@ function mapItems(type, field) {
 </script>
 
 <style>
-/* CSS is auto scoped, but using named classes is still recommended */
 @import '../stylesheets/ui-dynamic-form.css';
 </style>
