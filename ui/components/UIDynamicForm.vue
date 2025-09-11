@@ -988,8 +988,6 @@ export default {
       const formFields = this.userTask.userTaskConfig.formFields;
       const formFieldIds = formFields.map((ff) => ff.id);
       const initialValues = this.userTask.startToken;
-      console.log('Initial Values:', initialValues);
-      console.log('Form Fields:', formFields);
       const finishedFormData = msg.payload.formData;
       this.formIsFinished = !!msg.payload.formData;
       if (this.formIsFinished) {
@@ -1109,14 +1107,8 @@ export default {
         const formFields = this.userTask.userTaskConfig.formFields;
 
         try {
-          console.log(
-            'Processing file fields:',
-            formFields.filter((f) => f.type === 'file')
-          );
           processedFormData = await this.processFileFields(processedFormData, formFields);
-          console.log('File processing completed successfully');
         } catch (error) {
-          console.error('Error processing file fields:', error);
           this.showError('Fehler beim Verarbeiten der Dateien');
           return;
         }
@@ -1309,7 +1301,6 @@ export default {
 
           if (this.originalFileData[fieldId]) {
             processedData[fieldId] = this.originalFileData[fieldId];
-            console.log(`Using original file data for field ${fieldId}:`, this.originalFileData[fieldId]);
             continue;
           }
 
