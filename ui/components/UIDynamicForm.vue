@@ -79,6 +79,53 @@
                           {{ field.customForm ? field.customForm.hint : undefined }}
                         </p>
                       </div>
+                      <div v-else-if="createComponent(field).isFileField" class="ui-dynamic-form-file-wrapper">
+                        <div v-if="getFilePreviewsForField(field.id).length > 0" class="ui-dynamic-form-image-previews">
+                          <h4>Current files:</h4>
+                          <div class="ui-dynamic-form-preview-grid">
+                            <div
+                              v-for="preview in getFilePreviewsForField(field.id)"
+                              :key="preview.name"
+                              class="ui-dynamic-form-preview-item"
+                            >
+                              <img
+                                :src="preview.url"
+                                :alt="preview.name"
+                                class="ui-dynamic-form-preview-image"
+                                @click="openImageModal(preview)"
+                              />
+                              <div class="ui-dynamic-form-preview-info">
+                                <span class="ui-dynamic-form-preview-name">{{ preview.name }}</span>
+                                <span class="ui-dynamic-form-preview-size">{{ formatFileSize(preview.size) }}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <FormKit
+                          type="file"
+                          :id="field.id"
+                          :name="createComponent(field).name"
+                          :label="field.label"
+                          :required="field.required"
+                          v-model="formData[field.id]"
+                          :help="createComponent(field).hint"
+                          innerClass="reset-background"
+                          wrapperClass="$remove:formkit-wrapper"
+                          labelClass="ui-dynamic-form-input-label"
+                          :inputClass="`input-${theme}`"
+                          :readonly="createComponent(field).isReadOnly"
+                          :disabled="createComponent(field).isReadOnly"
+                          :multiple="createComponent(field).multiple"
+                          :validation="createComponent(field).validation"
+                          validationVisibility="live"
+                          :ref="
+                            (el) => {
+                              if (index === 0) firstFormFieldRef = el;
+                            }
+                          "
+                        />
+                      </div>
                       <component
                         :is="createComponent(field).type"
                         v-else
@@ -121,6 +168,27 @@
     <div v-if="!props.actions_inside_card && hasUserTask && actions.length > 0" style="padding-top: 32px">
       <UIDynamicFormFooterAction :actions="actions" :actionCallback="actionFn" />
     </div>
+
+    <v-dialog v-model="imageModalOpen" max-width="800px">
+      <v-card v-if="modalImage">
+        <v-card-title class="headline">{{ modalImage.name }}</v-card-title>
+        <v-card-text>
+          <img
+            :src="modalImage.url"
+            :alt="modalImage.name"
+            style="width: 100%; max-height: 70vh; object-fit: contain"
+          />
+          <div style="margin-top: 16px">
+            <strong>Size:</strong> {{ formatFileSize(modalImage.size) }}<br />
+            <strong>Type:</strong> {{ modalImage.type }}
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" text @click="closeImageModal">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -215,6 +283,7 @@ export default {
     return {
       actions: [],
       formData: {},
+      originalFileData: {},
       userTask: null,
       theme: '',
       errorMsg: '',
@@ -222,6 +291,10 @@ export default {
       msg: null,
       collapsed: false,
       firstFormFieldRef: null,
+      imageModalOpen: false,
+      modalImage: null,
+      objectUrlsByField: {},
+      previewCache: {},
     };
   },
   computed: {
@@ -235,14 +308,12 @@ export default {
       return !!this.userTask;
     },
     totalOutputs() {
-      const confirmOutputs = this.props.handle_confirmation_dialogs 
-        ? (this.props.confirm_actions ? this.props.confirm_actions.length : 2)
+      const confirmOutputs = this.props.handle_confirmation_dialogs
+        ? this.props.confirm_actions
+          ? this.props.confirm_actions.length
+          : 2
         : 0;
-      return (
-        this.props.options.length +
-        confirmOutputs +
-        (this.props.trigger_on_change ? 1 : 0)
-      );
+      return this.props.options.length + confirmOutputs + (this.props.trigger_on_change ? 1 : 0);
     },
     isConfirmDialog() {
       return this.userTask.userTaskConfig.formFields.some((field) => field.type === 'confirm');
@@ -260,26 +331,54 @@ export default {
   watch: {
     formData: {
       handler(newData, oldData) {
+        if (!oldData) return;
+
+        if (this.userTask && this.userTask.userTaskConfig && this.userTask.userTaskConfig.formFields) {
+          const fileFields = this.userTask.userTaskConfig.formFields.filter((field) => field.type === 'file');
+
+          fileFields.forEach((field) => {
+            const fieldId = field.id;
+            const newValue = newData[fieldId];
+            const oldValue = oldData[fieldId];
+
+            if (newValue !== oldValue && this.originalFileData[fieldId]) {
+              const hasNewFiles = this.hasActualFileObjects(newValue);
+
+              if (hasNewFiles) {
+                delete this.originalFileData[fieldId];
+
+                Object.keys(this.previewCache).forEach((key) => {
+                  if (key.startsWith(fieldId + '_')) {
+                    delete this.previewCache[key];
+                  }
+                });
+
+                this.cleanupObjectUrls(fieldId);
+              }
+            }
+          });
+        }
+
         if (this.props.trigger_on_change) {
           const res = { payload: { formData: newData, userTask: this.userTask } };
           this.send(res, this.totalOutputs - 1);
         }
       },
-      collapsed(newVal) {
-        if (!newVal && this.hasUserTask) {
-          nextTick(() => {
-            this.focusFirstFormField();
-          });
-        }
-      },
-      userTask(newVal) {
-        if (newVal && !this.collapsed) {
-          nextTick(() => {
-            this.focusFirstFormField();
-          });
-        }
-      },
       deep: true,
+    },
+    collapsed(newVal) {
+      if (!newVal && this.hasUserTask) {
+        nextTick(() => {
+          this.focusFirstFormField();
+        });
+      }
+    },
+    userTask(newVal) {
+      if (newVal && !this.collapsed) {
+        nextTick(() => {
+          this.focusFirstFormField();
+        });
+      }
     },
   },
   created() {
@@ -316,6 +415,7 @@ export default {
   },
   unmounted() {
     this.$socket?.off('msg-input:' + this.id);
+    this.cleanupObjectUrls();
   },
   methods: {
     createComponent(field) {
@@ -497,25 +597,17 @@ export default {
         case 'file':
           const multiple = field.customForm ? JSON.parse(JSON.stringify(field.customForm)).multiple === 'true' : false;
           return {
-            type: 'FormKit',
+            type: 'div',
             props: {
-              type: 'file',
-              id: field.id,
-              name,
-              label: field.label,
-              required: field.required,
-              value: this.formData[field.id],
-              help: hint,
-              innerClass: 'reset-background',
-              wrapperClass: '$remove:formkit-wrapper',
-              labelClass: 'ui-dynamic-form-input-label',
-              inputClass: `input-${this.theme}`,
-              readonly: isReadOnly,
-              disabled: isReadOnly,
-              multiple,
-              validation,
-              validationVisibility: 'live',
+              class: 'ui-dynamic-form-file-wrapper',
             },
+            isFileField: true,
+            field: field,
+            multiple: multiple,
+            isReadOnly: isReadOnly,
+            hint: hint,
+            validation: validation,
+            name: name,
           };
         case 'checkbox':
           const options = JSON.parse(JSON.stringify(field.customForm)).entries.map((obj) => {
@@ -876,6 +968,9 @@ export default {
         return;
       }
 
+      this.originalFileData = {};
+      this.previewCache = {};
+      this.cleanupObjectUrls();
       this.actions = this.props.options;
 
       const hasTask = msg.payload && msg.payload.userTask;
@@ -885,6 +980,8 @@ export default {
       } else {
         this.userTask = null;
         this.formData = {};
+        this.originalFileData = {};
+        this.cleanupObjectUrls();
         return;
       }
 
@@ -908,55 +1005,55 @@ export default {
             const confirmText = customForm.confirmButtonText ?? 'Confirm';
             const declineText = customForm.declineButtonText ?? 'Decline';
 
-              const confirmActions = [
-                {
-                  alignment: this.props.confirm_actions[1]?.alignment || 'left',
-                  primary: this.props.confirm_actions[1]?.primary || 'destructive',
-                  label: declineText,
-                  condition: '',
-                  isConfirmAction: true,
-                  confirmFieldId: field.id,
-                  confirmValue: false,
-                },
-                {
-                  alignment: this.props.confirm_actions[0]?.alignment || 'right',
-                  primary: this.props.confirm_actions[0]?.primary || 'primary', 
-                  label: confirmText,
-                  condition: '',
-                  isConfirmAction: true,
-                  confirmFieldId: field.id,
-                  confirmValue: true,
-                },
-              ];
+            const confirmActions = [
+              {
+                alignment: this.props.confirm_actions[1]?.alignment || 'left',
+                primary: this.props.confirm_actions[1]?.primary || 'destructive',
+                label: declineText,
+                condition: '',
+                isConfirmAction: true,
+                confirmFieldId: field.id,
+                confirmValue: false,
+              },
+              {
+                alignment: this.props.confirm_actions[0]?.alignment || 'right',
+                primary: this.props.confirm_actions[0]?.primary || 'primary',
+                label: confirmText,
+                condition: '',
+                isConfirmAction: true,
+                confirmFieldId: field.id,
+                confirmValue: true,
+              },
+            ];
 
-              const filteredActions = this.props.options.filter(action => {
-                if (!action.condition) return true;
-                try {
-                  const usertaskWithContext = {
-                    ...this.userTask,
-                    isConfirmDialog: true
-                  };
-                  const func = Function('fields', 'usertask', 'msg', '"use strict"; return (' + action.condition + ')');
-                  const result = func(this.formData, usertaskWithContext, this.msg);
-                  return Boolean(result);
-                } catch (err) {
-                  console.error('Error while evaluating condition: ' + err);
-                  return false;
-                }
-              });
+            const filteredActions = this.props.options.filter((action) => {
+              if (!action.condition) return true;
+              try {
+                const usertaskWithContext = {
+                  ...this.userTask,
+                  isConfirmDialog: true,
+                };
+                const func = Function('fields', 'usertask', 'msg', '"use strict"; return (' + action.condition + ')');
+                const result = func(this.formData, usertaskWithContext, this.msg);
+                return Boolean(result);
+              } catch (err) {
+                console.error('Error while evaluating condition: ' + err);
+                return false;
+              }
+            });
 
-              this.actions = [...filteredActions, ...confirmActions];
-            }
+            this.actions = [...filteredActions, ...confirmActions];
+          }
         });
       }
 
       if (!hasConfirmField && this.props.handle_confirmation_dialogs) {
-        this.actions = this.props.options.filter(action => {
+        this.actions = this.props.options.filter((action) => {
           if (!action.condition) return true;
           try {
             const usertaskWithContext = {
               ...this.userTask,
-              isConfirmDialog: false
+              isConfirmDialog: false,
             };
             const func = Function('fields', 'usertask', 'msg', '"use strict"; return (' + action.condition + ')');
             const result = func(this.formData, usertaskWithContext, this.msg);
@@ -972,7 +1069,12 @@ export default {
         Object.keys(initialValues)
           .filter((key) => formFieldIds.includes(key))
           .forEach((key) => {
-            this.formData[key] = initialValues[key];
+            const field = formFields.find((f) => f.id === key);
+            if (field && field.type === 'file') {
+              this.formData[key] = this.transformBase64ToFormKitFormat(initialValues[key], field);
+            } else {
+              this.formData[key] = initialValues[key];
+            }
           });
       }
 
@@ -980,7 +1082,12 @@ export default {
         Object.keys(finishedFormData)
           .filter((key) => formFieldIds.includes(key))
           .forEach((key) => {
-            this.formData[key] = finishedFormData[key];
+            const field = formFields.find((f) => f.id === key);
+            if (field && field.type === 'file') {
+              this.formData[key] = this.transformBase64ToFormKitFormat(finishedFormData[key], field);
+            } else {
+              this.formData[key] = finishedFormData[key];
+            }
           });
       }
 
@@ -988,32 +1095,23 @@ export default {
         this.focusFirstFormField();
       });
     },
-    actionFn(action) {
+    async actionFn(action) {
       if (action.isConfirmAction && action.confirmFieldId) {
         this.formData[action.confirmFieldId] = action.confirmValue;
-      }
-
-      if (action.label === 'Speichern' || action.label === 'Speichern und nächster') {
-        const formkitInputs = this.$refs.form.$el.querySelectorAll('.formkit-outer');
-        let allComplete = true;
-
-        formkitInputs.forEach((input) => {
-          const dataComplete = input.getAttribute('data-complete');
-          const dataInvalid = input.getAttribute('data-invalid');
-
-          if (dataComplete == null && dataInvalid === 'true') {
-            allComplete = false;
-          }
-        });
-
-        if (!allComplete) return;
       }
 
       if (this.checkCondition(action.condition, { isConfirmDialog: this.isConfirmDialog })) {
         this.showError('');
 
-        const processedFormData = { ...this.formData };
+        let processedFormData = { ...this.formData };
         const formFields = this.userTask.userTaskConfig.formFields;
+
+        try {
+          processedFormData = await this.processFileFields(processedFormData, formFields);
+        } catch (error) {
+          this.showError('Fehler beim Verarbeiten der Dateien');
+          return;
+        }
 
         formFields.forEach((field) => {
           const fieldValue = processedFormData[field.id];
@@ -1040,8 +1138,8 @@ export default {
 
         let outputIndex;
         if (action.isConfirmAction) {
-            const confirmActionIndex = action.confirmValue ? 1 : 0;
-            outputIndex = this.props.options.length + confirmActionIndex;
+          const confirmActionIndex = action.confirmValue ? 1 : 0;
+          outputIndex = this.props.options.length + confirmActionIndex;
         } else {
           outputIndex = this.props.options.findIndex((element) => element.label === action.label);
         }
@@ -1055,7 +1153,7 @@ export default {
       try {
         const usertaskWithContext = {
           ...this.userTask,
-          isConfirmDialog: context.isConfirmDialog || false
+          isConfirmDialog: context.isConfirmDialog || false,
         };
 
         const func = Function('fields', 'usertask', 'msg', '"use strict"; return (' + condition + ')');
@@ -1094,6 +1192,338 @@ export default {
         }
       }
     },
+    /**
+     * Transforms base64 file data to FormKit-compatible format for display.
+     *
+     * FormKit file inputs expect an array of objects with 'name' property for display.
+     * This function converts the base64 format (with 'data' property) to the display format,
+     * while preserving the original data in originalFileData for form submission.
+     *
+     * Expected input format from initialValues:
+     * {
+     *   name: "filename.ext",
+     *   size: 12345,
+     *   type: "image/png",
+     *   data: "base64string..."
+     * }
+     *
+     * Output format for FormKit:
+     * [
+     *   { name: "filename.ext" }
+     * ]
+     *
+     * @param {Object|Array} fileData - The file data from initial values
+     * @param {Object} field - The form field configuration
+     * @returns {Array} FormKit-compatible file array
+     */
+    transformBase64ToFormKitFormat(fileData, field) {
+      if (
+        Array.isArray(fileData) &&
+        fileData.length > 0 &&
+        typeof fileData[0] === 'object' &&
+        fileData[0].name &&
+        !fileData[0].data
+      ) {
+        return fileData;
+      }
+
+      const fieldId = field.id;
+      const multiple = field.customForm ? JSON.parse(JSON.stringify(field.customForm)).multiple === 'true' : false;
+
+      if (fileData && typeof fileData === 'object' && fileData.name && fileData.data) {
+        this.originalFileData[fieldId] = fileData;
+
+        const formKitFile = {
+          name: fileData.name,
+        };
+
+        return multiple ? [formKitFile] : [formKitFile];
+      }
+
+      if (Array.isArray(fileData)) {
+        this.originalFileData[fieldId] = fileData;
+
+        const formKitFiles = fileData
+          .filter((file) => file && typeof file === 'object' && file.name)
+          .map((file) => ({
+            name: file.name,
+          }));
+
+        return formKitFiles;
+      }
+
+      return [];
+    },
+    hasActualFileObjects(value) {
+      if (!value) return false;
+
+      if (Array.isArray(value)) {
+        return value.some((item) => {
+          return (
+            item instanceof File ||
+            (item && item.file instanceof File) ||
+            (item && item.file instanceof FileList && item.file.length > 0)
+          );
+        });
+      }
+
+      return (
+        value instanceof File ||
+        (value instanceof FileList && value.length > 0) ||
+        (value && value.file instanceof File) ||
+        (value && value.file instanceof FileList && value.file.length > 0)
+      );
+    },
+    async convertFileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result.split(',')[1];
+          resolve({
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            lastModified: file.lastModified,
+            data: base64,
+          });
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    },
+    async processFileFields(formData, formFields) {
+      const processedData = { ...formData };
+
+      for (const field of formFields) {
+        if (field.type === 'file') {
+          const fieldValue = processedData[field.id];
+          const fieldId = field.id;
+
+          if (this.originalFileData[fieldId]) {
+            processedData[fieldId] = this.originalFileData[fieldId];
+            continue;
+          }
+
+          if (fieldValue) {
+            const multiple = field.customForm
+              ? JSON.parse(JSON.stringify(field.customForm)).multiple === 'true'
+              : false;
+
+            if (multiple && Array.isArray(fieldValue)) {
+              const base64Files = [];
+              for (const file of fieldValue) {
+                const processedFile = await this.processIndividualFile(file);
+                if (processedFile) {
+                  base64Files.push(processedFile);
+                }
+              }
+              processedData[field.id] = base64Files;
+            } else if (Array.isArray(fieldValue)) {
+              const base64Files = [];
+              for (const file of fieldValue) {
+                const processedFile = await this.processIndividualFile(file);
+                if (processedFile) {
+                  base64Files.push(processedFile);
+                }
+              }
+              processedData[field.id] = multiple ? base64Files : base64Files[0] || null;
+            } else if (fieldValue) {
+              const processedFile = await this.processIndividualFile(fieldValue);
+              if (processedFile) {
+                processedData[field.id] = processedFile;
+              }
+            }
+          }
+        }
+      }
+
+      return processedData;
+    },
+    async processIndividualFile(fileData) {
+      let actualFile = null;
+
+      if (fileData instanceof File) {
+        actualFile = fileData;
+      } else if (fileData instanceof FileList && fileData.length > 0) {
+        actualFile = fileData[0];
+      } else if (fileData && fileData.file instanceof File) {
+        actualFile = fileData.file;
+      } else if (fileData && fileData.file instanceof FileList && fileData.file.length > 0) {
+        actualFile = fileData.file[0];
+      } else if (Array.isArray(fileData) && fileData.length > 0) {
+        if (fileData[0] instanceof File) {
+          actualFile = fileData[0];
+        } else if (fileData[0] && fileData[0].file instanceof File) {
+          actualFile = fileData[0].file;
+        } else if (fileData[0] && fileData[0].file instanceof FileList && fileData[0].file.length > 0) {
+          actualFile = fileData[0].file[0];
+        }
+      } else if (typeof fileData === 'object' && fileData.data && fileData.name) {
+        return fileData;
+      }
+
+      if (actualFile instanceof File) {
+        return await this.convertFileToBase64(actualFile);
+      }
+
+      if (fileData && typeof fileData === 'object' && !fileData.data) {
+        console.warn('Could not process file data:', fileData);
+      }
+
+      return fileData;
+    },
+    isImageFile(fileData) {
+      if (!fileData || typeof fileData !== 'object') return false;
+
+      const mimeType = fileData.type;
+      if (!mimeType) return false;
+
+      return mimeType.startsWith('image/');
+    },
+    generateImagePreviewUrl(fileData) {
+      if (!fileData || !fileData.data || !fileData.type) return null;
+
+      return `data:${fileData.type};base64,${fileData.data}`;
+    },
+    getFilePreviewsForField(fieldId) {
+      const currentData = this.formData[fieldId] || null;
+      const cachedOriginalData = this.originalFileData[fieldId] || null;
+      const cacheKey = `${fieldId}_${JSON.stringify(currentData)}_${JSON.stringify(cachedOriginalData)}`;
+
+      if (this.previewCache[cacheKey]) {
+        return this.previewCache[cacheKey];
+      }
+
+      const currentFormData = this.formData[fieldId];
+      const originalFileData = this.originalFileData[fieldId];
+
+      if (!currentFormData && !originalFileData) {
+        this.previewCache[cacheKey] = [];
+        return [];
+      }
+
+      let previews = [];
+
+      const hasNewFileObjects =
+        currentFormData &&
+        Array.isArray(currentFormData) &&
+        currentFormData.length > 0 &&
+        this.hasActualFileObjects(currentFormData);
+
+      if (hasNewFileObjects) {
+        previews = this.generatePreviewsFromCurrentFiles(currentFormData, fieldId);
+      } else if (originalFileData) {
+        const fileArray = Array.isArray(originalFileData) ? originalFileData : [originalFileData];
+        previews = fileArray
+          .filter((file) => this.isImageFile(file))
+          .map((file) => ({
+            name: file.name,
+            url: this.generateImagePreviewUrl(file),
+            size: file.size,
+            type: file.type,
+          }));
+      }
+
+      this.previewCache[cacheKey] = previews;
+
+      return previews;
+    },
+    generatePreviewsFromCurrentFiles(fileArray, fieldId = null) {
+      if (fieldId && this.objectUrlsByField[fieldId]) {
+        this.objectUrlsByField[fieldId].forEach((url) => URL.revokeObjectURL(url));
+        this.objectUrlsByField[fieldId] = [];
+      } else if (fieldId) {
+        this.objectUrlsByField[fieldId] = [];
+      }
+
+      const previews = fileArray
+        .filter((fileItem) => {
+          let actualFile = null;
+
+          if (fileItem instanceof File) {
+            actualFile = fileItem;
+          } else if (fileItem && fileItem.file instanceof File) {
+            actualFile = fileItem.file;
+          } else if (Array.isArray(fileItem) && fileItem[0] instanceof File) {
+            actualFile = fileItem[0];
+          }
+
+          return actualFile && actualFile.type && actualFile.type.startsWith('image/');
+        })
+        .map((fileItem) => {
+          let actualFile = null;
+
+          if (fileItem instanceof File) {
+            actualFile = fileItem;
+          } else if (fileItem && fileItem.file instanceof File) {
+            actualFile = fileItem.file;
+          } else if (Array.isArray(fileItem) && fileItem[0] instanceof File) {
+            actualFile = fileItem[0];
+          }
+
+          const url = actualFile ? URL.createObjectURL(actualFile) : null;
+
+          if (url && fieldId) {
+            if (!this.objectUrlsByField[fieldId]) {
+              this.objectUrlsByField[fieldId] = [];
+            }
+            this.objectUrlsByField[fieldId].push(url);
+          }
+
+          return {
+            name: actualFile.name,
+            url: url,
+            size: actualFile.size,
+            type: actualFile.type,
+            isObjectUrl: true,
+          };
+        })
+        .filter((preview) => preview.url !== null);
+
+      return previews;
+    },
+    formatFileSize(bytes) {
+      if (!bytes) return '0 B';
+
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    },
+    openImageModal(preview) {
+      this.modalImage = preview;
+      this.imageModalOpen = true;
+    },
+    closeImageModal() {
+      this.imageModalOpen = false;
+      this.modalImage = null;
+    },
+    cleanupObjectUrls(fieldId = null) {
+      if (fieldId) {
+        if (this.objectUrlsByField[fieldId]) {
+          this.objectUrlsByField[fieldId].forEach((url) => {
+            URL.revokeObjectURL(url);
+          });
+          this.objectUrlsByField[fieldId] = [];
+        }
+
+        Object.keys(this.previewCache).forEach((key) => {
+          if (key.startsWith(fieldId + '_')) {
+            delete this.previewCache[key];
+          }
+        });
+      } else {
+        Object.keys(this.objectUrlsByField).forEach((fieldId) => {
+          this.objectUrlsByField[fieldId].forEach((url) => {
+            URL.revokeObjectURL(url);
+          });
+        });
+        this.objectUrlsByField = {};
+
+        this.previewCache = {};
+      }
+    },
   },
 };
 
@@ -1110,6 +1540,5 @@ function mapItems(type, field) {
 </script>
 
 <style>
-/* CSS is auto scoped, but using named classes is still recommended */
 @import '../stylesheets/ui-dynamic-form.css';
 </style>
