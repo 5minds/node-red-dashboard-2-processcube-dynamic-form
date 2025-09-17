@@ -216,6 +216,21 @@ function requiredIf({ value }, [targetField, expectedValue], node) {
   return true;
 }
 
+function normalizeCustomForm(input, defaultValue = {}) {
+  if (typeof input === "string") {
+    try {
+      return JSON.parse(input);
+    } catch {
+      return defaultValue;
+    }
+  }
+  if (typeof input === "object" && input !== null) {
+    return { ...input };
+  }
+  return defaultValue;
+}
+
+
 class MarkdownRenderer extends marked.Renderer {
   link(params) {
     const link = super.link(params);
@@ -455,7 +470,7 @@ export default {
             },
           };
         case 'number':
-          const step = field.customForm ? JSON.parse(JSON.stringify(field.customForm)).step : undefined;
+          const step = normalizeCustomForm(field.customForm).step;
           return {
             type: 'FormKit',
             props: {
@@ -523,7 +538,7 @@ export default {
             },
           };
         case 'select':
-          const selections = JSON.parse(JSON.stringify(field.customForm)).entries.map((obj) => {
+          const selections = normalizeCustomForm(field.customForm, { entries: [] }).entries.map((obj) => {
             return { value: obj.key, label: obj.value };
           });
           return {
@@ -595,7 +610,7 @@ export default {
             },
           };
         case 'file':
-          const multiple = field.customForm ? JSON.parse(JSON.stringify(field.customForm)).multiple === 'true' : false;
+          const multiple = normalizeCustomForm(field.customForm, { multiple: false }).multiple === true;
           return {
             type: 'div',
             props: {
@@ -610,7 +625,7 @@ export default {
             name: name,
           };
         case 'checkbox':
-          const options = JSON.parse(JSON.stringify(field.customForm)).entries.map((obj) => {
+          const options = normalizeCustomForm(field.customForm, { entries: [] }).entries.map((obj) => {
             return { value: obj.key, label: obj.value };
           });
           return {
@@ -694,10 +709,11 @@ export default {
           };
         case 'header':
           let typeToUse = 'h1';
-          if (field.customForm && JSON.parse(JSON.stringify(field.customForm)).style === 'heading_2') {
+          const normalizedCustomForm = normalizeCustomForm(field.customForm);
+          if (normalizedCustomForm && normalizedCustomForm.style === 'heading_2') {
             typeToUse = 'h2';
           }
-          if (field.customForm && JSON.parse(JSON.stringify(field.customForm)).style === 'heading_3') {
+          if (normalizedCustomForm && normalizedCustomForm.style === 'heading_3') {
             typeToUse = 'h3';
           }
           return {
@@ -762,7 +778,8 @@ export default {
             },
           };
         case 'radio':
-          const radioOptions = JSON.parse(JSON.stringify(field.customForm)).entries.map((obj) => {
+          const normalizedRadioForm = normalizeCustomForm(field.customForm, { entries: [] });
+          const radioOptions = normalizedRadioForm.entries.map((obj) => {
             return { value: obj.key, label: obj.value };
           });
           return {
@@ -787,7 +804,7 @@ export default {
             },
           };
         case 'range':
-          const customForm = JSON.parse(JSON.stringify(field.customForm));
+          const customForm = normalizeCustomForm(field.customForm);
           return {
             type: 'v-slider',
             props: {
@@ -827,7 +844,7 @@ export default {
             },
           };
         case 'textarea':
-          const rows = field.customForm ? JSON.parse(JSON.stringify(field.customForm)).rows : undefined;
+          const rows = normalizeCustomForm(field.customForm, {}).rows;
           return {
             type: 'FormKit',
             props: {
@@ -1001,7 +1018,7 @@ export default {
           this.formData[field.id] = field.defaultValue;
 
           if (field.type === 'confirm') {
-            const customForm = field.customForm ? JSON.parse(JSON.stringify(field.customForm)) : {};
+            const customForm = normalizeCustomForm(field.customForm, {});
             const confirmText = customForm.confirmButtonText ?? 'Confirm';
             const declineText = customForm.declineButtonText ?? 'Decline';
 
@@ -1228,7 +1245,7 @@ export default {
       }
 
       const fieldId = field.id;
-      const multiple = field.customForm ? JSON.parse(JSON.stringify(field.customForm)).multiple === 'true' : false;
+      const multiple = normalizeCustomForm(field.customForm, { multiple: false }).multiple === true;
 
       if (fileData && typeof fileData === 'object' && fileData.name && fileData.data) {
         this.originalFileData[fieldId] = fileData;
@@ -1305,9 +1322,7 @@ export default {
           }
 
           if (fieldValue) {
-            const multiple = field.customForm
-              ? JSON.parse(JSON.stringify(field.customForm)).multiple === 'true'
-              : false;
+            const multiple = normalizeCustomForm(field.customForm, { multiple: false }).multiple === true;
 
             if (multiple && Array.isArray(fieldValue)) {
               const base64Files = [];
