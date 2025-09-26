@@ -964,7 +964,7 @@ export default {
       return style;
     },
     getForm() {
-      const form = getNode(this.$refs.formkit);
+      const form = getNode('form');
       return form;
     },
     fields() {
