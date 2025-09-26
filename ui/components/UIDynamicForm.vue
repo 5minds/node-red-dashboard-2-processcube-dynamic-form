@@ -1175,8 +1175,10 @@ export default {
           isConfirmDialog: context.isConfirmDialog || false,
         };
 
-        const func = Function('fields', 'usertask', 'msg', '"use strict"; return (' + condition + ')');
-        const result = func(this.formData, usertaskWithContext, this.msg);
+        const form = this.getForm();
+
+        const func = Function('fields', 'form', 'usertask', 'msg', '"use strict"; return (' + condition + ')');
+        const result = func(this.formData, form, usertaskWithContext, this.msg);
         return Boolean(result);
       } catch (err) {
         console.error('Error while evaluating condition: ' + err);
