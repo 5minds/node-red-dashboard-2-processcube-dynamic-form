@@ -433,8 +433,9 @@ export default {
     this.cleanupObjectUrls();
   },
   methods: {
-    createComponent(field) {
-      const customForm = field.customForm ? JSON.parse(JSON.stringify(field.customForm)) : {};
+    createComponent(field) {  
+      //const customForm = field.customForm ? JSON.parse(JSON.stringify(field.customForm)) : {};
+      const customForm = normalizeCustomForm(field.customForm, {});
       const hint = customForm.hint;
       const placeholder = customForm.placeholder;
       const validation = customForm.validation;
