@@ -143,7 +143,7 @@
               </div>
               <v-row :class="dynamicFooterClass">
                 <v-row v-if="errorMsg.length > 0" style="padding: 12px">
-                  <v-alert type="error">Error: {{ errorMsg }}</v-alert>
+                  <v-alert type="error">{{ errorMsg }}</v-alert>
                 </v-row>
                 <UIDynamicFormFooterAction
                   v-if="props.actions_inside_card && hasUserTask && actions.length > 0"
@@ -194,6 +194,7 @@
 
 <script>
 import { de } from '@formkit/i18n';
+import { getNode } from '@formkit/core';
 import { FormKit, defaultConfig, plugin } from '@formkit/vue';
 import { getCurrentInstance, markRaw, nextTick } from 'vue';
 import { marked } from 'marked';
@@ -280,9 +281,6 @@ export default {
     },
   },
   setup(props) {
-    console.info('UIDynamicForm setup with:', props);
-    console.debug('Vue function loaded correctly', markRaw);
-
     const instance = getCurrentInstance();
     const app = instance.appContext.app;
 
@@ -434,7 +432,6 @@ export default {
   },
   methods: {
     createComponent(field) {  
-      //const customForm = field.customForm ? JSON.parse(JSON.stringify(field.customForm)) : {};
       const customForm = normalizeCustomForm(field.customForm, {});
       const hint = customForm.hint;
       const placeholder = customForm.placeholder;
@@ -965,6 +962,10 @@ export default {
         style += `flex-basis: 100%;`;
       }
       return style;
+    },
+    getForm() {
+      const form = getNode(this.$refs.formkit);
+      return form;
     },
     fields() {
       const aFields = this.userTask.userTaskConfig?.formFields ?? [];
