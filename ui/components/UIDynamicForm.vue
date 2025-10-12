@@ -208,6 +208,22 @@ import UIDynamicFormFooterAction from './FooterActions.vue';
 import UIDynamicFormTitleText from './TitleText.vue';
 
 function requiredIf({ value }, [targetField, expectedValue], node) {
+  /*
+  {
+    $formkit: 'text',
+    name: 'companyName',
+    label: 'Company Name',
+    validation: 'requiredIf:isCompany,true'
+  }
+    -- oder--
+  {
+    $formkit: 'text',
+    name: 'lastName',
+    label: 'Last name',
+    validation: 'requiredIf:firstName'
+  }  
+  */
+
   console.debug(arguments);
 
   const actual = node?.root?.value?.[targetField];
