@@ -185,10 +185,10 @@
         </v-card-text>
         <v-card-actions>
           <a href="modalImage.url" :download="modalImage.name">
-            <v-btn variant="outlined" rounded="lg">Herunterladen</v-btn>
+            <v-btn variant="tonal" rounded="lg">Herunterladen</v-btn>
           </a>
           <v-spacer></v-spacer>
-          <v-btn variant="tonal" rounded="lg" @click="closeImageModal">Schließen</v-btn>
+          <v-btn variant="flat" rounded="lg" @click="closeImageModal">Schließen</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
