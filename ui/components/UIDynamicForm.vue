@@ -207,7 +207,7 @@ import '@formkit/themes/genesis';
 import UIDynamicFormFooterAction from './FooterActions.vue';
 import UIDynamicFormTitleText from './TitleText.vue';
 
-function requiredIf({ value }, [targetField, expectedValue], node) {
+function requiredIf(node, value, [target, expected]) {
   /*
   {
     $formkit: 'text',
@@ -224,17 +224,22 @@ function requiredIf({ value }, [targetField, expectedValue], node) {
   }  
   */
 
-  console.debug(arguments);
+// Regel: macht ein Feld nur dann erforderlich, wenn die Bedingung erfüllt ist
+  const targetNode = node.at(`$parent.${target}`) // Geschwisterfeld
+  const targetVal = targetNode?.value
 
-  const actual = node?.root?.value?.[targetField];
-  const isEmpty = value === '' || value === null || value === undefined;
+  const condition = typeof expected === 'undefined'
+    ? !!targetVal                      // nur "irgendwas gesetzt"
+    : String(targetVal) === String(expected) // exakter Vergleich
 
-  if (actual === expectedValue && isEmpty) {
-    return false;
-  }
-
-  return true;
+  // wenn Bedingung true → Wert muss "gefüllt" sein, sonst ist alles ok
+  return condition ? (value !== null && value !== undefined && String(value).trim().length > 0) : true
 }
+// Optionale Fehlermeldung
+requiredIf.message = ({ name }, [target, expected]) =>
+  typeof expected === 'undefined'
+    ? `${name} ist erforderlich, wenn ${target} ausgefüllt ist.`
+    : `${name} ist erforderlich, wenn ${target} = ${expected} ist.`
 // Optional: Eigenschaftsflags
 requiredIf.blocking = true;     // bei Fehlschlag blockiert es das Formular
 requiredIf.skipEmpty = true;    // bei leerem Wert überspringen
