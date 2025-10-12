@@ -184,8 +184,11 @@
           </div>
         </v-card-text>
         <v-card-actions>
+          <a href="modalImage.url" :download="modalImage.name">
+            <v-btn variant="tonal" rounded="lg">Herunterladen</v-btn>
+          </a>
           <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="closeImageModal">Close</v-btn>
+          <v-btn variant="flat" rounded="lg" @click="closeImageModal">Schließen</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -204,18 +207,61 @@ import '@formkit/themes/genesis';
 import UIDynamicFormFooterAction from './FooterActions.vue';
 import UIDynamicFormTitleText from './TitleText.vue';
 
-function requiredIf({ value }, [targetField, expectedValue], node) {
-  console.debug(arguments);
-
-  const actual = node?.root?.value?.[targetField];
-  const isEmpty = value === '' || value === null || value === undefined;
-
-  if (actual === expectedValue && isEmpty) {
-    return false;
+function requiredIf(node, value, [target, expected]) {
+  /*
+  {
+    $formkit: 'text',
+    name: 'companyName',
+    label: 'Company Name',
+    validation: 'requiredIf:isCompany,true'
   }
+    -- oder--
+  {
+    $formkit: 'text',
+    name: 'lastName',
+    label: 'Last name',
+    validation: 'requiredIf:firstName'
+  }  
+  */
 
-  return true;
+// Regel: macht ein Feld nur dann erforderlich, wenn die Bedingung erfüllt ist
+  const targetNode = node.at(`$parent.${target}`) // Geschwisterfeld
+  const targetVal = targetNode?.value
+
+  console.log('requiredIf:', { target, expected, targetVal, value })
+
+  const condition = typeof expected === 'undefined'
+    ? !!targetVal                      // nur "irgendwas gesetzt"
+    : String(targetVal) === String(expected) // exakter Vergleich
+
+  // wenn Bedingung true → Wert muss "gefüllt" sein, sonst ist alles ok
+  return condition ? (value !== null && value !== undefined && String(value).trim().length > 0) : true
 }
+// Optionale Fehlermeldung
+requiredIf.message = ({ name }, [target, expected]) =>
+  typeof expected === 'undefined'
+    ? `${name} ist erforderlich, wenn ${target} ausgefüllt ist.`
+    : `${name} ist erforderlich, wenn ${target} = ${expected} ist.`
+// Optional: Eigenschaftsflags
+requiredIf.blocking = true;     // bei Fehlschlag blockiert es das Formular
+requiredIf.skipEmpty = true;    // bei leerem Wert überspringen
+
+function multipleEmails(node) {
+  if (!node.value) {
+    return true; // Leerlauben, oder je nach Bedarf „required“ extra setzen
+  }
+  
+  // Trenne anhand von Komma oder Semikolon
+  const parts = node.value.split(/\s*[,;]\s*/);
+  
+  // regulärer Ausdruck für gültige E-Mail
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  return parts.every(p => emailRegex.test(p));
+};
+// Optional: Eigenschaftsflags
+multipleEmails.blocking = true;     // bei Fehlschlag blockiert es das Formular
+multipleEmails.skipEmpty = true;    // bei leerem Wert überspringen
 
 function normalizeCustomForm(input, defaultValue = {}) {
   if (typeof input === "string") {
@@ -288,7 +334,7 @@ export default {
       theme: 'genesis',
       locales: { de },
       locale: 'de',
-      rules: { requiredIf: requiredIf },
+      rules: { requiredIf, multipleEmails },
     });
     app.use(plugin, formkitConfig);
   },
