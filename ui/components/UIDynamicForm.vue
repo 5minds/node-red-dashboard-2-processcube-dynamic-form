@@ -228,6 +228,8 @@ function requiredIf(node, value, [target, expected]) {
   const targetNode = node.at(`$parent.${target}`) // Geschwisterfeld
   const targetVal = targetNode?.value
 
+  console.log('requiredIf:', { target, expected, targetVal, value })
+
   const condition = typeof expected === 'undefined'
     ? !!targetVal                      // nur "irgendwas gesetzt"
     : String(targetVal) === String(expected) // exakter Vergleich
