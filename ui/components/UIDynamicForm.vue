@@ -654,7 +654,7 @@ export default {
             },
           };
         case 'file':
-          const multiple = normalizeCustomForm(field.customForm, { multiple: false }).multiple === true;
+          const multiple = normalizeCustomForm(field.customForm, { multiple: false }).multiple;
           return {
             type: 'div',
             props: {
