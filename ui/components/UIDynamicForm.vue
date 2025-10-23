@@ -654,7 +654,7 @@ export default {
             },
           };
         case 'file':
-          const multiple = normalizeCustomForm(field.customForm, { multiple: false }).multiple === true;
+          const multiple = normalizeCustomForm(field.customForm, { multiple: false }).multiple;
           return {
             type: 'div',
             props: {
@@ -1295,7 +1295,7 @@ export default {
       }
 
       const fieldId = field.id;
-      const multiple = normalizeCustomForm(field.customForm, { multiple: false }).multiple === true;
+      const multiple = normalizeCustomForm(field.customForm, { multiple: false }).multiple;
 
       if (fileData && typeof fileData === 'object' && fileData.name && fileData.data) {
         this.originalFileData[fieldId] = fileData;
@@ -1372,7 +1372,7 @@ export default {
           }
 
           if (fieldValue) {
-            const multiple = normalizeCustomForm(field.customForm, { multiple: false }).multiple === true;
+            const multiple = normalizeCustomForm(field.customForm, { multiple: false }).multiple;
 
             if (multiple && Array.isArray(fieldValue)) {
               const base64Files = [];
