@@ -80,20 +80,28 @@
                         </p>
                       </div>
                       <div v-else-if="createComponent(field).isFileField" class="ui-dynamic-form-file-wrapper">
-                        <div v-if="getFilePreviewsForField(field.id).length > 0" class="ui-dynamic-form-image-previews">
+                        <div v-if="getFilePreviewsForField(field.id).length > 0" class="ui-dynamic-form-file-previews">
                           <h4>Current files:</h4>
                           <div class="ui-dynamic-form-preview-grid">
                             <div
                               v-for="preview in getFilePreviewsForField(field.id)"
                               :key="preview.name"
                               class="ui-dynamic-form-preview-item"
+                              @click="openFileModal(preview)"
                             >
+                              <!-- Image preview -->
                               <img
+                                v-if="preview.isImage"
                                 :src="preview.url"
                                 :alt="preview.name"
                                 class="ui-dynamic-form-preview-image"
-                                @click="openImageModal(preview)"
                               />
+                              <!-- File icon for non-images -->
+                              <div v-else class="ui-dynamic-form-file-icon">
+                                <v-icon size="48" :color="getFileIconColor(preview.type)">
+                                  {{ getFileIcon(preview.type) }}
+                                </v-icon>
+                              </div>
                               <div class="ui-dynamic-form-preview-info">
                                 <span class="ui-dynamic-form-preview-name">{{ preview.name }}</span>
                                 <span class="ui-dynamic-form-preview-size">{{ formatFileSize(preview.size) }}</span>
@@ -169,26 +177,37 @@
       <UIDynamicFormFooterAction :actions="actions" :actionCallback="actionFn" />
     </div>
 
-    <v-dialog v-model="imageModalOpen" max-width="800px">
-      <v-card v-if="modalImage">
-        <v-card-title class="headline">{{ modalImage.name }}</v-card-title>
+    <v-dialog v-model="fileModalOpen" max-width="800px">
+      <v-card v-if="modalFile">
+        <v-card-title class="headline">{{ modalFile.name }}</v-card-title>
         <v-card-text>
-          <img
-            :src="modalImage.url"
-            :alt="modalImage.name"
-            style="width: 100%; max-height: 70vh; object-fit: contain"
-          />
+          <!-- Image preview -->
+          <div v-if="modalFile.isImage">
+            <img
+              :src="modalFile.url"
+              :alt="modalFile.name"
+              style="width: 100%; max-height: 70vh; object-fit: contain"
+            />
+          </div>
+          <!-- File icon for non-images -->
+          <div v-else class="ui-dynamic-form-modal-file-icon">
+            <v-icon size="120" :color="getFileIconColor(modalFile.type)">
+              {{ getFileIcon(modalFile.type) }}
+            </v-icon>
+            <p class="text-h6 mt-4">{{ getFileTypeDescription(modalFile.type) }}</p>
+          </div>
+          
           <div style="margin-top: 16px">
-            <strong>Size:</strong> {{ formatFileSize(modalImage.size) }}<br />
-            <strong>Type:</strong> {{ modalImage.type }}
+            <strong>Size:</strong> {{ formatFileSize(modalFile.size) }}<br />
+            <strong>Type:</strong> {{ modalFile.type }}
           </div>
         </v-card-text>
         <v-card-actions>
-          <a href="modalImage.url" :download="modalImage.name">
-            <v-btn variant="tonal" rounded="lg">Herunterladen</v-btn>
-          </a>
+          <v-btn variant="tonal" rounded="lg" @click="downloadFile(modalFile)">
+            Herunterladen
+          </v-btn>
           <v-spacer></v-spacer>
-          <v-btn variant="flat" rounded="lg" @click="closeImageModal">Schließen</v-btn>
+          <v-btn variant="flat" rounded="lg" @click="closeFileModal">Schließen</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -350,8 +369,8 @@ export default {
       msg: null,
       collapsed: false,
       firstFormFieldRef: null,
-      imageModalOpen: false,
-      modalImage: null,
+      fileModalOpen: false,
+      modalFile: null,
       objectUrlsByField: {},
       previewCache: {},
     };
@@ -1450,6 +1469,11 @@ export default {
 
       return `data:${fileData.type};base64,${fileData.data}`;
     },
+    generateFileDownloadUrl(fileData) {
+      if (!fileData || !fileData.data || !fileData.type) return null;
+
+      return `data:${fileData.type};base64,${fileData.data}`;
+    },
     getFilePreviewsForField(fieldId) {
       const currentData = this.formData[fieldId] || null;
       const cachedOriginalData = this.originalFileData[fieldId] || null;
@@ -1480,12 +1504,13 @@ export default {
       } else if (originalFileData) {
         const fileArray = Array.isArray(originalFileData) ? originalFileData : [originalFileData];
         previews = fileArray
-          .filter((file) => this.isImageFile(file))
+          .filter((file) => file && file.name) // Accept all files, not just images
           .map((file) => ({
             name: file.name,
-            url: this.generateImagePreviewUrl(file),
+            url: this.isImageFile(file) ? this.generateImagePreviewUrl(file) : this.generateFileDownloadUrl(file),
             size: file.size,
             type: file.type,
+            isImage: this.isImageFile(file),
           }));
       }
 
@@ -1513,7 +1538,7 @@ export default {
             actualFile = fileItem[0];
           }
 
-          return actualFile && actualFile.type && actualFile.type.startsWith('image/');
+          return actualFile; // Accept all files, not just images
         })
         .map((fileItem) => {
           let actualFile = null;
@@ -1540,6 +1565,7 @@ export default {
             url: url,
             size: actualFile.size,
             type: actualFile.type,
+            isImage: actualFile.type && actualFile.type.startsWith('image/'),
             isObjectUrl: true,
           };
         })
@@ -1588,6 +1614,172 @@ export default {
 
         this.previewCache = {};
       }
+    },
+    getFileIcon(mimeType) {
+      if (!mimeType) return 'mdi-file';
+      
+      if (mimeType.startsWith('image/')) return 'mdi-image';
+      if (mimeType === 'application/pdf') return 'mdi-file-pdf-box';
+      if (mimeType.includes('word') || mimeType.includes('msword') || 
+          mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        return 'mdi-file-word';
+      }
+      if (mimeType.includes('excel') || mimeType.includes('spreadsheet') ||
+          mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+        return 'mdi-file-excel';
+      }
+      if (mimeType.includes('powerpoint') || mimeType.includes('presentation') ||
+          mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
+        return 'mdi-file-powerpoint';
+      }
+      if (mimeType === 'text/plain') return 'mdi-file-document';
+      if (mimeType.includes('zip') || mimeType.includes('rar') || mimeType.includes('7z')) {
+        return 'mdi-folder-zip';
+      }
+      
+      return 'mdi-file';
+    },
+    getFileIconColor(mimeType) {
+      if (!mimeType) return 'grey';
+      
+      if (mimeType.startsWith('image/')) return 'green';
+      if (mimeType === 'application/pdf') return 'red';
+      if (mimeType.includes('word') || mimeType.includes('msword') || 
+          mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        return 'blue';
+      }
+      if (mimeType.includes('excel') || mimeType.includes('spreadsheet') ||
+          mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+        return 'green';
+      }
+      if (mimeType.includes('powerpoint') || mimeType.includes('presentation') ||
+          mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
+        return 'orange';
+      }
+      
+      return 'grey';
+    },
+    getFileTypeDescription(mimeType) {
+      if (!mimeType) return 'Unbekannter Dateityp';
+      
+      if (mimeType === 'application/pdf') return 'PDF-Dokument';
+      if (mimeType.includes('word') || mimeType.includes('msword') || 
+          mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        return 'Word-Dokument';
+      }
+      if (mimeType.includes('excel') || mimeType.includes('spreadsheet') ||
+          mimeType === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+        return 'Excel-Arbeitsmappe';
+      }
+      if (mimeType.includes('powerpoint') || mimeType.includes('presentation') ||
+          mimeType === 'application/vnd.openxmlformats-officedocument.presentationml.presentation') {
+        return 'PowerPoint-Präsentation';
+      }
+      if (mimeType === 'text/plain') return 'Textdatei';
+      if (mimeType.startsWith('image/')) return 'Bilddatei';
+      
+      return 'Datei';
+    },
+    openFileModal(file) {
+      this.modalFile = file;
+      this.fileModalOpen = true;
+    },
+    closeFileModal() {
+      this.fileModalOpen = false;
+      this.modalFile = null;
+    },
+    downloadFile(file) {
+      if (!file || !file.url || !file.name) return;
+
+      // For Object URLs (newly uploaded files), we need to use a different approach
+      if (file.isObjectUrl) {
+        // Find the original file from formData
+        const fieldId = this.findFieldIdForFile(file);
+        if (fieldId) {
+          const fieldData = this.formData[fieldId];
+          const originalFile = this.findOriginalFile(fieldData, file.name);
+          
+          if (originalFile) {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(originalFile);
+            link.download = file.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            return;
+          }
+        }
+      }
+
+      // For data URLs (base64 encoded files from server)
+      if (file.url.startsWith('data:')) {
+        const link = document.createElement('a');
+        link.href = file.url;
+        link.download = file.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+
+      // Fallback for regular URLs
+      const link = document.createElement('a');
+      link.href = file.url;
+      link.download = file.name;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
+    findFieldIdForFile(file) {
+      // Search through all file fields to find which one contains this file
+      if (!this.userTask || !this.userTask.userTaskConfig || !this.userTask.userTaskConfig.formFields) {
+        return null;
+      }
+
+      const fileFields = this.userTask.userTaskConfig.formFields.filter(field => field.type === 'file');
+      
+      for (const field of fileFields) {
+        const previews = this.getFilePreviewsForField(field.id);
+        if (previews.some(preview => preview.name === file.name && preview.url === file.url)) {
+          return field.id;
+        }
+      }
+      return null;
+    },
+    findOriginalFile(fieldData, fileName) {
+      if (!fieldData) return null;
+
+      if (Array.isArray(fieldData)) {
+        for (const item of fieldData) {
+          const file = this.extractFileFromItem(item);
+          if (file && file.name === fileName) {
+            return file;
+          }
+        }
+      } else {
+        const file = this.extractFileFromItem(fieldData);
+        if (file && file.name === fileName) {
+          return file;
+        }
+      }
+      return null;
+    },
+    extractFileFromItem(item) {
+      if (item instanceof File) {
+        return item;
+      }
+      if (item && item.file instanceof File) {
+        return item.file;
+      }
+      if (item instanceof FileList && item.length > 0) {
+        return item[0];
+      }
+      if (item && item.file instanceof FileList && item.file.length > 0) {
+        return item.file[0];
+      }
+      return null;
     },
   },
 };
