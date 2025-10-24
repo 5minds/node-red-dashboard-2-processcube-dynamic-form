@@ -203,9 +203,9 @@
           </div>
         </v-card-text>
         <v-card-actions>
-          <a :href="modalFile.url" :download="modalFile.name">
-            <v-btn variant="tonal" rounded="lg">Herunterladen</v-btn>
-          </a>
+          <v-btn variant="tonal" rounded="lg" @click="downloadFile(modalFile)">
+            Herunterladen
+          </v-btn>
           <v-spacer></v-spacer>
           <v-btn variant="flat" rounded="lg" @click="closeFileModal">Schließen</v-btn>
         </v-card-actions>
@@ -1687,6 +1687,99 @@ export default {
     closeFileModal() {
       this.fileModalOpen = false;
       this.modalFile = null;
+    },
+    downloadFile(file) {
+      if (!file || !file.url || !file.name) return;
+
+      // For Object URLs (newly uploaded files), we need to use a different approach
+      if (file.isObjectUrl) {
+        // Find the original file from formData
+        const fieldId = this.findFieldIdForFile(file);
+        if (fieldId) {
+          const fieldData = this.formData[fieldId];
+          const originalFile = this.findOriginalFile(fieldData, file.name);
+          
+          if (originalFile) {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(originalFile);
+            link.download = file.name;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+            return;
+          }
+        }
+      }
+
+      // For data URLs (base64 encoded files from server)
+      if (file.url.startsWith('data:')) {
+        const link = document.createElement('a');
+        link.href = file.url;
+        link.download = file.name;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+
+      // Fallback for regular URLs
+      const link = document.createElement('a');
+      link.href = file.url;
+      link.download = file.name;
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
+    findFieldIdForFile(file) {
+      // Search through all file fields to find which one contains this file
+      if (!this.userTask || !this.userTask.userTaskConfig || !this.userTask.userTaskConfig.formFields) {
+        return null;
+      }
+
+      const fileFields = this.userTask.userTaskConfig.formFields.filter(field => field.type === 'file');
+      
+      for (const field of fileFields) {
+        const previews = this.getFilePreviewsForField(field.id);
+        if (previews.some(preview => preview.name === file.name && preview.url === file.url)) {
+          return field.id;
+        }
+      }
+      return null;
+    },
+    findOriginalFile(fieldData, fileName) {
+      if (!fieldData) return null;
+
+      if (Array.isArray(fieldData)) {
+        for (const item of fieldData) {
+          const file = this.extractFileFromItem(item);
+          if (file && file.name === fileName) {
+            return file;
+          }
+        }
+      } else {
+        const file = this.extractFileFromItem(fieldData);
+        if (file && file.name === fileName) {
+          return file;
+        }
+      }
+      return null;
+    },
+    extractFileFromItem(item) {
+      if (item instanceof File) {
+        return item;
+      }
+      if (item && item.file instanceof File) {
+        return item.file;
+      }
+      if (item instanceof FileList && item.length > 0) {
+        return item[0];
+      }
+      if (item && item.file instanceof FileList && item.file.length > 0) {
+        return item.file[0];
+      }
+      return null;
     },
   },
 };
