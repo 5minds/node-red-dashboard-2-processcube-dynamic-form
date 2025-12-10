@@ -6,6 +6,9 @@ on:
       - '*'
       - '*/*'
 
+permissions:
+  id-token: write  # Required for OIDC      
+
 env:
   CI_TOOLS_VERSION: '^5.0.0'
   # NOTE: Um den Releasezyklus von Alpha nach Beta zu ändern, einfach die nachfolgend deklarierten Env Variablen switchen.
