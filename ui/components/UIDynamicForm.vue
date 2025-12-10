@@ -486,6 +486,13 @@ export default {
       element.classList.add('test');
     });
 
+    // Deaktiviere Scroll-Wertänderungen bei Number-Inputs
+    document.addEventListener('wheel', (event) => {
+      if (event.target.type === 'number' && document.activeElement === event.target) {
+        event.preventDefault();
+      }
+    }, { passive: false });
+
     this.$socket.on('msg-input:' + this.id, (msg) => {
       this.init(msg);
     });
