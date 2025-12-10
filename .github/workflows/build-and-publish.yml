@@ -36,8 +36,6 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Install CI Tools
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm i -g @5minds/product_ci_tools@${{ env.CI_TOOLS_VERSION }}
 
       - name: 'Install Dependencies'
