@@ -38,8 +38,6 @@ jobs:
         run: npm i -g @5minds/product_ci_tools@${{ env.CI_TOOLS_VERSION }}
 
       - name: 'Install Dependencies'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npm ci
 
       - name: 'Build'
@@ -60,6 +58,4 @@ jobs:
 
       - name: 'Publish Version'
         if: "!startsWith(github.ref_name, 'renovate')"
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: ci_tools publish-npm-package --create-tag-from-branch-name
