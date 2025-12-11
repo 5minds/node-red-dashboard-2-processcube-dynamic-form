@@ -7,7 +7,8 @@ on:
       - '*/*'
 
 permissions:
-  id-token: write  # Required for OIDC      
+  id-token: write  # Required for OIDC
+  contents: read    
 
 env:
   CI_TOOLS_VERSION: '^5.0.0'
@@ -37,6 +38,10 @@ jobs:
 
       - name: Install CI Tools
         run: npm i -g @5minds/product_ci_tools@${{ env.CI_TOOLS_VERSION }}
+
+      # Ensure npm 11.5.1 or later is installed
+      - name: Update npm
+        run: npm install -g npm@latest
 
       - name: 'Install Dependencies'
         run: npm ci
